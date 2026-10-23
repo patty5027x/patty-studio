@@ -349,7 +349,7 @@ input[type=checkbox]{accent-color:var(--ink);width:16px;height:16px}
 <div class="wrap">
   <header class="mast">
     <div class="brand"><span data-icon="logo" data-size="30"></span><h1>PATTY.STUDIO</h1></div>
-    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v15</span><span id="conn"></span><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
+    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v16</span><span id="conn"></span><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
   </header>
   <main id="view"></main>
 </div>
@@ -727,7 +727,7 @@ function viewSignCore(){
     <button class="btn" data-act="day" data-n="-1" aria-label="前一天">‹</button>
     <input type="date" id="signDate" value="${signDate}">
     <span class="tag cream">週${WD[wd]}</span>
-    <button class="btn" data-act="day" data-n="1" aria-label="後一天">›</button>${signDate!==todayISO()?'<button class="btn primary" data-act="signToday" style="width:auto;padding:0 10px;font-size:14px">回到今天</button>':''}
+    <button class="btn" data-act="day" data-n="1" aria-label="後一天">›</button>
   </div>
   <div class="between"><div class="seg" role="group" aria-label="顯示範圍"><button data-act="signMode" data-v="today" class="${signMode==='today'?'on-att':''}">今日課程 ${nSched}</button><button data-act="signMode" data-v="all" class="${signMode==='all'?'on-att':''}">全部學生 ${S.students.filter(s=>s.active!==false).length}</button></div>
   <button class="btn" data-act="addLesson">＋ 試上／補課</button></div><div class="panel list" style="margin-top:12px">`;

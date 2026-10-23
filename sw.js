@@ -1,7 +1,7 @@
 /* PATTY.STUDIO offline cache.
    App page and config: network first, so updates show up right away; cached copy when offline.
    Fonts, icons and the Firebase library: cache first. */
-const VERSION = 'patty-v15';
+const VERSION = 'patty-v16';
 const SHELL = ['./', 'index.html', 'config.js', 'manifest.webmanifest',
   'fonts/gensen-R.woff', 'fonts/gensen-B.woff',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon.png'];
