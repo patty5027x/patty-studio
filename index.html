@@ -250,6 +250,32 @@ a.tag:hover{background:var(--cream)}
 .leaveopt.charged span{color:var(--brown)}
 .leaveopt.on{outline:2px solid var(--ink);outline-offset:2px}
 .slot.charged{background:var(--yellow);background-image:repeating-linear-gradient(135deg,transparent 0 5px,rgba(255,252,246,.55) 5px 9px)}
+.remind .tuitionmsg{border-top:1px solid rgba(62,58,57,.25);padding-top:8px;margin-top:4px;display:flex;flex-direction:column;gap:6px}
+.msgtxt{background:var(--paper);border:1.5px dashed var(--ink);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.6;color:var(--ink);user-select:text;-webkit-user-select:text}
+.clashbox .between{gap:8px}
+.vacbox{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;width:100%;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--cream);padding:10px 14px;font:inherit;font-size:14px;color:var(--ink);text-align:left}
+.vacbox.ok{background:var(--paper)}
+.vaclist{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.mcell.vac{background-image:repeating-linear-gradient(135deg,transparent 0 6px,rgba(174,172,120,.18) 6px 10px)}
+.vactag{font-size:10px;color:var(--paper);background:var(--olive);border-radius:4px;padding:0 3px;line-height:14px}
+.mk.v{background:var(--olive)}
+.vachead{padding:16px}
+.vacrow{padding:12px 14px}
+.vacrow+.vacrow{border-top:1px solid var(--hair)}
+.vacacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}
+.vacacts .btn{padding:6px 0}
+.c-due{background:var(--paper);box-shadow:inset 0 0 0 1.5px var(--red);color:var(--red)}
+.searchbox{margin:10px 0 2px}
+.searchbox .inline{width:100%}
+.yearchart{padding:14px 10px 6px;margin-top:10px}
+.ybars{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px;height:150px;align-items:end}
+.ybar{border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:stretch;height:100%;font:inherit}
+.ystack{flex:1;display:flex;flex-direction:column;justify-content:flex-end}
+.ystack i{display:block;border:1px solid var(--ink);border-bottom:0}
+.ystack i:first-child{border-radius:3px 3px 0 0}
+.ystack i:last-child{border-bottom:1px solid var(--ink)}
+.ybar small{font-size:11px;color:var(--muted);text-align:center;margin-top:3px}
+.ybar.now small{color:var(--ink);font-weight:700}
 /* nav with raised calendar key */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:var(--line);display:flex;justify-content:center;align-items:flex-end;
   padding:4px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));z-index:20}
@@ -316,13 +342,13 @@ input[type=checkbox]{accent-color:var(--ink);width:16px;height:16px}
 <div class="wrap">
   <header class="mast">
     <div class="brand"><span data-icon="logo" data-size="44"></span><h1>PATTY.STUDIO</h1></div>
-    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v13</span><span id="conn"></span><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
+    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v14</span><span id="conn"></span><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
   </header>
   <main id="view"></main>
 </div>
 
 <nav class="tabs" id="tabs">
-  <button data-tab="sign"><span class="ic"><span data-icon="pencil" data-size="28"></span></span>簽到</button>
+  <button data-tab="sign"><span class="ic"><span data-icon="pencil" data-size="28"></span></span>今天</button>
   <button data-tab="students"><span class="ic"><span data-icon="bear" data-size="28"></span></span>學生</button>
   <button data-tab="cal" class="mid"><span class="key"><span data-icon="calheart" data-size="38"></span></span>行事曆</button>
   <button data-tab="photo"><span class="ic"><span data-icon="polaroid" data-size="28"></span></span>攝影</button>
@@ -396,7 +422,7 @@ const scoreTile=()=>`<span class="tile score">${pix('memo',26)}</span>`;
 
 /* ---------- data ---------- */
 const WD=['日','一','二','三','四','五','六'];
-const COLS=['students','lessons','payments','income'];
+const COLS=['students','lessons','payments','income','vacations'];
 const PHOTO_CATS=['音樂會','棚拍','外拍','活動','其他'];
 const INSTR=['鋼琴','小提琴','其他'];
 const DEPOSIT=1000;
@@ -404,9 +430,9 @@ const SRC={self:{label:'Patty',full:'Patty（自己的學生）',mins:[30,60,90,
 const src=s=>SRC[s?.source]||SRC.self;
 const minOpts=(s,sel)=>{const o=src(s).mins.slice();if(sel&&!o.includes(+sel))o.push(+sel);return o.sort((a,b)=>a-b).map(m=>`<option value="${m}" ${+sel===m?'selected':''}>${m} 分鐘</option>`).join('')};
 const dur=m=>m>=60&&m%60===0?(m/60)+' 小時':m+' 分';
-const S={students:[],lessons:[],payments:[],income:[]};
+const S={students:[],lessons:[],payments:[],income:[],vacations:[]};
 const loaded=new Set();
-let db=null, tab='cal', signDate=todayISO(), month=todayISO().slice(0,7), calSel=todayISO(), editing=null, signMode='today', calView='month', stuId=null;
+let db=null, tab='sign', signDate=todayISO(), month=todayISO().slice(0,7), calSel=todayISO(), editing=null, signMode='today', calView='month', stuId=null;
 
 function todayISO(){return iso(new Date())}
 function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -447,6 +473,7 @@ function eventsOn(d){
   if(d>=todayISO())for(const s of S.students)if(!seen.has(s.id)&&occurs(s,d))ev.push({k:'lesson',time:s.time||'',s,l:null});
   for(const i of S.income)if(i.type==='photo'&&i.date===d)ev.push({k:'shoot',time:i.time||'',i});
   for(const s of S.students)for(const sc of (s.scores||[]))if(sc.date===d)ev.push({k:'score',time:'',s,sc});
+  for(const i of S.income)if(i.type==='photo'&&!i.delivered&&dueOf(i)===d)ev.push({k:'due',time:'',i});
   return ev.sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
 }
 const extraName=l=>l.studentId?(ST(l.studentId)?.name||'（已刪除的學生）'):(l.name||'試上');
@@ -454,7 +481,7 @@ const extraName=l=>l.studentId?(ST(l.studentId)?.name||'（已刪除的學生）
 function spansOn(d){
   const out=[];
   for(const e of eventsOn(d)){
-    if(e.k==='score')continue;
+    if(e.k==='score'||e.k==='due')continue;
     if(e.k==='shoot'){const s=toMin(e.i.time);if(s==null)continue;const en=toMin(e.i.endTime);out.push({key:e.i.id,kind:'shoot',s,end:en>s?en:s+60,label:e.i.title||'拍攝'});continue}
     const l=e.l; if(l&&(isLeave(l.status)||l.status==='moved'))continue;
     const s=toMin(e.time); if(s==null)continue;
@@ -531,7 +558,7 @@ function shootRow(i,withDate=true){
   const clash=clashesOn(i.date).some(c=>c.a.key===i.id||c.b.key===i.id);
   const d=parse(i.date);
   const left=withDate?`<span class="bigdate num"><b>${d.getMonth()+1}/${d.getDate()}</b><small>週${WD[d.getDay()]}</small></span>`:`<span class="time num">${esc(i.time||'—')}</span>`;
-  return `<div class="item click" data-act="editIncome" data-id="${i.id}">${left}${camTile()}<div class="main"><div class="name">${esc(i.title||'未命名')}</div>${clash?'<div class="row sub"><span class="tag clash">撞期</span></div>':''}</div>
+  return `<div class="item click" data-act="editIncome" data-id="${i.id}">${left}${camTile()}<div class="main"><div class="name">${esc(i.title||'未命名')}</div>${deliveryLine(i)?`<div class="sub">${deliveryLine(i)}</div>`:''}${clash?'<div class="row sub"><span class="tag clash">撞期</span></div>':''}</div>
     <div class="paycol"><span class="num" style="font-weight:700;color:var(--ink)">${i.amount?money(i.amount):'—'}</span>${shootStatus(i)}</div></div>`;
 }
 function scoreRow(s,sc,showDate){
@@ -555,10 +582,10 @@ function reminderBoxes(){
 
 /* ---------- views ---------- */
 function render(){
-  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===(tab==='stu'?'students':tab)));
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===(tab==='stu'?'students':tab==='vac'?'cal':tab)));
   const v=document.getElementById('view');
   if(db&&loaded.size<COLS.length){v.innerHTML='<div class="panel empty">讀取資料中…</div>';return}
-  v.innerHTML=({sign:viewSign,students:viewStudents,stu:viewStu,cal:viewCal,photo:viewPhoto,money:viewMoney})[tab]();
+  v.innerHTML=({sign:viewSign,students:viewStudents,stu:viewStu,vac:viewVac,cal:viewCal,photo:viewPhoto,money:viewMoney})[tab]();
 }
 
 function lessonRowCal(e){
@@ -566,12 +593,13 @@ function lessonRowCal(e){
   if(st==='moved')return `<div class="item" style="opacity:.55"><span class="time num">${esc(s?.time||'—')}</span>${sInst(s)}<div class="main"><div class="name"><s>${esc(s?.name||'')}</s></div><div class="row sub"><span class="tag">已調至 ${md(l.movedTo)} ${esc(l.movedTime||'')}</span></div></div></div>`;
   return `<div class="item click" ${s?`data-act="openStudent" data-id="${s.id}"`:''}><span class="time num">${esc(s?.time||'—')}<small>${dur(+(l?.minutes??s?.minutes??src(s).def))}</small></span>${sInst(s)}
     <div class="main"><div class="name">${esc(s?.name||'（已刪除的學生）')}</div><div class="row sub">${famaTag(s)}${s?.freq==='biweekly'?'<span class="tag">隔週</span>':''}</div>${matLine(s)}</div>
-    ${st==='attended'?'<span class="tag yellow">出席</span>':st==='leaveCharged'?'<span class="tag yellow">請假扣堂</span>':st==='leave'?'<span class="tag cream">請假</span>':calSel<=todayISO()?'<span class="tag">未簽到</span>':''}</div>`;
+    ${!l&&vacOn(calSel)?'<span class="tag" style="border-style:dashed">休假待處理</span>':''}${st==='attended'?'<span class="tag yellow">出席</span>':st==='leaveCharged'?'<span class="tag yellow">請假扣堂</span>':st==='leave'?'<span class="tag cream">請假</span>':calSel<=todayISO()?'<span class="tag">未簽到</span>':''}</div>`;
 }
 const CAL_VIEWS={month:'月',week:'週',day:'日'};
 function evMeta(e){
   /* label, colour class, time span, action for a calendar event */
   if(e.k==='shoot'){const s=toMin(e.i.time),en=toMin(e.i.endTime);return {cls:'c-photo',label:e.i.title||'拍攝',s,end:s==null?null:(en>s?en:s+60),act:`data-act="editIncome" data-id="${e.i.id}"`}}
+  if(e.k==='due')return {cls:'c-due',label:'交件：'+(e.i.title||'拍攝'),s:null,act:`data-act="editIncome" data-id="${e.i.id}"`};
   if(e.k==='score')return {cls:'c-score',label:'帶譜：'+(e.sc.title||'樂譜')+'（'+e.s.name+'）',s:null,act:`data-act="editScore" data-sid="${e.s.id}" data-scid="${e.sc.id}"`};
   const l=e.l, stu=e.k==='extra'?ST(l.studentId):e.s; const so=l?.source||stu?.source;
   const s=toMin(e.time); const mins=+(l?.minutes??stu?.minutes??src(stu).def)||60;
@@ -593,8 +621,9 @@ function monthGrid(){
   for(let d=1;d<=days;d++){
     const ds=iso(new Date(y,m-1,d)); const ev=eventsOn(ds); const cl=clashesOn(ds).length;
     const chips=ev.map(e=>{const x=evMeta(e);return `<span class="chip ${x.cls}">${x.s!=null?`<b>${hm(x.s)}</b>`:''}${esc(x.label)}</span>`});
-    cells+=`<button class="mcell ${ds===today?'today':''} ${ds===calSel?'sel':''} ${new Date(y,m-1,d).getDay()===0?'sun':''}" data-act="pick" data-d="${ds}" aria-label="${m}月${d}日，${ev.length} 個行程${cl?'，有撞期':''}">
-      <span class="mtop"><span class="d">${d}</span>${cl?'<span class="bang">!</span>':''}</span>${chips.slice(0,3).join('')}${chips.length>3?`<span class="morechip">還有 ${chips.length-3} 個</span>`:''}</button>`;
+    const vac=vacOn(ds);
+    cells+=`<button class="mcell ${vac?'vac':''} ${ds===today?'today':''} ${ds===calSel?'sel':''} ${new Date(y,m-1,d).getDay()===0?'sun':''}" data-act="pick" data-d="${ds}" aria-label="${m}月${d}日，${ev.length} 個行程${cl?'，有撞期':''}">
+      <span class="mtop"><span class="d">${d}</span>${cl?'<span class="bang">!</span>':vac?'<span class="vactag">休</span>':''}</span>${chips.slice(0,3).join('')}${chips.length>3?`<span class="morechip">還有 ${chips.length-3} 個</span>`:''}</button>`;
   }
   const rest=(7-(off+days)%7)%7;for(let i=0;i<rest;i++)cells+='<div class="mcell out"></div>';
   return `<div class="panel" style="overflow:hidden"><div class="calhead">${WD.map(w=>`<div>${w}</div>`).join('')}</div><div class="mgrid">${cells}</div></div>`;
@@ -637,7 +666,8 @@ function viewCal(){
     <div class="calrow"><div class="seg viewseg" role="group" aria-label="檢視方式">${Object.entries(CAL_VIEWS).map(([k,v])=>`<button data-act="calView" data-v="${k}" class="${calView===k?'on-att':''}" aria-pressed="${calView===k}">${v}</button>`).join('')}</div>
     <div class="row" style="gap:6px"><button class="btn sq-btn" data-act="calNav" data-n="-1" aria-label="上一頁">‹</button><button class="btn sq-btn" data-act="calNav" data-n="1" aria-label="下一頁">›</button></div></div>
   </div>${body}
-  <div class="legend"><span><i class="mk s"></i>Patty</span><span><i class="mk f"></i>費瑪</span><span><i class="mk r"></i>攝影</span><span><i class="mk y"></i>帶譜</span><span><i class="bang" style="position:static">!</i>撞期</span></div>
+  <div class="legend"><span><i class="mk s"></i>Patty</span><span><i class="mk f"></i>費瑪</span><span><i class="mk r"></i>攝影</span><span><i class="mk y"></i>帶譜</span><span><i class="bang" style="position:static">!</i>撞期</span><span><i class="mk v"></i>休假</span></div>
+  <div class="vaclist">${vacBoxes()}<button class="btn" data-act="newVac" data-d="${calSel}" style="align-self:flex-start">＋ 設定休假</button></div>
   <div class="between" style="margin:22px 2px 10px"><div class="label" style="margin:0">${mdw(calSel)}<span class="en">schedule</span></div>
   <div class="row"><button class="btn" data-act="goSign" data-d="${calSel}">簽到</button><button class="btn" data-act="newScoreOn" data-d="${calSel}">＋ 帶譜</button><button class="btn primary" data-act="newShootOn" data-d="${calSel}">＋ 拍攝</button></div></div>
   ${cl.length?`<div class="clashnote" style="margin-bottom:10px">！時間重疊：${cl.map(clashTxt).join('；')}</div>`:''}
@@ -646,6 +676,7 @@ function viewCal(){
   for(const e of ev){
     if(e.k==='shoot'){h+=shootRow(e.i,false);continue}
     if(e.k==='score'){h+=scoreRow(e.s,e.sc,false);continue}
+    if(e.k==='due'){h+=`<div class="item">${camTile()}<div class="main"><div class="name" data-act="editIncome" data-id="${e.i.id}">交件：${esc(e.i.title||'拍攝')}</div><div class="sub">${mdw(e.i.date)} 拍攝</div></div><button class="btn" data-act="delivered" data-id="${e.i.id}">已交件</button></div>`;continue}
     if(e.k==='extra'){const l=e.l;h+=`<div class="item click" ${l.studentId?`data-act="openStudent" data-id="${l.studentId}"`:`data-act="goSign" data-d="${calSel}"`}><span class="time num">${esc(l.time||'—')}<small>${dur(+l.minutes||60)}</small></span>${l.kind==='trial'?starTile():sInst(ST(l.studentId))}<div class="main"><div class="name">${esc(extraName(l))}</div><div class="row sub"><span class="tag cream">${KIND[l.kind]}</span>${l.fromDate?`<span>原 ${md(l.fromDate)}</span>`:''}${l.status==='attended'?'<span class="tag yellow">出席</span>':l.status==='leave'?'<span class="tag cream">請假</span>':''}</div></div></div>`;continue}
     h+=lessonRowCal(e);
   }
@@ -654,6 +685,15 @@ function viewCal(){
 const KIND={trial:'試上',makeup:'補課',moved:'調課'};
 
 function viewSign(){
+  const isToday=signDate===todayISO();
+  let h=(isToday?todayBoxes():'')+viewSignCore();
+  const shoots=S.income.filter(i=>i.type==='photo'&&i.date===signDate).sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
+  const scs=[];for(const s of S.students)for(const sc of (s.scores||[]))if(sc.date===signDate)scs.push([s,sc]);
+  if(shoots.length)h+=`<div class="label">拍攝<span class="en">photo</span></div><div class="panel list">${shoots.map(i=>shootRow(i,false)).join('')}</div>`;
+  if(scs.length)h+=`<div class="label">帶譜<span class="en">sheet music</span></div><div class="panel list">${scs.map(([s,sc])=>scoreRow(s,sc,false)).join('')}</div>`;
+  return h;
+}
+function viewSignCore(){
   const wd=parse(signDate).getDay();
   const todays=S.lessons.filter(l=>l.date===signDate);
   const recIds=new Set(todays.filter(l=>!l.kind).map(l=>l.studentId));
@@ -704,7 +744,9 @@ function stuRow(s,showTime){
 function viewStudents(){
   let h=`<div class="between" style="margin-bottom:4px"><h2>我的學生</h2><button class="btn primary" data-act="newStudent">＋ 新增學生</button></div>`;
   if(!S.students.length)return h+'<div class="panel empty" style="margin-top:12px">還沒有學生。新增時設定樂器、上課日、時間和學費，簽到頁和行事曆就會自動帶出來。</div>';
-  const act=S.students.filter(s=>s.active!==false), byTime=(a,b)=>(a.time||'99').localeCompare(b.time||'99');
+  const q=stuQuery.trim().toLowerCase(), hit=s=>!q||(s.name||'').toLowerCase().includes(q);
+  h+=`<div class="searchbox"><input type="search" id="stuSearch" class="inline" placeholder="搜尋學生名字" value="${esc(stuQuery)}" autocomplete="off" aria-label="搜尋學生"></div>`;
+  const act=S.students.filter(s=>s.active!==false&&hit(s)), byTime=(a,b)=>(a.time||'99').localeCompare(b.time||'99');
   for(const d of [1,2,3,4,5,6,0]){
     const list=act.filter(s=>(s.days||[]).includes(d)).sort(byTime);
     if(!list.length)continue;
@@ -712,7 +754,8 @@ function viewStudents(){
   }
   const none=act.filter(s=>!(s.days||[]).length);
   if(none.length)h+=`<div class="label">未排課<span class="en" style="text-transform:none;letter-spacing:.06em">${none.length} 位</span></div><div class="panel list">${none.map(s=>stuRow(s,false)).join('')}</div>`;
-  const off=S.students.filter(s=>s.active===false);
+  const off=S.students.filter(s=>s.active===false&&hit(s));
+  if(q&&!act.length&&!off.length)h+='<div class="panel empty" style="margin-top:12px">找不到符合的學生</div>';
   if(off.length)h+=`<div class="label">停課中<span class="en" style="text-transform:none;letter-spacing:.06em">${off.length} 位</span></div><div class="panel list">${off.map(s=>stuRow(s,false)).join('')}</div>`;
   return h;
 }
@@ -720,7 +763,7 @@ function viewStudents(){
 function upcomingLessons(s,n){
   const t=todayISO(),out=[];
   const pend=S.lessons.filter(l=>l.studentId===s.id&&l.kind&&l.kind!=='trial'&&!counts(l.status)&&!isLeave(l.status)&&l.date>=t).map(l=>({date:l.date,kind:l.kind}));
-  const taken=new Set(S.lessons.filter(l=>l.studentId===s.id).map(l=>l.date));
+  const taken=new Set(S.lessons.filter(l=>l.studentId===s.id&&(l.kind||l.status)).map(l=>l.date));
   let d=t;for(let i=0;i<120&&out.length<n+pend.length;i++){if(occurs(s,d)&&!taken.has(d))out.push({date:d});d=addDays(d,1)}
   return out.concat(pend).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,n);
 }
@@ -851,7 +894,8 @@ function viewPhoto(){
   return h;
 }
 
-function viewMoney(){
+function viewMoney(){return moneySeg()+(moneyMode==='year'?viewYear():viewMonthMoney())}
+function viewMonthMoney(){
   const r=monthCalc(month);
   const parts=[['Patty',r.bySrc.self||0,'var(--sky)'],['費瑪',r.bySrc.fama||0,'var(--orange)'],['攝影',r.photo,'var(--red)'],['其他',r.other,'var(--cream)']];
   const pos=parts.reduce((a,p)=>a+Math.max(0,p[1]),0)||1;
@@ -917,6 +961,7 @@ function dlgStudent(id){
     <label class="field">每堂時數<select name="minutes" id="f-minutes">${minOpts(s,s.minutes||src(s).def)}</select></label></div>
     <label class="field">每堂學費<input name="fee" id="f-fee" type="number" inputmode="numeric" value="${s.fee}"></label>
     <label class="field">備註<input name="note" id="f-note" value="${esc(s.note||'')}" placeholder="例：姊1H 妹30M"></label>
+    <label class="field">家長稱呼（收學費提醒用）<input name="parent" id="f-parent" value="${esc(s.parent||'')}" placeholder="${esc(s.name?s.name+'媽媽':'例：小貓媽媽')}"></label>
     ${id?'':'<label class="field">目前教材<input name="mat0" id="f-mat0" placeholder="例：拜爾、鈴木小提琴 1"></label>'}
     <label class="row sub"><input type="checkbox" name="active" id="f-active" ${s.active!==false?'checked':''}> 上課中</label>`,
   fd=>{
@@ -924,7 +969,7 @@ function dlgStudent(id){
     if(!id&&fd.get('mat0')?.trim())mats.push({id:rid('m'),title:fd.get('mat0').trim(),progress:'',done:false,start:todayISO()});
     const ins=fd.get('instrument')==='其他'?(fd.get('instrumentOther').trim()||'其他'):fd.get('instrument');
     const before=upcomingClashes().length;
-    put('students',id||rid('s'),{name:fd.get('name').trim(),source:fd.get('source'),instrument:ins,days:fd.getAll('days').map(Number),freq:fd.get('freq'),startDate:fd.get('startDate')||todayISO(),time:fd.get('time'),minutes:+fd.get('minutes'),fee:+fd.get('fee')||0,note:fd.get('note'),active:fd.get('active')==='on',materials:mats,scores:s.scores||[]})
+    put('students',id||rid('s'),{parent:(fd.get('parent')||'').trim(),name:fd.get('name').trim(),source:fd.get('source'),instrument:ins,days:fd.getAll('days').map(Number),freq:fd.get('freq'),startDate:fd.get('startDate')||todayISO(),time:fd.get('time'),minutes:+fd.get('minutes'),fee:+fd.get('fee')||0,note:fd.get('note'),active:fd.get('active')==='on',materials:mats,scores:s.scores||[]})
       .then(()=>setTimeout(()=>{const n=upcomingClashes().length;if(n&&n>=before)toast(`已儲存。注意：接下來 60 天有 ${n} 個撞期，請看行事曆`)},400))},
   id?`<button class="btn ghost danger" value="x:askDelStudent:${id}" formnovalidate>刪除</button>`:'');
 }
@@ -1014,20 +1059,138 @@ function dlgIncome(id,type,date){
     ${photo?`<label class="row sub"><input type="checkbox" name="noDeposit" id="f-inodep" ${i.noDeposit?'checked':''}> 常客，不收定金</label>
     <div id="f-depwrap" ${i.noDeposit?'hidden':''} style="display:flex;flex-direction:column;gap:10px"><div class="grid2"><label class="field">定金<input name="deposit" id="f-idep" type="number" value="${i.deposit??DEPOSIT}"></label><span></span></div>
     <label class="row sub"><input type="checkbox" name="depositPaid" id="f-idepp" ${i.depositPaid?'checked':''}> 已收定金</label></div>
-    <label class="row sub"><input type="checkbox" name="paid" id="f-ipaid" ${i.paid?'checked':''}> 已收全額</label>`:''}`,
+    <label class="row sub"><input type="checkbox" name="paid" id="f-ipaid" ${i.paid?'checked':''}> 已收全額</label>
+    <label class="row sub"><input type="checkbox" name="delivered" id="f-idel" ${i.delivered?'checked':''}> 已交件（拍攝後 7 天內）</label>`:''}`,
   fd=>{const d={type:i.type,title:fd.get('title'),client:fd.get('client'),date:fd.get('date'),amount:+fd.get('amount')||0};
-    if(photo){const nd=fd.get('noDeposit')==='on';Object.assign(d,{category:fd.get('category'),contact:(fd.get('contact')||'').trim(),noDeposit:nd,paid:fd.get('paid')==='on',depositPaid:!nd&&(fd.get('depositPaid')==='on'||fd.get('paid')==='on'),deposit:nd?0:(+fd.get('deposit')||0),place:fd.get('place'),time:fd.get('time'),endTime:fd.get('endTime')})}
+    if(photo){const nd=fd.get('noDeposit')==='on';Object.assign(d,{category:fd.get('category'),contact:(fd.get('contact')||'').trim(),noDeposit:nd,paid:fd.get('paid')==='on',depositPaid:!nd&&(fd.get('depositPaid')==='on'||fd.get('paid')==='on'),deposit:nd?0:(+fd.get('deposit')||0),place:fd.get('place'),time:fd.get('time'),endTime:fd.get('endTime'),delivered:fd.get('delivered')==='on',deliveredDate:fd.get('delivered')==='on'?(i.deliveredDate||todayISO()):''})}
     const nid=id||rid('i');put('income',nid,d);
     if(photo){const c=clashFor(d.date,d.time,d.endTime,nid);if(c.length)toast(`已儲存。注意：和 ${c.map(x=>x.label).join('、')} 撞期`)}},
   id?`<button class="btn ghost danger" value="x:delIncome:${id}" formnovalidate>刪除</button>`:'');
   if(photo)liveClash();
 }
 
+/* ---------- vacations: mark a date range, then decide each lesson in it ---------- */
+const vacOn=d=>S.vacations.find(v=>v.start<=d&&d<=v.end);
+function vacLessons(v){
+  const out=[];let d=v.start;
+  for(let i=0;i<120&&d<=v.end;i++){
+    for(const s of S.students){
+      const l=S.lessons.find(x=>x.id===d+'_'+s.id);
+      if(!l&&!occurs(s,d))continue;
+      const st=!l?'pending':l.status==='moved'?'moved':l.vacKeep&&!l.status?'keep':l.status||'pending';
+      out.push({date:d,s,l,state:st});
+    }
+    d=addDays(d,1);
+  }
+  return out.sort((a,b)=>(a.date+(a.s.time||'')).localeCompare(b.date+(b.s.time||'')));
+}
+const vacPending=v=>vacLessons(v).filter(x=>x.state==='pending').length;
+const vacStateTag=x=>({pending:'<span class="tag" style="border-style:dashed;color:var(--muted)">待處理</span>',
+  keep:'<span class="tag yellow">照常上課</span>',moved:`<span class="tag yellow">已調到 ${md(x.l?.movedTo||'')}</span>`,
+  leave:'<span class="tag cream">提早請假</span>',leaveCharged:'<span class="tag cream">請假扣堂</span>',attended:'<span class="tag yellow">已出席</span>'})[x.state]||'';
+let vacId=null;
+function viewVac(){
+  const v=S.vacations.find(x=>x.id===vacId);
+  if(!v)return `<button class="btn ghost back" data-act="backCal">‹ 行事曆</button><div class="panel empty">找不到這個休假，可能已經刪除。</div>`;
+  const ls=vacLessons(v),pend=ls.filter(x=>x.state==='pending').length;
+  let h=`<button class="btn ghost back" data-act="backCal">‹ 行事曆</button>
+  <div class="panel vachead"><div class="between"><div><h2>${esc(v.name||'休假')}</h2><div class="sub">${mdw(v.start)} – ${mdw(v.end)}</div></div><button class="btn" data-act="editVac" data-id="${v.id}">編輯</button></div>
+  <div class="sub" style="margin-top:6px">期間有 ${ls.length} 堂課${pend?`，還有 <b style="color:var(--ink)">${pend} 堂</b>待處理`:'，都處理好了'}</div></div>
+  <div class="panel list" style="margin-top:12px">`;
+  if(!ls.length)h+='<div class="empty">這段期間沒有課。</div>';
+  for(const x of ls){
+    const s=x.s,d=parse(x.date);
+    h+=`<div class="vacrow"><div class="item" style="padding:0"><span class="bigdate num"><b>${d.getMonth()+1}/${d.getDate()}</b><small>週${WD[d.getDay()]}</small></span>${sInst(s)}
+      <div class="main"><div class="name" style="cursor:default">${esc(s.name)}</div><div class="sub">${esc(s.time||'—')}・${dur(+(x.l?.minutes??s.minutes??src(s).def))}</div></div>${vacStateTag(x)}</div>
+      ${x.state==='pending'?`<div class="vacacts"><button class="btn" data-act="vacMove" data-sid="${s.id}" data-d="${x.date}">調課</button><button class="btn" data-act="vacKeep" data-sid="${s.id}" data-d="${x.date}">照常上課</button><button class="btn" data-act="vacLeave" data-sid="${s.id}" data-d="${x.date}">請假</button></div>`
+        :x.state!=='attended'?`<div style="text-align:right;margin-top:6px"><button class="linkbtn" data-act="vacReset" data-sid="${s.id}" data-d="${x.date}">重新選擇</button></div>`:''}</div>`;
+  }
+  return h+`</div><div style="text-align:center;margin-top:18px"><button class="linkbtn" data-act="delVac" data-id="${v.id}">刪除這個休假</button></div>`;
+}
+function dlgVac(id,start){
+  const v=S.vacations.find(x=>x.id===id)||{name:'',start:start||todayISO(),end:addDays(start||todayISO(),6)};
+  openDlg(id?'編輯休假':'設定休假',`
+    <label class="field">名稱<input name="name" id="f-vname" value="${esc(v.name)}" placeholder="例：關西旅行、過年" required></label>
+    <div class="grid2"><label class="field">開始<input type="date" name="start" id="f-vstart" value="${v.start}" required></label>
+    <label class="field">結束<input type="date" name="end" id="f-vend" value="${v.end}" required></label></div>
+    <div class="sub" style="margin-top:-4px">存好後會列出這段期間的每一堂課，你再一堂一堂決定要調課、照常上課或請假。</div>`,
+  fd=>{let a=fd.get('start'),b=fd.get('end');if(b<a)[a,b]=[b,a];const nid=id||rid('v');
+    put('vacations',nid,{name:(fd.get('name')||'').trim()||'休假',start:a,end:b});vacId=nid;go('vac')},
+  '',id?'儲存':'設定');
+}
+function vacBoxes(){
+  const t=todayISO();
+  const vs=S.vacations.filter(v=>v.end>=t).sort((a,b)=>a.start.localeCompare(b.start));
+  return vs.map(v=>{const n=vacPending(v);return `<button class="vacbox ${n?'':'ok'}" data-act="openVac" data-id="${v.id}"><span><b>${esc(v.name||'休假')}</b>・${md(v.start)} – ${md(v.end)}</span><span>${n?`還有 ${n} 堂待處理 ›`:'都處理好了 ›'}</span></button>`}).join('');
+}
+
+/* ---------- photo delivery: due 7 days after the shoot ---------- */
+const dueOf=i=>addDays(i.date,7);
+const daysBetween=(a,b)=>Math.round((parse(b)-parse(a))/864e5);
+function deliveryLine(i){
+  const t=todayISO();
+  if(i.delivered)return `已交件${i.deliveredDate?' '+md(i.deliveredDate):''}`;
+  if(i.date>t)return '';
+  const left=daysBetween(t,dueOf(i));
+  return `已拍攝・交件期限 ${md(dueOf(i))}${left>0?`（還有 ${left} 天）`:left===0?'（今天）':`（過期 ${-left} 天）`}`;
+}
+const dueSoon=()=>{const t=todayISO();return S.income.filter(i=>i.type==='photo'&&!i.delivered&&i.date<=t&&daysBetween(t,dueOf(i))<=2).sort((a,b)=>a.date.localeCompare(b.date))};
+
+/* ---------- tuition reminders ---------- */
+function tuitionAlerts(){
+  const out=[];
+  for(const s of S.students){
+    if(s.active===false||!(s.days||[]).length)continue;
+    const hasPay=S.payments.some(p=>p.studentId===s.id);
+    const top=tuitionPeriods(s)[0];if(!top)continue;
+    if(!top.pay){if(hasPay||top.used>0)out.push({s,left:0,used:top.used})}
+    else{const left=top.cap-top.used;if(left<=1)out.push({s,left,used:top.used})}
+  }
+  return out;
+}
+const parentOf=s=>(s.parent||'').trim()||s.name+'媽媽';
+const tuitionMsg=s=>`${parentOf(s)}您好，下一次上課就是新的一期了（${money(s.fee*4)}），提醒您繳費囉☺️`;
+function copyText(txt){
+  const done=()=>toast('已複製，可以貼到 LINE 了');
+  const fallback=()=>{const ta=document.createElement('textarea');ta.value=txt;ta.style.position='absolute';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done()}catch{toast('複製失敗，請長按訊息自行複製')}ta.remove()};
+  if(navigator.clipboard?.writeText)navigator.clipboard.writeText(txt).then(done,fallback);else fallback();
+}
+function todayBoxes(){
+  let h='';
+  const ta=tuitionAlerts();
+  if(ta.length)h+=`<div class="remind"><b>這週要收學費</b>${ta.map(x=>`<div class="tuitionmsg"><div class="between"><span style="font-weight:700">${esc(x.s.name)}・${x.left>0?`剩 ${x.left} 堂`:x.used?`已經上了 ${x.used} 堂未繳`:'這期用完了'}</span><button class="btn" data-act="copyMsg" data-id="${x.s.id}">複製提醒訊息</button></div><div class="msgtxt">${esc(tuitionMsg(x.s))}</div></div>`).join('')}</div>`;
+  const ds=dueSoon();
+  if(ds.length)h+=`<div class="clashbox"><b>攝影快到交件期限</b>${ds.map(i=>`<div class="between"><span>${esc(i.title||'拍攝')}・${deliveryLine(i).replace('已拍攝・','')}</span><button class="btn" data-act="delivered" data-id="${i.id}">已交件</button></div>`).join('')}</div>`;
+  h+=vacBoxes();
+  return h?`<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">${h}</div>`:'';
+}
+
+/* ---------- year overview ---------- */
+let moneyMode='month', yearSel=todayISO().slice(0,4);
+function viewYear(){
+  const rows=Array.from({length:12},(_,i)=>{const m=yearSel+'-'+String(i+1).padStart(2,'0');const r=monthCalc(m);return {m:i+1,self:r.bySrc.self||0,fama:r.bySrc.fama||0,photo:r.photo,other:Math.max(0,r.other),total:r.total}});
+  const tot=k=>rows.reduce((a,r)=>a+r[k],0);
+  const max=Math.max(1,...rows.map(r=>r.self+r.fama+r.photo+r.other));
+  const parts=[['Patty','self','var(--sky)'],['費瑪','fama','var(--orange)'],['攝影','photo','var(--red)'],['其他','other','var(--cream)']];
+  const now=todayISO().slice(0,7);
+  let h=`<div class="datebar"><button class="btn" data-act="yearNav" data-n="-1" aria-label="前一年">‹</button><b class="caltitle" style="flex:1;text-align:center">${yearSel} 年</b><button class="btn" data-act="yearNav" data-n="1" aria-label="下一年">›</button></div>
+  <div class="summary wide"><div class="panel stat total"><div class="k">${yearSel} 年總收入</div><div class="v">${money(tot('total'))}</div></div>
+  ${parts.map(p=>`<div class="panel stat"><div class="k"><i class="sq" style="background:${p[2]}"></i>${p[0]}</div><div class="v" style="font-size:16px">${money(tot(p[1]))}</div></div>`).join('')}</div>
+  <div class="panel yearchart"><div class="ybars">${rows.map(r=>`<button class="ybar ${yearSel+'-'+String(r.m).padStart(2,'0')===now?'now':''}" data-act="pickMonth" data-m="${yearSel}-${String(r.m).padStart(2,'0')}" aria-label="${r.m} 月 ${money(r.total)}">
+    <span class="ystack">${parts.slice().reverse().map(p=>r[p[1]]>0?`<i style="height:${r[p[1]]/max*100}%;background:${p[2]}"></i>`:'').join('')}</span><small>${r.m}</small></button>`).join('')}</div></div>
+  <div class="label">每月總額<span class="en">monthly</span></div><div class="panel list">${rows.map(r=>`<div class="item click" data-act="pickMonth" data-m="${yearSel}-${String(r.m).padStart(2,'0')}" style="padding:9px 14px"><div class="main">${r.m} 月</div><span class="num" style="font-weight:700;color:var(--ink)">${money(r.total)}</span><span class="chev" aria-hidden="true">›</span></div>`).join('')}</div>`;
+  return h;
+}
+const moneySeg=()=>`<div class="seg" role="group" aria-label="檢視" style="margin-bottom:14px"><button data-act="moneyMode" data-v="month" class="${moneyMode==='month'?'on-att':''}">月</button><button data-act="moneyMode" data-v="year" class="${moneyMode==='year'?'on-att':''}">全年</button></div>`;
+
+/* ---------- student search ---------- */
+let stuQuery='';
+
 /* two kinds of leave: told in advance (no charge) or last-minute (charged as a lesson) */
 let leaveTarget=null;
 function dlgLeave(t){
   leaveTarget=t;
-  const name=t.type==='reg'?ST(t.sid)?.name:extraName(t.l);const date=t.type==='reg'?signDate:t.l.date;
+  const name=t.type==='reg'?ST(t.sid)?.name:extraName(t.l);const date=t.type==='reg'?(t.date||signDate):t.l.date;
   const cur=t.type==='reg'?t.cur?.status:t.l.status;
   openDlg(`${esc(name)}・${md(date)} 請假`,`<div class="sub" style="margin-top:-4px">這次請假要扣堂嗎？</div>
     <button class="leaveopt free ${cur==='leave'?'on':''}" value="x:setLeave:leave" formnovalidate><b>提早請假</b><span>不扣堂、不算學費，這期堂數順延</span></button>
@@ -1037,9 +1200,9 @@ function dlgLeave(t){
 }
 function applyLeave(st){
   const t=leaveTarget;if(!t)return;leaveTarget=null;
-  if(t.type==='reg'){const s=ST(t.sid);const id=signDate+'_'+s.id;const cur=t.cur;
+  if(t.type==='reg'){const s=ST(t.sid);const dt=t.date||signDate;const id=dt+'_'+s.id;const cur=t.cur;
     if(st==='clear'){if(cur)del('lessons',id);return}
-    put('lessons',id,{studentId:s.id,source:s.source||'self',date:signDate,status:st,fee:cur?.fee??s.fee,minutes:cur?.minutes??s.minutes??src(s).def,note:cur?.note??''});
+    put('lessons',id,{studentId:s.id,source:s.source||'self',date:dt,status:st,fee:cur?.fee??s.fee,minutes:cur?.minutes??s.minutes??src(s).def,note:cur?.note??''});
   }else patch('lessons',t.l.id,{status:st==='clear'?'':st});
   toast(st==='leaveCharged'?'已記為臨時請假，扣一堂':st==='leave'?'已記為提早請假，不扣堂':'已取消請假');
 }
@@ -1061,7 +1224,7 @@ document.addEventListener('click',e=>{
   if(b){const inDlg=b.closest('dialog');if(inDlg&&b.dataset.act!=='toggleScore'&&b.dataset.act!=='editScore')return;handle(b);return}
   const tb=e.target.closest('#tabs button');if(tb){tb.classList.remove('bounce');void tb.offsetWidth;tb.classList.add('bounce');go(tb.dataset.tab)}
 });
-function go(t){tab=t;try{localStorage.setItem('tab',t==='stu'?'students':t)}catch{}render();scrollTo(0,0)}
+function go(t){tab=t;try{localStorage.setItem('tab',t==='stu'?'students':t==='vac'?'cal':t)}catch{}render();scrollTo(0,0)}
 document.addEventListener('change',e=>{
   if(e.target.id==='signDate'&&e.target.value){signDate=e.target.value;render()}
   if(e.target.id==='monthPick'&&e.target.value){month=e.target.value;render()}
@@ -1074,7 +1237,8 @@ document.addEventListener('change',e=>{
     if(prev){const nd=document.getElementById('f-inodep');if(nd&&prev.noDeposit&&!nd.checked){nd.checked=true;document.getElementById('f-depwrap').hidden=true}
       const ct=document.getElementById('f-icontact');if(ct&&!ct.value&&prev.contact){ct.value=prev.contact;ct.dispatchEvent(new Event('input',{bubbles:true}))}}}
 });
-document.addEventListener('input',e=>{if(editing&&e.target.type==='time'&&Object.values(editing).includes(e.target.id))liveClash();
+document.addEventListener('input',e=>{
+  if(e.target.id==='stuSearch'){stuQuery=e.target.value;render();const i=document.getElementById('stuSearch');if(i){i.focus();const n=i.value.length;try{i.setSelectionRange(n,n)}catch{}}return}if(editing&&e.target.type==='time'&&Object.values(editing).includes(e.target.id))liveClash();
   if(e.target.id==='np-n'){const a=document.getElementById('np-amt');if(a)a.value=(+e.target.dataset.fee||0)*(+e.target.value||0)}
   if(e.target.id==='f-icontact'){const p=document.getElementById('f-icontact-preview');if(p)p.innerHTML=contactHtml(e.target.value)||'貼上 IG 網址會自動變成可點的 IG 連結'}});
 function syncSel(){if(!calSel.startsWith(month))calSel=todayISO().startsWith(month)?todayISO():month+'-01'}
@@ -1117,6 +1281,20 @@ function handle(b){
     case 'openStudent':stuId=d.id;logShown=4;openPeriods=new Set();go('stu');break;
     case 'newPay':dlgPay(d.id);break;
     case 'newMat':dlgMat(d.id);break;
+    case 'copyMsg':{const s=ST(d.id);if(s)copyText(tuitionMsg(s));break}
+    case 'delivered':patch('income',d.id,{delivered:true,deliveredDate:todayISO()});toast('已標記交件');break;
+    case 'newVac':dlgVac(null,d.d);break;
+    case 'editVac':dlgVac(d.id);break;
+    case 'openVac':vacId=d.id;go('vac');break;
+    case 'backCal':go('cal');break;
+    case 'delVac':del('vacations',d.id);go('cal');toast('已刪除休假，已經做的調課和請假都保留');break;
+    case 'vacMove':dlgMove(d.sid,d.d);break;
+    case 'vacKeep':{const s=ST(d.sid);put('lessons',d.d+'_'+s.id,{studentId:s.id,source:s.source||'self',date:d.d,status:'',vacKeep:true,fee:s.fee,minutes:s.minutes??src(s).def,note:''});break}
+    case 'vacLeave':dlgLeave({type:'reg',sid:d.sid,date:d.d,cur:S.lessons.find(l=>l.id===d.d+'_'+d.sid)});break;
+    case 'vacReset':{const o=S.lessons.find(l=>l.id===d.d+'_'+d.sid);if(o){if(o.movedId)del('lessons',o.movedId);del('lessons',o.id)}break}
+    case 'moneyMode':moneyMode=d.v;render();break;
+    case 'yearNav':yearSel=String(+yearSel+ +d.n);render();break;
+    case 'pickMonth':month=d.m;moneyMode='month';render();scrollTo(0,0);break;
     case 'togglePeriod':openPeriods.has(d.id)?openPeriods.delete(d.id):openPeriods.add(d.id);render();break;
     case 'logMore':logShown+=4;render();break;
     case 'logLess':logShown=4;render();break;
@@ -1135,7 +1313,7 @@ function handle(b){
 /* ---------- boot (Firebase) ---------- */
 document.querySelectorAll('[data-icon]').forEach(el=>el.outerHTML=pix(el.dataset.icon,+(el.dataset.size||26)));
 {const n=new Date();document.getElementById('issueNo').textContent=n.getFullYear()+'.'+String(n.getMonth()+1).padStart(2,'0')+'.'+String(n.getDate()).padStart(2,'0')}
-try{const t=localStorage.getItem('tab');if(['sign','students','cal','photo','money'].includes(t))tab=t}catch{}
+
 const conn=document.getElementById('conn');
 const viewEl=document.getElementById('view');
 const nav=document.getElementById('tabs');
