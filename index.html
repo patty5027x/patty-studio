@@ -221,6 +221,27 @@ tr.grp td{background:var(--cream);font-weight:700;color:var(--ink);border-top:1.
 .contact{color:var(--brown)}
 .tag.ig{background:var(--paper);text-decoration:none}
 a.tag:hover{background:var(--cream)}
+.stutop{display:flex;gap:14px;align-items:center}
+.editbtn{margin-left:auto;align-self:flex-start;padding:3px 12px;font-size:13px}
+.infogrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;margin-top:16px;padding-top:14px;border-top:1px solid var(--hair)}
+.infogrid .k{font-size:12px;color:var(--muted);letter-spacing:.08em}
+.infogrid .v{font-size:15px;color:var(--ink);font-weight:700;margin-top:1px;overflow-wrap:anywhere}
+.sechead{margin:24px 2px 10px}
+.morebtn{display:block;width:100%;border:0;border-top:1px solid var(--hair);background:none;padding:11px;font:inherit;font-size:13px;color:var(--ink);letter-spacing:.06em}
+.stuhead{display:block!important}
+.period{margin-bottom:10px;overflow:hidden}
+.period .ph{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.period .ph.click{cursor:pointer}
+.period.unpaid .ph{background:var(--cream)}
+.slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:0 14px 14px}
+.period.unpaid .slots{padding-top:12px}
+.slot{border:1.5px solid var(--ink);border-radius:8px;padding:6px 2px;text-align:center;font-size:12px;line-height:1.35;color:var(--ink)}
+.slot b{display:block;font-size:14px;font-variant-numeric:tabular-nums}
+.slot.done{background:var(--yellow)}
+.slot.leave{background:var(--cream);color:var(--muted)}
+.slot.todo{border-style:dashed;color:var(--muted)}
+.slot.todo b{color:var(--muted);font-weight:500}
+.linkbtn{border:0;background:none;padding:0;font:inherit;font-size:12px;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
 /* nav with raised calendar key */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:var(--line);display:flex;justify-content:center;align-items:flex-end;
   padding:4px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));z-index:20}
@@ -662,60 +683,130 @@ function viewSign(){
   }
   return h;
 }
-function viewStudents(){
-  const list=[...S.students].sort((a,b)=>(a.active===false)-(b.active===false)||(a.days?.[0]??9)-(b.days?.[0]??9)||(a.time||'').localeCompare(b.time||''));
-  let h=`<div class="between" style="margin-bottom:12px"><h2>我的學生</h2><button class="btn primary" data-act="newStudent">＋ 新增學生</button></div><div class="panel list">`;
-  if(!list.length)h+='<div class="empty">還沒有學生。新增時設定樂器、上課日、時間和學費，簽到頁和行事曆就會自動帶出來。</div>';
-  for(const s of list){const b=balance(s.id);const owe=(s.scores||[]).filter(x=>!x.paid).length;
-    h+=`<div class="item click" data-act="openStudent" data-id="${s.id}" style="${s.active===false?'opacity:.5':''}">${sInst(s)}<div class="main">
+function stuRow(s,showTime){
+  const b=balance(s.id);const owe=(s.scores||[]).filter(x=>!x.paid).length;
+  return `<div class="item click" data-act="openStudent" data-id="${s.id}" style="${s.active===false?'opacity:.5':''}">${showTime?`<span class="time num">${esc(s.time||'—')}</span>`:''}${sInst(s)}<div class="main">
       <div class="name">${esc(s.name)}</div>
-      <div class="row sub">${famaTag(s)}<span>${freqLabel(s)}${(s.days||[]).map(d=>WD[d]).join('、')||'—'}${s.time?' '+esc(s.time):''}</span><span>${dur(+(s.minutes||src(s).def))}</span><span class="num">${money(s.fee)}/堂</span>${owe?`<span class="tag yellow">譜費未收 ${owe}</span>`:''}${s.active===false?'<span class="tag">停課</span>':''}</div>${matLine(s)}</div>
-      ${b===null?'<span class="sub">未記繳費</span>':`<span class="tag ${b<=0?'ink':'cream'}">${b<=0?'需繳費':'剩 '+b+' 堂'}</span>`}<span class="chev" aria-hidden="true">›</span></div>`}
-  return h+'</div>';
+      <div class="row sub">${famaTag(s)}${s.freq==='biweekly'?'<span class="tag">隔週</span>':''}<span class="num">${money(s.fee)}/堂</span>${owe?`<span class="tag yellow">譜費未收</span>`:''}</div></div>
+      ${b===null?'<span class="sub">未記繳費</span>':`<span class="tag ${b<=0?'ink':'cream'}">${b<=0?'需繳費':'剩 '+b+' 堂'}</span>`}<span class="chev" aria-hidden="true">›</span></div>`;
 }
-/* one page per student */
+/* student list grouped by weekday (Mon → Sun); a student with two lesson days appears in both */
+function viewStudents(){
+  let h=`<div class="between" style="margin-bottom:4px"><h2>我的學生</h2><button class="btn primary" data-act="newStudent">＋ 新增學生</button></div>`;
+  if(!S.students.length)return h+'<div class="panel empty" style="margin-top:12px">還沒有學生。新增時設定樂器、上課日、時間和學費，簽到頁和行事曆就會自動帶出來。</div>';
+  const act=S.students.filter(s=>s.active!==false), byTime=(a,b)=>(a.time||'99').localeCompare(b.time||'99');
+  for(const d of [1,2,3,4,5,6,0]){
+    const list=act.filter(s=>(s.days||[]).includes(d)).sort(byTime);
+    if(!list.length)continue;
+    h+=`<div class="label">週${WD[d]}<span class="en" style="text-transform:none;letter-spacing:.06em">${list.length} 位</span></div><div class="panel list">${list.map(s=>stuRow(s,true)).join('')}</div>`;
+  }
+  const none=act.filter(s=>!(s.days||[]).length);
+  if(none.length)h+=`<div class="label">未排課<span class="en" style="text-transform:none;letter-spacing:.06em">${none.length} 位</span></div><div class="panel list">${none.map(s=>stuRow(s,false)).join('')}</div>`;
+  const off=S.students.filter(s=>s.active===false);
+  if(off.length)h+=`<div class="label">停課中<span class="en" style="text-transform:none;letter-spacing:.06em">${off.length} 位</span></div><div class="panel list">${off.map(s=>stuRow(s,false)).join('')}</div>`;
+  return h;
+}
+/* tuition periods: each payment opens a period of N lessons; attended lessons fill periods in date order,
+   leaves sit in the period they happened in without using it up, lessons past the paid ones form unpaid periods */
+let openPeriods=new Set();
+function tuitionPeriods(s){
+  const pays=S.payments.filter(p=>p.studentId===s.id).sort((a,b)=>a.date.localeCompare(b.date));
+  const evs=S.lessons.filter(l=>l.studentId===s.id&&l.kind!=='trial'&&(l.status==='attended'||l.status==='leave')).sort((a,b)=>a.date.localeCompare(b.date));
+  const per=pays.map((p,i)=>({no:i+1,pay:p,cap:+p.lessons||4,used:0,slots:[]}));
+  const unpaid=[];let pi=0;
+  const cur=()=>{
+    while(pi<per.length&&per[pi].used>=per[pi].cap)pi++;
+    if(pi<per.length)return per[pi];
+    let u=unpaid[unpaid.length-1];
+    if(!u||u.used>=u.cap){u={no:per.length+unpaid.length+1,pay:null,cap:4,used:0,slots:[]};unpaid.push(u)}
+    return u;
+  };
+  for(const l of evs){const p=cur();p.slots.push({l});if(l.status==='attended')p.used++}
+  /* upcoming lessons fill the open period; if every paid period is used up, show the next one as unpaid */
+  const all=per.concat(unpaid);
+  let open=all.find(p=>p.used<p.cap&&(p.pay||p.used>0));
+  if(!open&&s.active!==false&&(s.days||[]).length){open={no:all.length+1,pay:null,cap:4,used:0,slots:[],upcomingOnly:true};unpaid.push(open);all.push(open)}
+  if(open){
+    let need=open.cap-open.used,d=todayISO();
+    const taken=new Set(S.lessons.filter(l=>l.studentId===s.id).map(l=>l.date));
+    for(let i=0;i<120&&need>0;i++){if(occurs(s,d)&&!taken.has(d)){open.slots.push({date:d});need--}d=addDays(d,1)}
+  }
+  return all.reverse();
+}
+function periodCard(s,p,first){
+  const unpaidP=!p.pay;
+  const done=p.slots.filter(x=>x.l&&x.l.status==='attended');
+  const full=!unpaidP&&p.used>=p.cap;
+  const open=first||unpaidP||!full||openPeriods.has(p.pay?.id);
+  const range=done.length?`${md(done[0].l.date)} – ${md(done[done.length-1].l.date)}`:'';
+  const sub=unpaidP?(p.used?`已經上了 ${p.used} 堂，記得收 ${money(s.fee*p.cap)}`:`下一堂前記得收 ${money(s.fee*p.cap)}`)
+    :`${md(p.pay.date)} 繳費・${money(p.pay.amount)}${full&&range?'・'+range:''}`;
+  const pill=unpaidP?'<span class="tag ink">需繳費</span>':full?`<span class="tag yellow">${p.cap} 堂上完</span>`:`<span class="tag cream">上到 ${p.used} / ${p.cap}</span>`;
+  const head=`<div class="ph ${full&&!first?'click':''}" ${full&&!first?`data-act="togglePeriod" data-id="${p.pay.id}"`:''}>
+    <div class="main"><div class="name" style="cursor:inherit">第 ${p.no} 期${unpaidP?'・尚未繳費':''}</div><div class="sub">${sub}</div></div>${pill}
+    ${full&&!first?`<span class="chev" aria-hidden="true">${open?'⌃':'⌄'}</span>`:''}</div>`;
+  if(!open)return `<div class="panel period">${head}</div>`;
+  const slots=p.slots.map(x=>x.l?`<div class="slot ${x.l.status==='attended'?'done':'leave'}"><b>${md(x.l.date)}</b>${x.l.status==='attended'?(x.l.kind==='moved'?'調課':x.l.kind==='makeup'?'補課':'出席'):'請假'}</div>`:`<div class="slot todo"><b>${md(x.date)}</b>待上</div>`).join('');
+  const del=p.pay?`<button class="linkbtn" data-act="delPay" data-id="${p.pay.id}">刪除這筆繳費</button>`:'';
+  return `<div class="panel period ${unpaidP?'unpaid':''}">${head}<div class="slots">${slots||'<div class="sub" style="grid-column:1/-1">還沒有排到課</div>'}</div>${del?`<div style="padding:0 14px 10px;text-align:right">${del}</div>`:''}</div>`;
+}
+function tuitionSection(s){
+  const per=tuitionPeriods(s);
+  const total=S.payments.filter(p=>p.studentId===s.id).reduce((a,p)=>a+(+p.amount||0),0);
+  let h=`<div class="between sechead"><div class="label" style="margin:0">學費與上課<span class="en" style="text-transform:none;letter-spacing:.06em">累計 ${money(total)}</span></div><button class="btn primary" data-act="newPay" data-id="${s.id}">＋ 記錄繳費</button></div>`;
+  if(!per.length)return h+'<div class="panel empty" style="padding:14px">還沒有繳費和上課紀錄</div>';
+  return h+per.map((p,i)=>periodCard(s,p,i===0)).join('');
+}
+/* one page per student: info, tuition periods, sheet music, books */
+let logShown=4;
 function viewStu(){
   const s=ST(stuId);
   if(!s)return `<button class="btn ghost back" data-act="back">‹ 學生名單</button><div class="panel empty">找不到這位學生，可能已經刪除。</div>`;
   const b=balance(s.id); const mats=s.materials||[];
   const scores=(s.scores||[]).slice().sort((a,b)=>(a.brought-b.brought)||(b.date||'').localeCompare(a.date||''));
   const pays=S.payments.filter(p=>p.studentId===s.id).sort((a,b)=>b.date.localeCompare(a.date));
-  const ls=S.lessons.filter(l=>l.studentId===s.id&&l.status!=='moved').sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20);
+  const allLs=S.lessons.filter(l=>l.studentId===s.id&&l.status!=='moved').sort((a,b)=>b.date.localeCompare(a.date));
+  const ls=allLs.slice(0,logShown);
   const paidTotal=pays.reduce((a,p)=>a+(+p.amount||0),0);
   const nextLesson=(()=>{let d=todayISO();for(let i=0;i<70;i++){if(occurs(s,d)){const r=S.lessons.find(x=>x.id===d+'_'+s.id);if(!r||(r.status!=='moved'&&r.status!=='leave'))return d}d=addDays(d,1)}return null})();
+  const info=[['上課時間',`${freqLabel(s)}${(s.days||[]).map(d=>WD[d]).join('、')||'—'} ${esc(s.time||'')}`],['下一堂',nextLesson?mdw(nextLesson):'—'],['樂器・時數',`${esc(s.instrument||'—')}・${dur(+(s.minutes||src(s).def))}`],['學費',`${money(s.fee)}／堂`]];
+  const sec=(t,en,btn)=>`<div class="between sechead"><div class="label" style="margin:0">${t}<span class="en">${en}</span></div>${btn||''}</div>`;
   return `<button class="btn ghost back" data-act="back">‹ 學生名單</button>
   <section class="panel stuhead">
-    <span class="tile big ${s.source==='fama'?'fama':'self'}">${pix(instName(s.instrument),44)}</span>
-    <div class="main"><h2 style="font-size:22px">${esc(s.name)}</h2>
-      <div class="row sub" style="margin-top:4px">${famaTag(s)}<span>${esc(s.instrument||'')}</span><span>${freqLabel(s)}${(s.days||[]).map(d=>WD[d]).join('、')||'—'} ${esc(s.time||'')}</span><span>${dur(+(s.minutes||src(s).def))}</span><span class="num">${money(s.fee)}/堂</span>${s.active===false?'<span class="tag">停課</span>':''}</div>
-      ${nextLesson?`<div class="sub" style="margin-top:4px">下一堂：${mdw(nextLesson)} ${esc(s.time||'')}</div>`:''}
-      ${s.note?`<div class="sub">備註：${esc(s.note)}</div>`:''}</div>
-    <button class="btn" data-act="editStudent" data-id="${s.id}">編輯資料</button>
+    <div class="stutop"><span class="tile big ${s.source==='fama'?'fama':'self'}">${pix(instName(s.instrument),40)}</span>
+      <div style="min-width:0"><h2 style="font-size:22px">${esc(s.name)}</h2><div class="row" style="margin-top:4px">${famaTag(s)}${s.active===false?'<span class="tag">停課</span>':''}</div></div>
+      <button class="btn editbtn" data-act="editStudent" data-id="${s.id}">編輯</button></div>
+    <div class="infogrid">${info.map(([k,v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join('')}</div>
+    ${s.note?`<div class="sub" style="margin-top:10px">備註：${esc(s.note)}</div>`:''}
   </section>
 
-  <div class="label">學習教材<span class="en">books</span></div>
+  ${tuitionSection(s)}
+
+  ${sec('購譜提醒','sheet music',`<button class="btn" data-act="newScoreFor" data-id="${s.id}">＋ 購譜</button>`)}
+  <div class="panel list">${scores.map(sc=>scoreRow(s,sc,true)).join('')||'<div class="empty" style="padding:14px">還沒有購譜紀錄</div>'}</div>
+
+  ${sec('學習教材','books',`<button class="btn" data-act="newMat" data-id="${s.id}">＋ 教材</button>`)}
   <div class="panel list">
-    ${mats.map(m=>`<div class="item mat-row" style="${m.done?'opacity:.55':''}"><div class="main"><div class="name" style="cursor:default">${esc(m.title)}</div>${m.start?`<div class="sub">開始 ${m.start.replace(/-/g,'/')}</div>`:''}</div>
+    ${mats.map(m=>`<div class="item" style="${m.done?'opacity:.55':''}"><div class="main"><div class="name" style="cursor:default">${esc(m.title)}</div>${m.start?`<div class="sub">開始 ${m.start.replace(/-/g,'/')}</div>`:''}</div>
       <label class="row sub" style="gap:4px;flex-shrink:0"><input type="checkbox" id="md-${m.id}" data-mat="${m.id}" data-f="done" ${m.done?'checked':''}>學完</label>
       <button class="btn ghost danger" data-act="delMat" data-id="${m.id}" aria-label="刪除教材 ${esc(m.title)}">×</button></div>`).join('')||'<div class="empty" style="padding:14px">還沒有教材紀錄</div>'}
-    <div class="item addrow"><input type="text" class="inline" id="nm-title" placeholder="新增教材名稱，例：拜爾" aria-label="新增教材名稱"><button class="btn" data-act="addMat">新增</button></div>
-  </div>
-
-  <div class="between"><div class="label">購譜提醒<span class="en">sheet music</span></div><button class="btn" data-act="newScoreFor" data-id="${s.id}">＋ 購譜</button></div>
-  <div class="panel list">${scores.map(sc=>scoreRow(s,sc,true)).join('')||'<div class="empty" style="padding:14px">還沒有購譜紀錄。新增後，行事曆會在帶譜那天提醒你帶譜並跟家長收費。</div>'}</div>
-
-  <div class="label">繳費記錄<span class="en">payments</span></div>
-  <div class="panel list">
-    <div class="item"><div class="main"><span class="tag ${b!==null&&b<=0?'ink':'cream'}">${b===null?'未記繳費':b<=0?'需繳費（'+b+'）':'預繳剩 '+b+' 堂'}</span></div><span class="sub">累計 <b class="num" style="color:var(--ink)">${money(paidTotal)}</b></span></div>
-    ${pays.map(p=>`<div class="item"><div class="main num">${p.date.replace(/-/g,'/')}</div><span>${p.lessons} 堂</span><span class="num" style="font-weight:700;color:var(--ink)">${money(p.amount)}</span><button class="btn ghost danger" data-act="delPay" data-id="${p.id}" aria-label="刪除這筆繳費">×</button></div>`).join('')}
-    <div class="item addrow"><label class="pfield">繳費日<input type="date" class="inline" id="np-date" value="${todayISO()}" aria-label="繳費日"></label><label class="pfield">堂數<span class="row" style="gap:4px;flex-wrap:nowrap"><input type="number" class="inline" id="np-n" value="4" min="1" data-fee="${s.fee}" aria-label="堂數" style="width:64px">堂</span></label><label class="pfield">金額<input type="number" class="inline" id="np-amt" value="${s.fee*4}" aria-label="金額" style="width:110px"></label><button class="btn primary" data-act="addPay">記錄</button></div>
-  </div>
-
-  <div class="label">上課紀錄<span class="en">lessons</span></div>
-  <div class="panel list">${ls.map(l=>`<div class="item"><div class="main"><span class="num" style="color:var(--ink);font-weight:700">${mdw(l.date)}</span>${l.note?`<span class="sub"> ${esc(l.note)}</span>`:''}</div>
-    ${l.status==='attended'?'<span class="tag yellow">出席</span>':l.status==='leave'?'<span class="tag cream">請假</span>':l.status==='moved'?`<span class="tag">調至 ${md(l.movedTo)}</span>`:l.kind?`<span class="tag">${KIND[l.kind]}・待上</span>`:''}
-    <span class="sub">${dur(+l.minutes||60)}</span><span class="num">${money(l.fee)}</span></div>`).join('')||'<div class="empty" style="padding:14px">還沒有上課紀錄</div>'}</div>`;
+  </div>`;
 }
+function dlgPay(sid){
+  const s=ST(sid);if(!s)return;
+  openDlg(`記錄繳費・${esc(s.name)}`,`
+    <label class="field">繳費日<input type="date" name="date" id="f-pdate" value="${todayISO()}" required></label>
+    <div class="grid2"><label class="field">堂數<input type="number" name="n" id="np-n" value="4" min="1" inputmode="numeric" data-fee="${s.fee}" required></label>
+    <label class="field">金額<input type="number" name="amt" id="np-amt" value="${s.fee*4}" inputmode="numeric" required></label></div>
+    <div class="sub" style="margin-top:-4px">金額會依堂數自動算成 ${money(s.fee)} × 堂數，也可以手動改。</div>`,
+  fd=>{const n=+fd.get('n');if(!(n>0))return;put('payments',rid('p'),{studentId:sid,date:fd.get('date')||todayISO(),lessons:n,amount:+fd.get('amt')||s.fee*n});toast('已記錄繳費')},'','記錄');
+}
+function dlgMat(sid){
+  const s=ST(sid);if(!s)return;
+  openDlg(`新增教材・${esc(s.name)}`,`<label class="field">教材名稱<input name="title" id="f-mtitle" required placeholder="例：拜爾、鈴木小提琴 1"></label>`,
+  fd=>{const t=(fd.get('title')||'').trim();if(t)patch('students',sid,{materials:[...(s.materials||[]),{id:rid('m'),title:t,done:false,start:todayISO()}]})},'','新增');
+}
+
 function viewPhoto(){
   const r=monthCalc(month); const y=month.slice(0,4);
   const yearSum=S.income.filter(i=>i.type==='photo'&&i.date?.startsWith(y)).reduce((a,i)=>a+(+i.amount||0),0);
@@ -976,7 +1067,12 @@ function handle(b){
     case 'editExtra':dlgExtra(d.id);break;
     case 'delLesson':{const l=S.lessons.find(x=>x.id===d.id);del('lessons',d.id);if(l?.kind==='moved'&&l.fromDate&&l.studentId){del('lessons',l.fromDate+'_'+l.studentId);toast('已取消調課，回到原本的時間')}break}
     case 'newStudent':dlgStudent();break;
-    case 'openStudent':stuId=d.id;go('stu');break;
+    case 'openStudent':stuId=d.id;logShown=4;openPeriods=new Set();go('stu');break;
+    case 'newPay':dlgPay(d.id);break;
+    case 'newMat':dlgMat(d.id);break;
+    case 'togglePeriod':openPeriods.has(d.id)?openPeriods.delete(d.id):openPeriods.add(d.id);render();break;
+    case 'logMore':logShown+=4;render();break;
+    case 'logLess':logShown=4;render();break;
     case 'editIncome':dlgIncome(d.id);break;
     case 'newPhoto':dlgIncome(null,'photo');break;
     case 'newOther':dlgIncome(null,'other');break;
