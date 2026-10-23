@@ -278,11 +278,31 @@ a.tag:hover{background:var(--cream)}
 .ybar small{font-size:11px;color:var(--muted);text-align:center;margin-top:3px}
 .ybar.now small{color:var(--ink);font-weight:700}
 .cics{display:flex;gap:6px;flex-shrink:0}
-.cic{width:34px;height:34px;border:1.5px solid var(--ink);border-radius:8px;display:grid;place-items:center;background:var(--paper);padding:0;cursor:pointer}
+.cic{width:30px;height:30px;border:1.5px solid var(--ink);border-radius:8px;display:grid;place-items:center;background:var(--paper);padding:0;cursor:pointer}
 .tile.private{background:var(--hair)}
 .c-private{background:var(--hair);color:var(--ink)}
 .blk.c-private{background:var(--hair)}
 .mast .issue .sub2{gap:8px}
+.sdate{width:52px;box-sizing:border-box;flex-shrink:0;text-align:center;line-height:1.2;padding:3px 8px 3px 0;border-right:1.5px solid var(--hair);color:var(--ink)}
+.sdate b{display:block;font-size:15px;font-weight:700}
+.sdate small{font-size:11px;color:var(--muted)}
+.shootrow{gap:12px}
+.name.one{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px}
+.pseg{display:flex;border:1.5px solid var(--ink);border-radius:10px;overflow:hidden;margin-top:4px}
+.pseg label{flex:1;position:relative;cursor:pointer}
+.pseg label+label{border-left:1.5px solid var(--ink)}
+.pseg input{position:absolute;opacity:0;pointer-events:none}
+.pseg span{display:block;text-align:center;padding:8px 0;font-size:14px}
+.pseg input:checked+span{background:var(--yellow);font-weight:700}
+.pseg input:focus-visible+span{outline:2px solid var(--ink);outline-offset:-4px}
+.vbar{height:8px;border:1.5px solid var(--ink);border-radius:6px;overflow:hidden;background:var(--paper);margin-top:6px}
+.vbar i{display:block;height:100%;background:var(--yellow);transition:width .25s}
+.vstu{padding:12px 14px;margin-top:12px}
+.vles{border-top:1px dashed var(--hair);margin-top:10px;padding-top:10px}
+.vacacts .btn.on{background:var(--yellow);font-weight:700}
+.slots2{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.slotbtn{font:inherit;font-size:13px;border:1.5px dashed var(--ink);border-radius:8px;padding:5px 9px;background:var(--paper);color:var(--ink);cursor:pointer}
+.slotbtn:not(.other){border-style:solid;background:#E8F6FF}
 /* nav with raised calendar key */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:var(--line);display:flex;justify-content:center;align-items:flex-end;
   padding:4px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));z-index:20}
@@ -349,7 +369,7 @@ input[type=checkbox]{accent-color:var(--ink);width:16px;height:16px}
 <div class="wrap">
   <header class="mast">
     <div class="brand"><span data-icon="logo" data-size="30"></span><h1>PATTY.STUDIO</h1></div>
-    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v16</span><span id="conn"></span><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
+    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v17</span><span id="conn"></span><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
   </header>
   <main id="view"></main>
 </div>
@@ -485,7 +505,7 @@ function eventsOn(d){
   for(const i of S.income)if(i.type==='photo'&&i.date===d)ev.push({k:'shoot',time:i.time||'',i});
   for(const s of S.students)for(const sc of (s.scores||[]))if(sc.date===d)ev.push({k:'score',time:'',s,sc});
   for(const i of S.income)if(i.type==='photo'&&!i.delivered&&dueOf(i)===d)ev.push({k:'due',time:'',i});
-  for(const p of S.personal)if(p.date===d)ev.push({k:'personal',time:p.allDay?'':(p.time||''),p});
+  for(const p of S.personal)if(p.date<=d&&d<=pEnd(p))ev.push({k:'personal',time:p.allDay?'':(p.time||''),p});
   return ev.sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
 }
 const extraName=l=>l.studentId?(ST(l.studentId)?.name||'（已刪除的學生）'):(l.name||'試上');
@@ -571,8 +591,8 @@ function shootStatus(i){
 function shootRow(i,withDate=true){
   const clash=clashesOn(i.date).some(c=>c.a.key===i.id||c.b.key===i.id);
   const d=parse(i.date);
-  const left=withDate?`<span class="bigdate num"><b>${d.getMonth()+1}/${d.getDate()}</b><small>週${WD[d.getDay()]}</small></span>`:`<span class="time num">${esc(i.time||'—')}</span>`;
-  return `<div class="item click" data-act="editIncome" data-id="${i.id}">${left}${camTile()}<div class="main"><div class="name">${esc(i.title||'未命名')}</div>${deliveryLine(i)?`<div class="sub">${deliveryLine(i)}</div>`:''}${clash?'<div class="row sub"><span class="tag clash">撞期</span></div>':''}</div>
+  const left=withDate?`<span class="sdate num"><b>${d.getMonth()+1}/${d.getDate()}</b><small>週${WD[d.getDay()]}</small></span>`:`<span class="time num">${esc(i.time||'—')}</span>${camTile()}`;
+  return `<div class="item click shootrow" data-act="editIncome" data-id="${i.id}">${left}<div class="main"><div class="name one">${esc(i.title||'未命名')}</div>${deliveryLine(i)?`<div class="sub">${deliveryLine(i)}</div>`:''}${clash?'<div class="row sub"><span class="tag clash">撞期</span></div>':''}</div>
     ${i.contact?`<div class="cics">${contactIcons(i.contact)}</div>`:''}<div class="paycol"><span class="num" style="font-weight:700;color:var(--ink)">${i.amount?money(i.amount):'—'}</span>${shootStatus(i)}</div></div>`;
 }
 function scoreRow(s,sc,showDate){
@@ -607,7 +627,7 @@ function lessonRowCal(e){
   if(st==='moved')return `<div class="item" style="opacity:.55"><span class="time num">${esc(s?.time||'—')}</span>${sInst(s)}<div class="main"><div class="name"><s>${esc(s?.name||'')}</s></div><div class="row sub"><span class="tag">已調至 ${md(l.movedTo)} ${esc(l.movedTime||'')}</span></div></div></div>`;
   return `<div class="item click" ${s?`data-act="openStudent" data-id="${s.id}"`:''}><span class="time num">${esc(s?.time||'—')}<small>${dur(+(l?.minutes??s?.minutes??src(s).def))}</small></span>${sInst(s)}
     <div class="main"><div class="name">${esc(s?.name||'（已刪除的學生）')}</div><div class="row sub">${famaTag(s)}${s?.freq==='biweekly'?'<span class="tag">隔週</span>':''}</div>${matLine(s)}</div>
-    ${!l&&vacOn(calSel)?'<span class="tag" style="border-style:dashed">休假待處理</span>':''}${st==='attended'?'<span class="tag yellow">出席</span>':st==='leaveCharged'?'<span class="tag yellow">請假扣堂</span>':st==='leave'?'<span class="tag cream">請假</span>':calSel<=todayISO()?'<span class="tag">未簽到</span>':''}</div>`;
+    ${!l&&vacOn(calSel)?'<span class="tag" style="border-style:dashed">待安排</span>':''}${st==='attended'?'<span class="tag yellow">出席</span>':st==='leaveCharged'?'<span class="tag yellow">請假扣堂</span>':st==='leave'?'<span class="tag cream">請假</span>':calSel<=todayISO()?'<span class="tag">未簽到</span>':''}</div>`;
 }
 const CAL_VIEWS={month:'月',week:'週',day:'日'};
 function evMeta(e){
@@ -638,7 +658,7 @@ function monthGrid(){
     const chips=ev.map(e=>{const x=evMeta(e);return `<span class="chip ${x.cls}">${x.s!=null?`<b>${hm(x.s)}</b>`:''}${esc(x.label)}</span>`});
     const vac=vacOn(ds);
     cells+=`<button class="mcell ${vac?'vac':''} ${ds===today?'today':''} ${ds===calSel?'sel':''} ${new Date(y,m-1,d).getDay()===0?'sun':''}" data-act="pick" data-d="${ds}" aria-label="${m}月${d}日，${ev.length} 個行程${cl?'，有撞期':''}">
-      <span class="mtop"><span class="d">${d}</span>${cl?'<span class="bang">!</span>':vac?'<span class="vactag">休</span>':''}</span>${chips.slice(0,3).join('')}${chips.length>3?`<span class="morechip">還有 ${chips.length-3} 個</span>`:''}</button>`;
+      <span class="mtop"><span class="d">${d}</span>${cl?'<span class="bang">!</span>':vac?'<span class="vactag">私</span>':''}</span>${chips.slice(0,3).join('')}${chips.length>3?`<span class="morechip">還有 ${chips.length-3} 個</span>`:''}</button>`;
   }
   const rest=(7-(off+days)%7)%7;for(let i=0;i<rest;i++)cells+='<div class="mcell out"></div>';
   return `<div class="panel" style="overflow:hidden"><div class="calhead">${WD.map(w=>`<div>${w}</div>`).join('')}</div><div class="mgrid">${cells}</div></div>`;
@@ -682,7 +702,7 @@ function viewCal(){
     <div class="row" style="gap:6px"><button class="btn sq-btn" data-act="calNav" data-n="-1" aria-label="上一頁">‹</button><button class="btn sq-btn" data-act="calNav" data-n="1" aria-label="下一頁">›</button></div></div>
   </div>${body}
   <div class="legend"><span><i class="mk s"></i>Patty</span><span><i class="mk f"></i>費瑪</span><span><i class="mk r"></i>攝影</span><span><i class="mk y"></i>帶譜</span><span><i class="bang" style="position:static">!</i>撞期</span><span><i class="mk v"></i>休假</span></div>
-  <div class="vaclist">${vacBoxes()}<button class="btn" data-act="newVac" data-d="${calSel}" style="align-self:flex-start">＋ 設定休假</button></div>
+  ${vacBoxes()?`<div class="vaclist">${vacBoxes()}</div>`:''}
   <div class="between" style="margin:22px 2px 10px"><div class="label" style="margin:0">${mdw(calSel)}<span class="en">schedule</span></div>
   <div class="row"><button class="btn" data-act="goSign" data-d="${calSel}">簽到</button><button class="btn" data-act="newScoreOn" data-d="${calSel}">＋ 帶譜</button><button class="btn" data-act="newPersonal" data-d="${calSel}">＋ 私人</button><button class="btn primary" data-act="newShootOn" data-d="${calSel}">＋ 拍攝</button></div></div>
   ${cl.length?`<div class="clashnote" style="margin-bottom:10px">！時間重疊：${cl.map(clashTxt).join('；')}</div>`:''}
@@ -1026,10 +1046,10 @@ function dlgMove(sid,date){
     <label class="field">時長<select name="minutes" id="f-mmin">${minOpts(s,cur?.minutes||s.minutes||src(s).def)}</select></label>
     ${clashBox}
     <label class="field">備註<input name="note" id="f-mnote" placeholder="例：家長出差"></label>`,
-  fd=>{const nid=rid('l');const nd=fd.get('date'),nt=fd.get('time');
+  fd=>{const nd=fd.get('date'),nt=fd.get('time');
     const c=clashFor(nd,nt,hm(toMin(nt)+(+fd.get('minutes'))),sid);
-    put('lessons',nid,{kind:'moved',studentId:sid,source:s.source||'self',date:nd,time:nt,minutes:+fd.get('minutes'),fee:cur?.fee??s.fee,status:'',note:fd.get('note'),fromDate:date});
-    put('lessons',date+'_'+sid,{studentId:sid,source:s.source||'self',date,status:'moved',fee:cur?.fee??s.fee,minutes:cur?.minutes??s.minutes??src(s).def,note:fd.get('note'),movedTo:nd,movedTime:nt,movedId:nid});
+    if(cur?.movedId)del('lessons',cur.movedId);
+    doMove(sid,date,nd,nt,fd.get('minutes'),fd.get('note')||'');vacMoving=null;
     toast(c.length?`已調到 ${md(nd)} ${nt}，但和 ${c.map(x=>x.label).join('、')} 撞期`:`已調到 ${mdw(nd)} ${nt}`)},'','確定調課');
   liveClash();
 }
@@ -1102,26 +1122,46 @@ function contactIcons(c){
 
 /* ---------- private appointments (shown grey, used for clash checks, not income) ---------- */
 function personalRow(p){
-  return `<div class="item click" data-act="editPersonal" data-id="${p.id}"><span class="time num">${p.allDay?'整天':esc(p.time||'—')}${!p.allDay&&p.endTime?`<small>–${esc(p.endTime)}</small>`:''}</span><span class="tile private">${pix('lock',24)}</span>
-    <div class="main"><div class="name">${esc(p.title||'私人行程')}</div><div class="sub">私人行程${p.note?'・'+esc(p.note):''}</div></div><span class="tag">私人</span></div>`;
+  const n=vacLessons(p),pend=n.filter(x=>x.state==='pending').length;
+  const left=p.allDay?(pEnd(p)!==p.date?'多天':'整天'):`${esc(p.time||'—')}${p.endTime?`<small>–${esc(p.endTime)}</small>`:''}`;
+  return `<div class="item click" data-act="editPersonal" data-id="${p.id}"><span class="time num">${left}</span><span class="tile private">${pix('lock',24)}</span>
+    <div class="main"><div class="name">${esc(p.title||'私人行程')}</div><div class="sub">${pEnd(p)!==p.date?pRange(p)+'・':''}私人${p.note?'・'+esc(p.note):''}</div></div>${n.length?`<span class="tag ${pend?'ink':'yellow'}">${pend?pend+' 堂待安排':'課已安排'}</span>`:'<span class="tag">私人</span>'}</div>`;
 }
 function dlgPersonal(id,date){
-  const p=S.personal.find(x=>x.id===id)||{title:'',date:date||todayISO(),time:'',endTime:'',allDay:false,note:''};
+  const p=S.personal.find(x=>x.id===id)||{title:'',date:date||todayISO(),endDate:'',time:'',endTime:'',allDay:false,reason:'',note:''};
+  const ty=!p.allDay?'time':pEnd(p)!==p.date?'range':'day';
   editing={date:'f-pdate2',start:'f-ptime',end:'f-pend',key:id||'__new'};
+  const r=(v,l)=>`<label><input type="radio" name="ptype" value="${v}" ${ty===v?'checked':''}><span>${l}</span></label>`;
   openDlg(id?'編輯私人行程':'新增私人行程',`
-    <label class="field">名稱<input name="title" id="f-ptitle" required value="${esc(p.title)}" placeholder="例：牙醫、朋友聚餐"></label>
-    <label class="field">日期<input type="date" name="date" id="f-pdate2" required value="${p.date}"></label>
-    <label class="row sub"><input type="checkbox" name="allDay" id="f-pallday" ${p.allDay?'checked':''}> 整天</label>
-    <div class="grid2" id="f-ptimes" ${p.allDay?'hidden':''}><label class="field">開始<input type="time" name="time" id="f-ptime" step="300" value="${esc(p.time||'')}"></label>
+    <label class="field">名稱<input name="title" id="f-ptitle" required value="${esc(p.title)}" placeholder="例：關西旅行、牙醫"></label>
+    <div class="field">類型<div class="pseg" id="f-ptype">${r('time','幾點到幾點')}${r('day','整天')}${r('range','好幾天')}</div></div>
+    <div class="grid2"><label class="field"><span id="f-pdlab">${ty==='range'?'開始':'日期'}</span><input type="date" name="date" id="f-pdate2" required value="${p.date}"></label>
+    <label class="field" id="f-pendw" ${ty==='range'?'':'hidden'}>結束<input type="date" name="endDate" id="f-pend2" value="${p.endDate||addDays(p.date,6)}"></label></div>
+    <div class="grid2" id="f-ptimes" ${ty==='time'?'':'hidden'}><label class="field">開始<input type="time" name="time" id="f-ptime" step="300" value="${esc(p.time||'')}"></label>
     <label class="field">結束<input type="time" name="endTime" id="f-pend" step="300" value="${esc(p.endTime||'')}"></label></div>
     ${clashBox}
+    <div class="remind" id="f-phint" hidden></div>
+    <label class="field">通知家長的原因<input name="reason" id="f-preason" value="${esc(p.reason||'')}" placeholder="例：不在台灣、有事"></label>
+    <div class="sub" style="margin-top:-4px">會寫進給家長的訊息：「老師 10/29–11/4 <u>不在台灣</u>」，沒填就寫「請假」</div>
     <label class="field">備註<input name="note" id="f-pnote" value="${esc(p.note||'')}"></label>`,
-  fd=>{const d={title:(fd.get('title')||'').trim()||'私人行程',date:fd.get('date'),allDay:fd.get('allDay')==='on',time:fd.get('time')||'',endTime:fd.get('endTime')||'',note:fd.get('note')||''};
+  fd=>{const t=fd.get('ptype')||'time';let a=fd.get('date'),b=t==='range'?fd.get('endDate')||'':'';if(b&&b<a)[a,b]=[b,a];if(b===a)b='';
+    const d={title:(fd.get('title')||'').trim()||'私人行程',date:a,endDate:b,allDay:t!=='time',time:t==='time'?fd.get('time')||'':'',endTime:t==='time'?fd.get('endTime')||'':'',reason:(fd.get('reason')||'').trim(),note:fd.get('note')||''};
     const nid=id||rid('pv');put('personal',nid,d);
+    const n=vacLessons({...d,id:nid}).length;
+    if(n){vacId=nid;vacMoving=null;go('vac');toast(`這段時間有 ${n} 堂課，一堂一堂安排吧`);return}
     const c=d.allDay?spansOn(d.date).filter(x=>x.key!==nid):clashFor(d.date,d.time,d.endTime,nid);
     if(c.length)toast(`已儲存。注意：和 ${c.map(x=>x.label).join('、')} 撞期，要取捨一下`)},
   id?`<button class="btn ghost danger" value="x:delPersonal:${id}" formnovalidate>刪除</button>`:'');
-  liveClash();
+  liveClash();pHint();
+}
+/* while filling the form: show which type's fields apply and how many lessons fall inside */
+function pHint(){
+  const g=id=>document.getElementById(id);if(!g('f-ptype'))return;
+  const t=(document.querySelector('#f-ptype input:checked')||{}).value||'time';
+  g('f-ptimes').hidden=t!=='time';g('f-pendw').hidden=t!=='range';g('f-pdlab').textContent=t==='range'?'開始':'日期';
+  const p={date:g('f-pdate2').value,endDate:t==='range'?g('f-pend2').value:'',allDay:t!=='time',time:g('f-ptime').value,endTime:g('f-pend').value};
+  const n=p.date?vacLessons(p).length:0,hint=g('f-phint');
+  hint.hidden=!n;if(n)hint.innerHTML=`<b>這段時間有 ${n} 堂課</b><div class="sub">存好後會帶你一堂一堂安排</div>`;
 }
 
 /* ---------- student search without re-rendering (keeps typing and 注音 smooth) ---------- */
@@ -1133,14 +1173,18 @@ function filterStudents(){
   const e=document.getElementById('stuEmpty');if(e)e.hidden=any||!q;
 }
 
-/* ---------- vacations: mark a date range, then decide each lesson in it ---------- */
-const vacOn=d=>S.vacations.find(v=>v.start<=d&&d<=v.end);
-function vacLessons(v){
-  const out=[];let d=v.start;
-  for(let i=0;i<120&&d<=v.end;i++){
+/* ---------- private plans: a time, a whole day, or several days; lessons inside get arranged one by one ---------- */
+const pEnd=p=>p.endDate&&p.endDate>p.date?p.endDate:p.date;
+const pRange=p=>pEnd(p)!==p.date?`${md(p.date)}–${md(pEnd(p))}`:mdw(p.date);
+const vacOn=d=>S.personal.find(p=>p.allDay&&p.date<=d&&d<=pEnd(p));
+function vacLessons(p){
+  const out=[];let d=p.date;const end=pEnd(p);
+  const ps=p.allDay?null:toMin(p.time),pe=p.allDay?null:(toMin(p.endTime)>ps?toMin(p.endTime):ps+60);
+  for(let i=0;i<120&&d<=end;i++){
     for(const s of S.students){
       const l=S.lessons.find(x=>x.id===d+'_'+s.id);
       if(!l&&!occurs(s,d))continue;
+      if(!p.allDay){const ls=toMin(s.time);if(ps==null||ls==null)continue;const le=ls+(+(l?.minutes??s.minutes??src(s).def));if(!(ls<pe&&ps<le))continue}
       const st=!l?'pending':l.status==='moved'?'moved':l.vacKeep&&!l.status?'keep':l.status||'pending';
       out.push({date:d,s,l,state:st});
     }
@@ -1148,44 +1192,86 @@ function vacLessons(v){
   }
   return out.sort((a,b)=>(a.date+(a.s.time||'')).localeCompare(b.date+(b.s.time||'')));
 }
-const vacPending=v=>vacLessons(v).filter(x=>x.state==='pending').length;
-const vacStateTag=x=>({pending:'<span class="tag" style="border-style:dashed;color:var(--muted)">待處理</span>',
-  keep:'<span class="tag yellow">照常上課</span>',moved:`<span class="tag yellow">已調到 ${md(x.l?.movedTo||'')}</span>`,
-  leave:'<span class="tag cream">提早請假</span>',leaveCharged:'<span class="tag cream">請假扣堂</span>',attended:'<span class="tag yellow">已出席</span>'})[x.state]||'';
-let vacId=null;
-function viewVac(){
-  const v=S.vacations.find(x=>x.id===vacId);
-  if(!v)return `<button class="btn ghost back" data-act="backCal">‹ 行事曆</button><div class="panel empty">找不到這個休假，可能已經刪除。</div>`;
-  const ls=vacLessons(v),pend=ls.filter(x=>x.state==='pending').length;
-  let h=`<button class="btn ghost back" data-act="backCal">‹ 行事曆</button>
-  <div class="panel vachead"><div class="between"><div><h2>${esc(v.name||'休假')}</h2><div class="sub">${mdw(v.start)} – ${mdw(v.end)}</div></div><button class="btn" data-act="editVac" data-id="${v.id}">編輯</button></div>
-  <div class="sub" style="margin-top:6px">期間有 ${ls.length} 堂課${pend?`，還有 <b style="color:var(--ink)">${pend} 堂</b>待處理`:'，都處理好了'}</div></div>
-  <div class="panel list" style="margin-top:12px">`;
-  if(!ls.length)h+='<div class="empty">這段期間沒有課。</div>';
-  for(const x of ls){
-    const s=x.s,d=parse(x.date);
-    h+=`<div class="vacrow"><div class="item" style="padding:0"><span class="bigdate num"><b>${d.getMonth()+1}/${d.getDate()}</b><small>週${WD[d.getDay()]}</small></span>${sInst(s)}
-      <div class="main"><div class="name" style="cursor:default">${esc(s.name)}</div><div class="sub">${esc(s.time||'—')}・${dur(+(x.l?.minutes??s.minutes??src(s).def))}</div></div>${vacStateTag(x)}</div>
-      ${x.state==='pending'?`<div class="vacacts"><button class="btn" data-act="vacMove" data-sid="${s.id}" data-d="${x.date}">調課</button><button class="btn" data-act="vacKeep" data-sid="${s.id}" data-d="${x.date}">照常上課</button><button class="btn" data-act="vacLeave" data-sid="${s.id}" data-d="${x.date}">請假</button></div>`
-        :x.state!=='attended'?`<div style="text-align:right;margin-top:6px"><button class="linkbtn" data-act="vacReset" data-sid="${s.id}" data-d="${x.date}">重新選擇</button></div>`:''}</div>`;
+const vacPending=p=>vacLessons(p).filter(x=>x.state==='pending').length;
+const VAC_LAB={moved:'調課',keep:'照常上課',leave:'停課一次'};
+/* free times after the plan for a make-up lesson: the student's usual time on days without a clash */
+function suggestSlots(s,p,date){
+  const mins=+(s.minutes??src(s).def),t=s.time;if(!t)return [];
+  let d=addDays(p.allDay?pEnd(p):date,1);if(d<=todayISO())d=addDays(todayISO(),1);
+  const out=[];
+  for(let i=0;i<28&&out.length<3;i++,d=addDays(d,1)){
+    if(occurs(s,d)||S.lessons.some(l=>l.studentId===s.id&&l.date===d&&l.status!=='moved'))continue;
+    if(vacOn(d))continue;
+    if(clashFor(d,t,hm(toMin(t)+mins),s.id).length)continue;
+    out.push({d,t});
   }
-  return h+`</div><div style="text-align:center;margin-top:18px"><button class="linkbtn" data-act="delVac" data-id="${v.id}">刪除這個休假</button></div>`;
+  return out;
 }
-function dlgVac(id,start){
-  const v=S.vacations.find(x=>x.id===id)||{name:'',start:start||todayISO(),end:addDays(start||todayISO(),6)};
-  openDlg(id?'編輯休假':'設定休假',`
-    <label class="field">名稱<input name="name" id="f-vname" value="${esc(v.name)}" placeholder="例：關西旅行、過年" required></label>
-    <div class="grid2"><label class="field">開始<input type="date" name="start" id="f-vstart" value="${v.start}" required></label>
-    <label class="field">結束<input type="date" name="end" id="f-vend" value="${v.end}" required></label></div>
-    <div class="sub" style="margin-top:-4px">存好後會列出這段期間的每一堂課，你再一堂一堂決定要調課、照常上課或請假。</div>`,
-  fd=>{let a=fd.get('start'),b=fd.get('end');if(b<a)[a,b]=[b,a];const nid=id||rid('v');
-    put('vacations',nid,{name:(fd.get('name')||'').trim()||'休假',start:a,end:b});vacId=nid;go('vac')},
-  '',id?'儲存':'設定');
+function doMove(sid,date,nd,nt,minutes,note=''){
+  const s=ST(sid),cur=S.lessons.find(x=>x.id===date+'_'+sid),nid=rid('l');
+  minutes=+(minutes||cur?.minutes||s.minutes||src(s).def);
+  put('lessons',nid,{kind:'moved',studentId:sid,source:s.source||'self',date:nd,time:nt,minutes,fee:cur?.fee??s.fee,status:'',note,fromDate:date});
+  put('lessons',date+'_'+sid,{studentId:sid,source:s.source||'self',date,status:'moved',fee:cur?.fee??s.fee,minutes:cur?.minutes??s.minutes??src(s).def,note,movedTo:nd,movedTime:nt,movedId:nid});
+  return nid;
+}
+function vacReset(sid,date){const o=S.lessons.find(l=>l.id===date+'_'+sid);if(o){if(o.movedId)del('lessons',o.movedId);del('lessons',o.id)}}
+function vacApply(sid,date,a){
+  const s=ST(sid);if(!s)return;vacReset(sid,date);
+  const base={studentId:s.id,source:s.source||'self',date,fee:s.fee,minutes:s.minutes??src(s).def,note:''};
+  if(a==='keep')put('lessons',date+'_'+s.id,{...base,status:'',vacKeep:true});
+  if(a==='leave')put('lessons',date+'_'+s.id,{...base,status:'leave'});
+}
+function vacMsg(p,s,rows){
+  const parts=rows.map(x=>x.state==='moved'&&x.l?.movedTo?`${mdw(x.date)}的課能否改到 ${mdw(x.l.movedTo)}${x.l.movedTime||''}`:x.state==='leave'?`${mdw(x.date)}的課暫停一次`:'').filter(Boolean);
+  if(!parts.length)return '';
+  return `${parentOf(s)}您好，老師 ${pRange(p)} ${(p.reason||'').trim()||'請假'}，${parts.join('，')}，謝謝您☺️`;
+}
+let vacId=null, vacMoving=null;
+function viewVac(){
+  const p=S.personal.find(x=>x.id===vacId);
+  if(!p)return `<button class="btn ghost back" data-act="backCal">‹ 行事曆</button><div class="panel empty">找不到這個行程，可能已經刪除。</div>`;
+  const ls=vacLessons(p),done=ls.filter(x=>x.state!=='pending').length;
+  const when=p.allDay?(pEnd(p)!==p.date?`${mdw(p.date)} – ${mdw(pEnd(p))}`:`${mdw(p.date)} 整天`):`${mdw(p.date)} ${esc(p.time||'')}${p.endTime?'–'+esc(p.endTime):''}`;
+  let h=`<button class="btn ghost back" data-act="backCal">‹ 行事曆</button>
+  <div class="panel vachead"><div class="between"><div style="min-width:0"><h2>${esc(p.title||'私人行程')}</h2><div class="sub">${when}・私人${p.reason?'・'+esc(p.reason):''}</div></div><button class="btn" data-act="editPersonal" data-id="${p.id}" data-plain="1">編輯</button></div>
+  ${ls.length?`<div class="between" style="margin-top:10px"><span class="sub">已安排 <b style="color:var(--ink)">${done} / ${ls.length}</b></span></div><div class="vbar"><i style="width:${ls.length?done/ls.length*100:0}%"></i></div>
+  ${done<ls.length?`<div class="row" style="margin-top:10px"><button class="btn" data-act="vacAll" data-v="leave">剩下的全部停課</button><button class="btn" data-act="vacAll" data-v="keep">剩下的全部照常</button></div>`:''}`
+  :'<div class="sub" style="margin-top:8px">這段時間沒有課，不用安排。</div>'}</div>`;
+  const by=new Map();for(const x of ls){if(!by.has(x.s.id))by.set(x.s.id,[]);by.get(x.s.id).push(x)}
+  for(const [sid,rows] of by){
+    const s=rows[0].s;
+    h+=`<div class="panel vstu"><div class="row" style="gap:8px">${sInst(s)}<b>${esc(s.name)}</b><span class="sub">${rows.length} 堂</span></div>`;
+    for(const x of rows){
+      const key=x.date+'_'+sid,moving=vacMoving===key&&x.state==='pending';
+      const tag=x.state==='pending'?(moving?'<span class="tag yellow">調課・選時間</span>':'<span class="tag" style="border-style:dashed;color:var(--muted)">待安排</span>')
+        :x.state==='moved'?`<span class="tag yellow">調到 ${mdw(x.l.movedTo)} ${esc(x.l.movedTime||'')}</span>`:x.state==='keep'?'<span class="tag yellow">照常上課</span>'
+        :x.state==='leave'?'<span class="tag cream">停課一次</span>':x.state==='leaveCharged'?'<span class="tag cream">請假扣堂</span>':'<span class="tag yellow">已出席</span>';
+      h+=`<div class="vles"><div class="between"><span class="num" style="font-weight:700;color:var(--ink)">${mdw(x.date)} ${esc(s.time||'')}</span>${tag}</div>`;
+      if(x.state!=='attended'){
+        const on=a=>(moving&&a==='moved')||x.state===a?'on':'';
+        h+=`<div class="vacacts"><button class="btn ${on('moved')}" data-act="vacSet" data-v="moved" data-sid="${sid}" data-d="${x.date}">調課</button><button class="btn ${on('keep')}" data-act="vacSet" data-v="keep" data-sid="${sid}" data-d="${x.date}">照常上課</button><button class="btn ${on('leave')}" data-act="vacSet" data-v="leave" data-sid="${sid}" data-d="${x.date}">停課一次</button></div>`;
+        if(moving){const sl=suggestSlots(s,p,x.date);
+          h+=`<div class="sub" style="margin-top:8px">${sl.length?'你有空的時間，點一下就排好':'附近找不到空檔，請自己選時間'}</div><div class="slots2">${sl.map(o=>`<button class="slotbtn" data-act="vacMoveTo" data-sid="${sid}" data-d="${x.date}" data-nd="${o.d}" data-nt="${o.t}">${mdw(o.d)} ${o.t}</button>`).join('')}<button class="slotbtn other" data-act="vacMove" data-sid="${sid}" data-d="${x.date}">其他時間…</button></div>`}
+      }
+      h+='</div>';
+    }
+    const msg=vacMsg(p,s,rows);
+    if(msg)h+=`<div class="msgtxt" style="margin-top:10px">${esc(msg)}</div><div style="margin-top:8px"><button class="btn" data-act="copyTxt" data-t="${esc(msg)}" data-msg="已複製，可以貼到 LINE 了">複製通知訊息</button></div>`;
+    h+='</div>';
+  }
+  return h+`<div style="text-align:center;margin-top:18px"><button class="linkbtn" data-act="delVac" data-id="${p.id}">刪除這個行程</button></div>`;
 }
 function vacBoxes(){
   const t=todayISO();
-  const vs=S.vacations.filter(v=>v.end>=t).sort((a,b)=>a.start.localeCompare(b.start));
-  return vs.map(v=>{const n=vacPending(v);return `<button class="vacbox ${n?'':'ok'}" data-act="openVac" data-id="${v.id}"><span><b>${esc(v.name||'休假')}</b>・${md(v.start)} – ${md(v.end)}</span><span>${n?`還有 ${n} 堂待處理 ›`:'都處理好了 ›'}</span></button>`}).join('');
+  const vs=S.personal.filter(p=>pEnd(p)>=t).sort((a,b)=>a.date.localeCompare(b.date)).map(p=>({p,ls:vacLessons(p)})).filter(x=>x.ls.length);
+  return vs.map(({p,ls})=>{const n=ls.filter(x=>x.state==='pending').length;return `<button class="vacbox ${n?'':'ok'}" data-act="openVac" data-id="${p.id}"><span><b>${esc(p.title||'私人行程')}</b>・${pRange(p)}</span><span>${n?`還有 ${n} 堂待安排 ›`:'都安排好了 ›'}</span></button>`}).join('');
+}
+/* old 休假 records become 私人行程 (lesson decisions live on the lessons, so nothing is lost) */
+let vacMigrated=false;
+function migrateVacations(){
+  if(vacMigrated||!db||loaded.size<COLS.length||!S.vacations.length)return;
+  vacMigrated=true;
+  for(const v of S.vacations){put('personal',v.id,{title:v.name||'休假',date:v.start,endDate:v.end>v.start?v.end:'',allDay:true,time:'',endTime:'',reason:'',note:''});del('vacations',v.id)}
 }
 
 /* ---------- photo delivery: due 7 days after the shoot ---------- */
@@ -1298,7 +1384,7 @@ document.addEventListener('change',e=>{
   if(e.target.id==='f-inst'){const w=document.getElementById('f-inst-other-wrap');if(w)w.hidden=e.target.value!=='其他'}
   if(editing&&Object.values(editing).includes(e.target.id))liveClash();
   if(e.target.dataset.mat&&stuId){const st=ST(stuId);if(st){const f=e.target.dataset.f;const v=f==='done'?e.target.checked:e.target.value.trim();patch('students',st.id,{materials:(st.materials||[]).map(m=>m.id===e.target.dataset.mat?{...m,[f]:v}:m)})}}
-  if(e.target.id==='f-pallday'){const w=document.getElementById('f-ptimes');if(w)w.hidden=e.target.checked}
+  if(e.target.name==='ptype'||['f-pdate2','f-pend2'].includes(e.target.id))pHint();
   if(e.target.id==='f-inodep'){const w=document.getElementById('f-depwrap');if(w)w.hidden=e.target.checked}
   if(e.target.id==='f-iclient'){const c=e.target.value.trim();const prev=S.income.filter(x=>x.type==='photo'&&x.client===c).sort((a,b)=>b.date.localeCompare(a.date))[0];
     if(prev){const nd=document.getElementById('f-inodep');if(nd&&prev.noDeposit&&!nd.checked){nd.checked=true;document.getElementById('f-depwrap').hidden=true}
@@ -1306,7 +1392,8 @@ document.addEventListener('change',e=>{
 });
 document.addEventListener('compositionend',e=>{if(e.target.id==='stuSearch'){stuQuery=e.target.value;filterStudents()}});
 document.addEventListener('input',e=>{
-  if(e.target.id==='stuSearch'){stuQuery=e.target.value;if(!e.isComposing)filterStudents();return}if(editing&&e.target.type==='time'&&Object.values(editing).includes(e.target.id))liveClash();
+  if(e.target.id==='stuSearch'){stuQuery=e.target.value;if(!e.isComposing)filterStudents();return}
+  if(['f-ptime','f-pend','f-pdate2','f-pend2'].includes(e.target.id))pHint();if(editing&&e.target.type==='time'&&Object.values(editing).includes(e.target.id))liveClash();
   if(e.target.id==='np-n'){const a=document.getElementById('np-amt');if(a)a.value=(+e.target.dataset.fee||0)*(+e.target.value||0)}
   if(e.target.id==='f-icontact'){const p=document.getElementById('f-icontact-preview');if(p)p.innerHTML=contactHtml(e.target.value)||'貼上 IG 網址會自動變成可點的 IG 連結'}});
 function syncSel(){if(!calSel.startsWith(month))calSel=todayISO().startsWith(month)?todayISO():month+'-01'}
@@ -1351,19 +1438,20 @@ function handle(b){
     case 'newMat':dlgMat(d.id);break;
     case 'signToday':signDate=todayISO();render();break;
     case 'newPersonal':dlgPersonal(null,d.d);break;
-    case 'editPersonal':dlgPersonal(d.id);break;
+    case 'editPersonal':{const p=S.personal.find(x=>x.id===d.id);if(p&&!d.plain&&tab!=='vac'&&vacLessons(p).length){vacId=p.id;vacMoving=null;go('vac')}else dlgPersonal(d.id);break}
     case 'copyTxt':copyText(d.t,d.msg);break;
     case 'copyMsg':{const s=ST(d.id);if(s)copyText(tuitionMsg(s));break}
     case 'delivered':patch('income',d.id,{delivered:true,deliveredDate:todayISO()});toast('已標記交件');break;
-    case 'newVac':dlgVac(null,d.d);break;
-    case 'editVac':dlgVac(d.id);break;
-    case 'openVac':vacId=d.id;go('vac');break;
+    case 'openVac':vacId=d.id;vacMoving=null;go('vac');break;
     case 'backCal':go('cal');break;
-    case 'delVac':del('vacations',d.id);go('cal');toast('已刪除休假，已經做的調課和請假都保留');break;
+    case 'delVac':del('personal',d.id);go('cal');toast('已刪除行程，已經做的調課和停課都保留');break;
     case 'vacMove':dlgMove(d.sid,d.d);break;
-    case 'vacKeep':{const s=ST(d.sid);put('lessons',d.d+'_'+s.id,{studentId:s.id,source:s.source||'self',date:d.d,status:'',vacKeep:true,fee:s.fee,minutes:s.minutes??src(s).def,note:''});break}
-    case 'vacLeave':dlgLeave({type:'reg',sid:d.sid,date:d.d,cur:S.lessons.find(l=>l.id===d.d+'_'+d.sid)});break;
-    case 'vacReset':{const o=S.lessons.find(l=>l.id===d.d+'_'+d.sid);if(o){if(o.movedId)del('lessons',o.movedId);del('lessons',o.id)}break}
+    case 'vacSet':{const k=d.d+'_'+d.sid,cur=S.lessons.find(l=>l.id===k),st=!cur?'pending':cur.status==='moved'?'moved':cur.vacKeep&&!cur.status?'keep':cur.status||'pending';
+      if(d.v==='moved'){if(st==='moved'){dlgMove(d.sid,d.d);break}vacMoving=vacMoving===k&&st==='pending'?null:k;if(st!=='pending')vacReset(d.sid,d.d);render();break}
+      vacMoving=null;if(st===d.v){vacReset(d.sid,d.d);break}vacApply(d.sid,d.d,d.v);break}
+    case 'vacMoveTo':vacReset(d.sid,d.d);doMove(d.sid,d.d,d.nd,d.nt);vacMoving=null;toast(`已調到 ${mdw(d.nd)} ${d.nt}`);break;
+    case 'vacAll':{const p=S.personal.find(x=>x.id===vacId);if(p){for(const x of vacLessons(p))if(x.state==='pending')vacApply(x.s.id,x.date,d.v)}vacMoving=null;break}
+    case 'vacReset':vacReset(d.sid,d.d);break;
     case 'moneyMode':moneyMode=d.v;render();break;
     case 'yearNav':yearSel=String(+yearSel+ +d.n);render();break;
     case 'pickMonth':month=d.m;moneyMode='month';render();scrollTo(0,0);break;
@@ -1423,7 +1511,7 @@ function startData(){
   const root=firebase.firestore().collection('users').doc(user.uid);
   db={collection:c=>root.collection(c)};
   loaded.clear();render();setConn();
-  unsubs=COLS.map(c=>db.collection(c).onSnapshot(snap=>{S[c]=snap.docs.map(d=>({id:d.id,...d.data()}));loaded.add(c);render();maybeOfferImport()},e=>{conn.textContent='同步錯誤';toast(e.message||e.code)}));
+  unsubs=COLS.map(c=>db.collection(c).onSnapshot(snap=>{S[c]=snap.docs.map(d=>({id:d.id,...d.data()}));loaded.add(c);render();maybeOfferImport();migrateVacations()},e=>{conn.textContent='同步錯誤';toast(e.message||e.code)}));
 }
 /* first run: bring over what was in the Claude version of the ledger */
 let importOffered=false;
