@@ -308,7 +308,7 @@ input[type=checkbox]{accent-color:var(--ink);width:16px;height:16px}
 <div class="wrap">
   <header class="mast">
     <div class="brand"><span data-icon="logo" data-size="44"></span><h1>PATTY.STUDIO</h1></div>
-    <div class="issue"><b id="issueNo"></b><div class="sub2"><span id="conn"></span><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
+    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v12</span><span id="conn"></span><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
   </header>
   <main id="view"></main>
 </div>
@@ -706,6 +706,14 @@ function viewStudents(){
   if(off.length)h+=`<div class="label">停課中<span class="en" style="text-transform:none;letter-spacing:.06em">${off.length} 位</span></div><div class="panel list">${off.map(s=>stuRow(s,false)).join('')}</div>`;
   return h;
 }
+/* next lessons still to come: pending moved/makeup lessons plus regular days (moved-away and leave days skipped) */
+function upcomingLessons(s,n){
+  const t=todayISO(),out=[];
+  const pend=S.lessons.filter(l=>l.studentId===s.id&&l.kind&&l.kind!=='trial'&&l.status!=='attended'&&l.status!=='leave'&&l.date>=t).map(l=>({date:l.date,kind:l.kind}));
+  const taken=new Set(S.lessons.filter(l=>l.studentId===s.id).map(l=>l.date));
+  let d=t;for(let i=0;i<120&&out.length<n+pend.length;i++){if(occurs(s,d)&&!taken.has(d))out.push({date:d});d=addDays(d,1)}
+  return out.concat(pend).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,n);
+}
 /* tuition periods: each payment opens a period of N lessons; attended lessons fill periods in date order,
    leaves sit in the period they happened in without using it up, lessons past the paid ones form unpaid periods */
 let openPeriods=new Set();
@@ -727,9 +735,8 @@ function tuitionPeriods(s){
   let open=all.find(p=>p.used<p.cap&&(p.pay||p.used>0));
   if(!open&&s.active!==false&&(s.days||[]).length){open={no:all.length+1,pay:null,cap:4,used:0,slots:[],upcomingOnly:true};unpaid.push(open);all.push(open)}
   if(open){
-    let need=open.cap-open.used,d=todayISO();
-    const taken=new Set(S.lessons.filter(l=>l.studentId===s.id).map(l=>l.date));
-    for(let i=0;i<120&&need>0;i++){if(occurs(s,d)&&!taken.has(d)){open.slots.push({date:d});need--}d=addDays(d,1)}
+    const need=open.cap-open.used;
+    open.slots.push(...upcomingLessons(s,need).map(u=>({date:u.date,kind:u.kind})));
   }
   return all.reverse();
 }
@@ -746,7 +753,7 @@ function periodCard(s,p,first){
     <div class="main"><div class="name" style="cursor:inherit">第 ${p.no} 期${unpaidP?'・尚未繳費':''}</div><div class="sub">${sub}</div></div>${pill}
     ${full&&!first?`<span class="chev" aria-hidden="true">${open?'⌃':'⌄'}</span>`:''}</div>`;
   if(!open)return `<div class="panel period">${head}</div>`;
-  const slots=p.slots.map(x=>x.l?`<div class="slot ${x.l.status==='attended'?'done':'leave'}"><b>${md(x.l.date)}</b>${x.l.status==='attended'?(x.l.kind==='moved'?'調課':x.l.kind==='makeup'?'補課':'出席'):'請假'}</div>`:`<div class="slot todo"><b>${md(x.date)}</b>待上</div>`).join('');
+  const slots=p.slots.map(x=>x.l?`<div class="slot ${x.l.status==='attended'?'done':'leave'}"><b>${md(x.l.date)}</b>${x.l.status==='attended'?(x.l.kind==='moved'?'調課':x.l.kind==='makeup'?'補課':'出席'):'請假'}</div>`:`<div class="slot todo"><b>${md(x.date)}</b>${x.kind==='moved'?'調課・待上':x.kind==='makeup'?'補課・待上':'待上'}</div>`).join('');
   const del=p.pay?`<button class="linkbtn" data-act="delPay" data-id="${p.pay.id}">刪除這筆繳費</button>`:'';
   return `<div class="panel period ${unpaidP?'unpaid':''}">${head}<div class="slots">${slots||'<div class="sub" style="grid-column:1/-1">還沒有排到課</div>'}</div>${del?`<div style="padding:0 14px 10px;text-align:right">${del}</div>`:''}</div>`;
 }
@@ -768,7 +775,7 @@ function viewStu(){
   const allLs=S.lessons.filter(l=>l.studentId===s.id&&l.status!=='moved').sort((a,b)=>b.date.localeCompare(a.date));
   const ls=allLs.slice(0,logShown);
   const paidTotal=pays.reduce((a,p)=>a+(+p.amount||0),0);
-  const nextLesson=(()=>{let d=todayISO();for(let i=0;i<70;i++){if(occurs(s,d)){const r=S.lessons.find(x=>x.id===d+'_'+s.id);if(!r||(r.status!=='moved'&&r.status!=='leave'))return d}d=addDays(d,1)}return null})();
+  const nextLesson=upcomingLessons(s,1)[0]?.date||null;
   const info=[['上課時間',`${freqLabel(s)}${(s.days||[]).map(d=>WD[d]).join('、')||'—'} ${esc(s.time||'')}`],['下一堂',nextLesson?mdw(nextLesson):'—'],['樂器・時數',`${esc(s.instrument||'—')}・${dur(+(s.minutes||src(s).def))}`],['學費',`${money(s.fee)}／堂`]];
   const sec=(t,en,btn)=>`<div class="between sechead"><div class="label" style="margin:0">${t}<span class="en">${en}</span></div>${btn||''}</div>`;
   return `<button class="btn ghost back" data-act="back">‹ 學生名單</button>
