@@ -242,6 +242,14 @@ a.tag:hover{background:var(--cream)}
 .slot.todo{border-style:dashed;color:var(--muted)}
 .slot.todo b{color:var(--muted);font-weight:500}
 .linkbtn{border:0;background:none;padding:0;font:inherit;font-size:12px;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+.leaveopt{display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;text-align:left;border:1.5px solid var(--ink);border-radius:12px;padding:12px 14px;background:var(--paper);font:inherit;color:var(--ink)}
+.leaveopt b{font-size:15px}
+.leaveopt span{font-size:12px;color:var(--muted)}
+.leaveopt.free{background:var(--cream)}
+.leaveopt.charged{background:var(--yellow)}
+.leaveopt.charged span{color:var(--brown)}
+.leaveopt.on{outline:2px solid var(--ink);outline-offset:2px}
+.slot.charged{background:var(--yellow);background-image:repeating-linear-gradient(135deg,transparent 0 5px,rgba(255,252,246,.55) 5px 9px)}
 /* nav with raised calendar key */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:var(--line);display:flex;justify-content:center;align-items:flex-end;
   padding:4px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));z-index:20}
@@ -308,7 +316,7 @@ input[type=checkbox]{accent-color:var(--ink);width:16px;height:16px}
 <div class="wrap">
   <header class="mast">
     <div class="brand"><span data-icon="logo" data-size="44"></span><h1>PATTY.STUDIO</h1></div>
-    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v12</span><span id="conn"></span><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
+    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v13</span><span id="conn"></span><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
   </header>
   <main id="view"></main>
 </div>
@@ -448,7 +456,7 @@ function spansOn(d){
   for(const e of eventsOn(d)){
     if(e.k==='score')continue;
     if(e.k==='shoot'){const s=toMin(e.i.time);if(s==null)continue;const en=toMin(e.i.endTime);out.push({key:e.i.id,kind:'shoot',s,end:en>s?en:s+60,label:e.i.title||'拍攝'});continue}
-    const l=e.l; if(l&&(l.status==='leave'||l.status==='moved'))continue;
+    const l=e.l; if(l&&(isLeave(l.status)||l.status==='moved'))continue;
     const s=toMin(e.time); if(s==null)continue;
     const mins=+(l?.minutes??e.s?.minutes??src(e.s).def)||60;
     out.push({key:e.k==='extra'?l.id:e.s?.id,kind:'lesson',s,end:s+mins,label:e.k==='extra'?extraName(l):(e.s?.name||'學生')});
@@ -470,7 +478,7 @@ function monthCalc(m){
   const r={teach:0,photo:0,other:0,rows:[],others:[],photos:[],scores:[],bySrc:{}};
   const by={};
   for(const l of S.lessons){
-    if(l.status!=='attended'||!l.date.startsWith(m))continue;
+    if(!counts(l.status)||!l.date.startsWith(m))continue;
     const fee=+l.fee||0; r.teach+=fee;
     const stu=ST(l.studentId); const source=l.source||stu?.source||'self';
     const key=l.studentId||('trial:'+(l.name||''));
@@ -491,7 +499,7 @@ function balance(sid){
   const pays=S.payments.filter(p=>p.studentId===sid);
   if(!pays.length)return null;
   const paid=pays.reduce((a,p)=>a+(+p.lessons||0),0);
-  const used=S.lessons.filter(l=>l.studentId===sid&&l.status==='attended'&&l.kind!=='trial').length;
+  const used=S.lessons.filter(l=>l.studentId===sid&&counts(l.status)&&l.kind!=='trial').length;
   return paid-used;
 }
 
@@ -502,7 +510,9 @@ const famaTag=s=>s?`<span class="tag ${s.source==='fama'?'fama':'self'}">${src(s
 const curMats=s=>(s?.materials||[]).filter(m=>!m.done);
 const matLine=s=>{const m=curMats(s);return m.length?`<div class="matline"><b>教材</b>${m.map(x=>esc(x.title)).join('／')}</div>`:''};
 const shootTime=i=>i.time?esc(i.time)+(i.endTime?'–'+esc(i.endTime):''):'';
-const seg=(act,attr,st)=>`<div class="seg"><button data-act="${act}" ${attr} data-st="attended" class="${st==='attended'?'on-att':''}">出席</button><button data-act="${act}" ${attr} data-st="leave" class="${st==='leave'?'on-leave':''}">請假</button></div>`;
+const isLeave=st=>st==='leave'||st==='leaveCharged';
+const counts=st=>st==='attended'||st==='leaveCharged';  /* uses up a lesson and earns the fee */
+const seg=(act,attr,st)=>`<div class="seg"><button data-act="${act}" ${attr} data-st="attended" class="${st==='attended'?'on-att':''}">出席</button><button data-act="${act}" ${attr} data-st="leave" class="${isLeave(st)?'on-leave':''}">${st==='leaveCharged'?'請假扣堂':'請假'}</button></div>`;
 function contactHtml(c){
   if(!c)return '';
   const t=String(c).trim();
@@ -556,7 +566,7 @@ function lessonRowCal(e){
   if(st==='moved')return `<div class="item" style="opacity:.55"><span class="time num">${esc(s?.time||'—')}</span>${sInst(s)}<div class="main"><div class="name"><s>${esc(s?.name||'')}</s></div><div class="row sub"><span class="tag">已調至 ${md(l.movedTo)} ${esc(l.movedTime||'')}</span></div></div></div>`;
   return `<div class="item click" ${s?`data-act="openStudent" data-id="${s.id}"`:''}><span class="time num">${esc(s?.time||'—')}<small>${dur(+(l?.minutes??s?.minutes??src(s).def))}</small></span>${sInst(s)}
     <div class="main"><div class="name">${esc(s?.name||'（已刪除的學生）')}</div><div class="row sub">${famaTag(s)}${s?.freq==='biweekly'?'<span class="tag">隔週</span>':''}</div>${matLine(s)}</div>
-    ${st==='attended'?'<span class="tag yellow">出席</span>':st==='leave'?'<span class="tag cream">請假</span>':calSel<=todayISO()?'<span class="tag">未簽到</span>':''}</div>`;
+    ${st==='attended'?'<span class="tag yellow">出席</span>':st==='leaveCharged'?'<span class="tag yellow">請假扣堂</span>':st==='leave'?'<span class="tag cream">請假</span>':calSel<=todayISO()?'<span class="tag">未簽到</span>':''}</div>`;
 }
 const CAL_VIEWS={month:'月',week:'週',day:'日'};
 function evMeta(e){
@@ -565,9 +575,9 @@ function evMeta(e){
   if(e.k==='score')return {cls:'c-score',label:'帶譜：'+(e.sc.title||'樂譜')+'（'+e.s.name+'）',s:null,act:`data-act="editScore" data-sid="${e.s.id}" data-scid="${e.sc.id}"`};
   const l=e.l, stu=e.k==='extra'?ST(l.studentId):e.s; const so=l?.source||stu?.source;
   const s=toMin(e.time); const mins=+(l?.minutes??stu?.minutes??src(stu).def)||60;
-  const off=l&&(l.status==='leave'||l.status==='moved');
+  const off=l&&(isLeave(l.status)||l.status==='moved');
   const name=e.k==='extra'?extraName(l)+(l.kind==='trial'?'（試上）':l.kind==='moved'?'（調課）':'（補課）'):(stu?.name||'學生');
-  return {cls:(so==='fama'?'c-fama':'c-self')+(off?' c-off':''),label:name+(l?.status==='leave'?'・請假':''),s,end:s==null?null:s+mins,act:stu?`data-act="openStudent" data-id="${stu.id}"`:`data-act="goSign" data-d="${l?.date||''}"`};
+  return {cls:(so==='fama'?'c-fama':'c-self')+(off?' c-off':''),label:name+(l?.status==='leaveCharged'?'・請假扣堂':l?.status==='leave'?'・請假':''),s,end:s==null?null:s+mins,act:stu?`data-act="openStudent" data-id="${stu.id}"`:`data-act="goSign" data-d="${l?.date||''}"`};
 }
 function calTitle(){
   const d=parse(calSel);
@@ -709,7 +719,7 @@ function viewStudents(){
 /* next lessons still to come: pending moved/makeup lessons plus regular days (moved-away and leave days skipped) */
 function upcomingLessons(s,n){
   const t=todayISO(),out=[];
-  const pend=S.lessons.filter(l=>l.studentId===s.id&&l.kind&&l.kind!=='trial'&&l.status!=='attended'&&l.status!=='leave'&&l.date>=t).map(l=>({date:l.date,kind:l.kind}));
+  const pend=S.lessons.filter(l=>l.studentId===s.id&&l.kind&&l.kind!=='trial'&&!counts(l.status)&&!isLeave(l.status)&&l.date>=t).map(l=>({date:l.date,kind:l.kind}));
   const taken=new Set(S.lessons.filter(l=>l.studentId===s.id).map(l=>l.date));
   let d=t;for(let i=0;i<120&&out.length<n+pend.length;i++){if(occurs(s,d)&&!taken.has(d))out.push({date:d});d=addDays(d,1)}
   return out.concat(pend).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,n);
@@ -719,7 +729,7 @@ function upcomingLessons(s,n){
 let openPeriods=new Set();
 function tuitionPeriods(s){
   const pays=S.payments.filter(p=>p.studentId===s.id).sort((a,b)=>a.date.localeCompare(b.date));
-  const evs=S.lessons.filter(l=>l.studentId===s.id&&l.kind!=='trial'&&(l.status==='attended'||l.status==='leave')).sort((a,b)=>a.date.localeCompare(b.date));
+  const evs=S.lessons.filter(l=>l.studentId===s.id&&l.kind!=='trial'&&(counts(l.status)||l.status==='leave')).sort((a,b)=>a.date.localeCompare(b.date));
   const per=pays.map((p,i)=>({no:i+1,pay:p,cap:+p.lessons||4,used:0,slots:[]}));
   const unpaid=[];let pi=0;
   const cur=()=>{
@@ -729,7 +739,14 @@ function tuitionPeriods(s){
     if(!u||u.used>=u.cap){u={no:per.length+unpaid.length+1,pay:null,cap:4,used:0,slots:[]};unpaid.push(u)}
     return u;
   };
-  for(const l of evs){const p=cur();p.slots.push({l});if(l.status==='attended')p.used++}
+  /* advance-notice leaves don't take a slot; they're listed under the period they fell in */
+  let freeHold=[];
+  const peek=()=>{let i=pi;while(i<per.length&&per[i].used>=per[i].cap)i++;if(i<per.length)return per[i];const u=unpaid[unpaid.length-1];return u&&u.used<u.cap?u:null};
+  for(const l of evs){
+    if(l.status==='leave'){const p=peek();if(p)(p.free=p.free||[]).push(l);else freeHold.push(l);continue}
+    const p=cur();if(freeHold.length){(p.free=p.free||[]).push(...freeHold);freeHold=[]}
+    p.slots.push({l});p.used++;
+  }
   /* upcoming lessons fill the open period; if every paid period is used up, show the next one as unpaid */
   const all=per.concat(unpaid);
   let open=all.find(p=>p.used<p.cap&&(p.pay||p.used>0));
@@ -742,7 +759,7 @@ function tuitionPeriods(s){
 }
 function periodCard(s,p,first){
   const unpaidP=!p.pay;
-  const done=p.slots.filter(x=>x.l&&x.l.status==='attended');
+  const done=p.slots.filter(x=>x.l&&counts(x.l.status));
   const full=!unpaidP&&p.used>=p.cap;
   const open=first||unpaidP||!full||openPeriods.has(p.pay?.id);
   const range=done.length?`${md(done[0].l.date)} – ${md(done[done.length-1].l.date)}`:'';
@@ -753,9 +770,10 @@ function periodCard(s,p,first){
     <div class="main"><div class="name" style="cursor:inherit">第 ${p.no} 期${unpaidP?'・尚未繳費':''}</div><div class="sub">${sub}</div></div>${pill}
     ${full&&!first?`<span class="chev" aria-hidden="true">${open?'⌃':'⌄'}</span>`:''}</div>`;
   if(!open)return `<div class="panel period">${head}</div>`;
-  const slots=p.slots.map(x=>x.l?`<div class="slot ${x.l.status==='attended'?'done':'leave'}"><b>${md(x.l.date)}</b>${x.l.status==='attended'?(x.l.kind==='moved'?'調課':x.l.kind==='makeup'?'補課':'出席'):'請假'}</div>`:`<div class="slot todo"><b>${md(x.date)}</b>${x.kind==='moved'?'調課・待上':x.kind==='makeup'?'補課・待上':'待上'}</div>`).join('');
+  const slots=p.slots.map(x=>x.l?`<div class="slot ${x.l.status==='leaveCharged'?'charged':'done'}"><b>${md(x.l.date)}</b>${x.l.status==='leaveCharged'?'請假扣堂':x.l.kind==='moved'?'調課':x.l.kind==='makeup'?'補課':'出席'}</div>`:`<div class="slot todo"><b>${md(x.date)}</b>${x.kind==='moved'?'調課・待上':x.kind==='makeup'?'補課・待上':'待上'}</div>`).join('');
   const del=p.pay?`<button class="linkbtn" data-act="delPay" data-id="${p.pay.id}">刪除這筆繳費</button>`:'';
-  return `<div class="panel period ${unpaidP?'unpaid':''}">${head}<div class="slots">${slots||'<div class="sub" style="grid-column:1/-1">還沒有排到課</div>'}</div>${del?`<div style="padding:0 14px 10px;text-align:right">${del}</div>`:''}</div>`;
+  const freeNote=(p.free||[]).length?`<div class="sub" style="padding:0 14px 10px">提早請假：${p.free.map(l=>md(l.date)).join('、')}（不扣堂）</div>`:'';
+  return `<div class="panel period ${unpaidP?'unpaid':''}">${head}<div class="slots">${slots||'<div class="sub" style="grid-column:1/-1">還沒有排到課</div>'}</div>${freeNote}${del?`<div style="padding:0 14px 10px;text-align:right">${del}</div>`:''}</div>`;
 }
 function tuitionSection(s){
   const per=tuitionPeriods(s);
@@ -1005,6 +1023,26 @@ function dlgIncome(id,type,date){
   if(photo)liveClash();
 }
 
+/* two kinds of leave: told in advance (no charge) or last-minute (charged as a lesson) */
+let leaveTarget=null;
+function dlgLeave(t){
+  leaveTarget=t;
+  const name=t.type==='reg'?ST(t.sid)?.name:extraName(t.l);const date=t.type==='reg'?signDate:t.l.date;
+  const cur=t.type==='reg'?t.cur?.status:t.l.status;
+  openDlg(`${esc(name)}・${md(date)} 請假`,`<div class="sub" style="margin-top:-4px">這次請假要扣堂嗎？</div>
+    <button class="leaveopt free ${cur==='leave'?'on':''}" value="x:setLeave:leave" formnovalidate><b>提早請假</b><span>不扣堂、不算學費，這期堂數順延</span></button>
+    <button class="leaveopt charged ${cur==='leaveCharged'?'on':''}" value="x:setLeave:leaveCharged" formnovalidate><b>臨時請假・扣一堂</b><span>照常算一堂學費，佔這期一堂</span></button>
+    ${isLeave(cur)?'<button class="leaveopt" value="x:setLeave:clear" formnovalidate><b>取消請假</b><span>回到還沒簽到</span></button>':''}`,null,'','');
+  form.querySelector('[value="ok"]').hidden=true;
+}
+function applyLeave(st){
+  const t=leaveTarget;if(!t)return;leaveTarget=null;
+  if(t.type==='reg'){const s=ST(t.sid);const id=signDate+'_'+s.id;const cur=t.cur;
+    if(st==='clear'){if(cur)del('lessons',id);return}
+    put('lessons',id,{studentId:s.id,source:s.source||'self',date:signDate,status:st,fee:cur?.fee??s.fee,minutes:cur?.minutes??s.minutes??src(s).def,note:cur?.note??''});
+  }else patch('lessons',t.l.id,{status:st==='clear'?'':st});
+  toast(st==='leaveCharged'?'已記為臨時請假，扣一堂':st==='leave'?'已記為提早請假，不扣堂':'已取消請假');
+}
 /* ---------- actions ---------- */
 function act(spec){
   const [a,...rest]=spec.split(':');const arg=rest.join(':');
@@ -1013,6 +1051,7 @@ function act(spec){
   if(a==='delPay'){del('payments',arg);toast('已刪除繳費')}
   if(a==='delIncome')del('income',arg);
   if(a==='editStudent')dlgStudent(arg);
+  if(a==='setLeave')applyLeave(arg);
   if(a==='newScore')dlgScore(arg);
   if(a==='delMat'){const [sid,mid]=arg.split(':');const st=ST(sid);if(st)patch('students',sid,{materials:(st.materials||[]).filter(m=>m.id!==mid)})}
   if(a==='delScore'){const [sid,scid]=arg.split(':');const st=ST(sid);if(st)patch('students',sid,{scores:(st.scores||[]).filter(m=>m.id!==scid)})}
@@ -1063,10 +1102,11 @@ function handle(b){
     case 'newShootOn':dlgIncome(null,'photo',d.d);break;
     case 'newScoreOn':dlgScore(S.students[0]?.id,null,d.d);break;
     case 'mark':{const s=ST(d.sid);const id=signDate+'_'+s.id;const cur=S.lessons.find(l=>l.id===id);
+      if(d.st==='leave'){dlgLeave({type:'reg',sid:s.id,cur});break}
       if(cur&&cur.status===d.st)del('lessons',id);
       else put('lessons',id,{studentId:s.id,source:s.source||'self',date:signDate,status:d.st,fee:cur?.fee??s.fee,minutes:cur?.minutes??s.minutes??src(s).def,note:cur?.note??''});
       break}
-    case 'markX':{const l=S.lessons.find(x=>x.id===d.id);if(l)patch('lessons',l.id,{status:l.status===d.st?'':d.st});break}
+    case 'markX':{const l=S.lessons.find(x=>x.id===d.id);if(!l)break;if(d.st==='leave'){dlgLeave({type:'extra',l});break}patch('lessons',l.id,{status:l.status===d.st?'':d.st});break}
     case 'move':dlgMove(d.sid,signDate);break;
     case 'undoMove':{const o=S.lessons.find(x=>x.id===signDate+'_'+d.sid);if(o){if(o.movedId)del('lessons',o.movedId);del('lessons',o.id);toast('已取消調課')}break}
     case 'editLesson':dlgLesson(d.sid);break;
