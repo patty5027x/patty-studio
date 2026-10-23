@@ -1,0 +1,58 @@
+{
+ "students": [],
+ "lessons": [],
+ "payments": [],
+ "income": [
+  {
+   "id": "i_mvl7sw1kldf3",
+   "amount": 7000,
+   "category": "音樂會",
+   "client": "林口賦格",
+   "contact": "Message",
+   "date": "2026-12-27",
+   "deposit": 0,
+   "depositPaid": false,
+   "endTime": "17:00",
+   "noDeposit": true,
+   "paid": false,
+   "place": "林口體育大學",
+   "time": "09:00",
+   "title": "林口賦格學生音樂會",
+   "type": "photo"
+  },
+  {
+   "id": "i_mvl96mv8e9e2",
+   "amount": 4000,
+   "category": "音樂會",
+   "client": "Amy老師",
+   "contact": "https://www.instagram.com/k.v_amy?xtok=ZjM5ZGc2bmZqdXJ4",
+   "date": "2027-11-20",
+   "deposit": 0,
+   "depositPaid": false,
+   "endTime": "17:00",
+   "noDeposit": true,
+   "paid": false,
+   "place": "南港生技園區音樂廳",
+   "time": "12:30",
+   "title": "Amy老師學生音樂會",
+   "type": "photo"
+  },
+  {
+   "id": "i_mvl90z6pbn6r",
+   "amount": 2000,
+   "category": "音樂會",
+   "client": "",
+   "contact": "LINE：康康",
+   "date": "2027-01-24",
+   "deposit": 0,
+   "depositPaid": false,
+   "endTime": "",
+   "noDeposit": true,
+   "paid": false,
+   "place": "",
+   "time": "",
+   "title": "康康婕翎師生音樂會",
+   "type": "photo"
+  }
+ ]
+}
