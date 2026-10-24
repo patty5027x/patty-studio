@@ -346,6 +346,7 @@ input[type=checkbox].switch:checked{background:var(--yellow)}
 input[type=checkbox].switch:checked::after{left:19px}
 .switch:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.switch,.switch::after{transition:none}}
+.allatt{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
 /* nav with raised calendar key */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:var(--line);display:flex;justify-content:center;align-items:flex-end;
   padding:4px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));z-index:20}
@@ -412,7 +413,7 @@ input[type=checkbox]{accent-color:var(--ink);width:16px;height:16px}
 <div class="wrap">
   <header class="mast">
     <div class="brand"><span data-icon="logo" data-size="30"></span><h1>PATTY.STUDIO</h1></div>
-    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v19</span><span id="conn"></span><button class="btn ghost bell" id="bellBtn" data-act="openNotify" hidden aria-label="通知設定"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
+    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v20</span><span id="conn"></span><button class="btn ghost bell" id="bellBtn" data-act="openNotify" hidden aria-label="通知設定"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
   </header>
   <main id="view"></main>
 </div>
@@ -773,6 +774,13 @@ function viewSign(){
   h+=`<div class="row" style="margin-top:14px"><button class="btn" data-act="newShootOn" data-d="${signDate}">＋ 拍攝</button><button class="btn" data-act="newPersonal" data-d="${signDate}">＋ 私人行程</button></div>`;
   return h;
 }
+/* lessons on the sign-in day that are scheduled but not marked yet (請假、調課 are left alone) */
+function signPending(){
+  const out=[];
+  for(const s of S.students){if(!occurs(s,signDate))continue;const l=S.lessons.find(x=>x.id===signDate+'_'+s.id);if(!l||!l.status)out.push({s,l})}
+  for(const l of S.lessons)if(l.date===signDate&&l.kind&&!l.status)out.push({x:l});
+  return out;
+}
 function viewSignCore(){
   const wd=parse(signDate).getDay();
   const todays=S.lessons.filter(l=>l.date===signDate);
@@ -784,6 +792,7 @@ function viewSignCore(){
   const extra=todays.filter(l=>l.kind).sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
   const clashKeys=new Set(clashesOn(signDate).flatMap(c=>[c.a.key,c.b.key]));
   const nSched=S.students.filter(sched).length;
+  const pend=signPending().length;
   let h=`<div class="datebar">
     <button class="btn" data-act="day" data-n="-1" aria-label="前一天">‹</button>
     <input type="date" id="signDate" value="${signDate}">
@@ -791,7 +800,7 @@ function viewSignCore(){
     <button class="btn" data-act="day" data-n="1" aria-label="後一天">›</button>
   </div>
   <div class="between"><div class="seg" role="group" aria-label="顯示範圍"><button data-act="signMode" data-v="today" class="${signMode==='today'?'on-att':''}">今日課程 ${nSched}</button><button data-act="signMode" data-v="all" class="${signMode==='all'?'on-att':''}">全部學生 ${S.students.filter(s=>s.active!==false).length}</button></div>
-  <button class="btn" data-act="addLesson">＋ 試上／補課</button></div><div class="panel list" style="margin-top:12px">`;
+  <button class="btn" data-act="addLesson">＋ 試上／補課</button></div>${pend?`<div class="allatt"><span class="sub">還有 ${pend} 堂沒簽到</span><button class="btn primary" data-act="allAttend">全部出席</button></div>`:''}<div class="panel list" style="margin-top:${pend?8:12}px">`;
   if(!S.students.length)h+=`<div class="empty">還沒有學生。到「學生」分頁新增，設定好上課日之後，這裡會自動列出當天要上課的人。</div>`;
   else if(!list.length)h+=`<div class="empty">週${WD[wd]}沒有固定課。要幫其他學生簽到，切換到「全部學生」。</div>`;
   for(const s of list){
@@ -1486,6 +1495,9 @@ function handle(b){
       const sw=document.getElementById('calSwipe');if(sw&&calSlide){sw.classList.add(calSlide>0?'in-r':'in-l')}calSlide=0;break}
     case 'calToday':calSel=todayISO();render();break;
     case 'signMode':signMode=d.v;render();break;
+    case 'allAttend':{const p=signPending();for(const o of p){if(o.x){patch('lessons',o.x.id,{status:'attended'});continue}const s=o.s,cur=o.l;
+      put('lessons',signDate+'_'+s.id,{...(cur||{}),studentId:s.id,source:s.source||'self',date:signDate,status:'attended',fee:cur?.fee??s.fee,minutes:cur?.minutes??s.minutes??src(s).def,note:cur?.note??''})}
+      toast(`已把 ${p.length} 堂記為出席`);break}
     case 'back':go('students');break;
     case 'editStudent':dlgStudent(d.id);break;
     case 'newScoreFor':dlgScore(d.id);break;
