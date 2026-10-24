@@ -303,6 +303,40 @@ a.tag:hover{background:var(--cream)}
 .slots2{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .slotbtn{font:inherit;font-size:13px;border:1.5px dashed var(--ink);border-radius:8px;padding:5px 9px;background:var(--paper);color:var(--ink);cursor:pointer}
 .slotbtn:not(.other){border-style:solid;background:#E8F6FF}
+.calbar1{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.calbar1 .caltitle{flex:1;font-size:17px}
+.btn.sm{padding:4px 10px;font-size:14px}
+.calbar1 .viewseg button{padding:3px 10px;font-size:13px}
+.mgrid .mcell{min-height:0;height:46px;align-items:center;padding:3px 0 0;gap:0;position:relative}
+.mgrid .mcell .d{width:22px;height:22px;font-size:13px}
+.mgrid .mcell .bang{position:absolute;top:2px;right:2px}
+.dots{display:flex;gap:2px;margin-top:3px;align-items:center;height:7px}
+.dots b{font-size:9px;line-height:7px;color:var(--muted)}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot.c-due{box-shadow:inset 0 0 0 1.5px var(--red);background:var(--paper)}
+.dot.c-private{background:#A9A196}
+.dot.c-off{opacity:.35}
+.dot.big{width:12px;height:12px;border-radius:4px}
+.calhead div{padding:3px 0;font-size:11px}
+.legend{gap:10px;font-size:11px;margin:6px 2px 0;flex-wrap:wrap}
+.legend .dot{width:7px;height:7px}
+.swhint{margin-left:auto}
+.aghead{display:flex;align-items:center;justify-content:space-between;margin:12px 2px 6px}
+.aghead b{font-size:15px;color:var(--ink)}
+.plusbtn{width:36px;height:36px;border-radius:10px;border:1.5px solid var(--ink);background:var(--yellow);font-size:22px;line-height:1;display:grid;place-items:center;cursor:pointer;color:var(--ink);padding:0}
+.aglist{max-height:max(150px,calc(100dvh - 560px - env(safe-area-inset-bottom,0px)));overflow:auto;overscroll-behavior:contain}
+#calSwipe{touch-action:pan-y}
+#calSwipe.in-r{animation:calInR .2s ease-out}
+#calSwipe.in-l{animation:calInL .2s ease-out}
+@keyframes calInR{from{opacity:.3;transform:translateX(24px)}to{opacity:1;transform:none}}
+@keyframes calInL{from{opacity:.3;transform:translateX(-24px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#calSwipe.in-r,#calSwipe.in-l{animation:none}}
+.addgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:4px 0 8px}
+.addop{display:flex;align-items:center;gap:10px;border:1.5px solid var(--ink);border-radius:12px;background:var(--paper);padding:12px 10px;font:inherit;color:var(--ink);text-align:left;cursor:pointer}
+.addop small,.addrow small{display:block;font-size:12px;color:var(--muted)}
+.addlist{border:1.5px solid var(--ink);border-radius:12px;overflow:hidden;margin:4px 0 8px}
+.addrow{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;border:0;border-bottom:1px solid var(--hair);background:var(--paper);padding:12px 14px;font:inherit;color:var(--ink);text-align:left;cursor:pointer}
+.addrow:last-child{border-bottom:0}
 /* nav with raised calendar key */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:var(--line);display:flex;justify-content:center;align-items:flex-end;
   padding:4px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));z-index:20}
@@ -369,7 +403,7 @@ input[type=checkbox]{accent-color:var(--ink);width:16px;height:16px}
 <div class="wrap">
   <header class="mast">
     <div class="brand"><span data-icon="logo" data-size="30"></span><h1>PATTY.STUDIO</h1></div>
-    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v17</span><span id="conn"></span><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
+    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v18</span><span id="conn"></span><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
   </header>
   <main id="view"></main>
 </div>
@@ -625,7 +659,7 @@ function render(){
 function lessonRowCal(e){
   const s=e.s,l=e.l,st=l?.status;
   if(st==='moved')return `<div class="item" style="opacity:.55"><span class="time num">${esc(s?.time||'—')}</span>${sInst(s)}<div class="main"><div class="name"><s>${esc(s?.name||'')}</s></div><div class="row sub"><span class="tag">已調至 ${md(l.movedTo)} ${esc(l.movedTime||'')}</span></div></div></div>`;
-  return `<div class="item click" ${s?`data-act="openStudent" data-id="${s.id}"`:''}><span class="time num">${esc(s?.time||'—')}<small>${dur(+(l?.minutes??s?.minutes??src(s).def))}</small></span>${sInst(s)}
+  return `<div class="item click" data-act="goSign" data-d="${calSel}"><span class="time num">${esc(s?.time||'—')}<small>${dur(+(l?.minutes??s?.minutes??src(s).def))}</small></span>${sInst(s)}
     <div class="main"><div class="name">${esc(s?.name||'（已刪除的學生）')}</div><div class="row sub">${famaTag(s)}${s?.freq==='biweekly'?'<span class="tag">隔週</span>':''}</div>${matLine(s)}</div>
     ${!l&&vacOn(calSel)?'<span class="tag" style="border-style:dashed">待安排</span>':''}${st==='attended'?'<span class="tag yellow">出席</span>':st==='leaveCharged'?'<span class="tag yellow">請假扣堂</span>':st==='leave'?'<span class="tag cream">請假</span>':calSel<=todayISO()?'<span class="tag">未簽到</span>':''}</div>`;
 }
@@ -639,7 +673,7 @@ function evMeta(e){
   const l=e.l, stu=e.k==='extra'?ST(l.studentId):e.s; const so=l?.source||stu?.source;
   const s=toMin(e.time); const mins=+(l?.minutes??stu?.minutes??src(stu).def)||60;
   const off=l&&(isLeave(l.status)||l.status==='moved');
-  const name=e.k==='extra'?extraName(l)+(l.kind==='trial'?'（試上）':l.kind==='moved'?'（調課）':'（補課）'):(stu?.name||'學生');
+  const name=e.k==='extra'?extraName(l)+'（'+(KIND[l.kind]||'補課')+'）':(stu?.name||'學生');
   return {cls:(so==='fama'?'c-fama':'c-self')+(off?' c-off':''),label:name+(l?.status==='leaveCharged'?'・請假扣堂':l?.status==='leave'?'・請假':''),s,end:s==null?null:s+mins,act:stu?`data-act="openStudent" data-id="${stu.id}"`:`data-act="goSign" data-d="${l?.date||''}"`};
 }
 function calTitle(){
@@ -655,10 +689,10 @@ function monthGrid(){
   for(let i=0;i<off;i++)cells+='<div class="mcell out"></div>';
   for(let d=1;d<=days;d++){
     const ds=iso(new Date(y,m-1,d)); const ev=eventsOn(ds); const cl=clashesOn(ds).length;
-    const chips=ev.map(e=>{const x=evMeta(e);return `<span class="chip ${x.cls}">${x.s!=null?`<b>${hm(x.s)}</b>`:''}${esc(x.label)}</span>`});
+    const dots=ev.map(e=>`<i class="dot ${evMeta(e).cls}"></i>`);
     const vac=vacOn(ds);
     cells+=`<button class="mcell ${vac?'vac':''} ${ds===today?'today':''} ${ds===calSel?'sel':''} ${new Date(y,m-1,d).getDay()===0?'sun':''}" data-act="pick" data-d="${ds}" aria-label="${m}月${d}日，${ev.length} 個行程${cl?'，有撞期':''}">
-      <span class="mtop"><span class="d">${d}</span>${cl?'<span class="bang">!</span>':vac?'<span class="vactag">私</span>':''}</span>${chips.slice(0,3).join('')}${chips.length>3?`<span class="morechip">還有 ${chips.length-3} 個</span>`:''}</button>`;
+      <span class="d">${d}</span>${cl?'<span class="bang">!</span>':''}<span class="dots">${dots.slice(0,4).join('')}${dots.length>4?'<b>+</b>':''}</span></button>`;
   }
   const rest=(7-(off+days)%7)%7;for(let i=0;i<rest;i++)cells+='<div class="mcell out"></div>';
   return `<div class="panel" style="overflow:hidden"><div class="calhead">${WD.map(w=>`<div>${w}</div>`).join('')}</div><div class="mgrid">${cells}</div></div>`;
@@ -696,29 +730,26 @@ function timeGrid(dates){
 function viewCal(){
   const ev=eventsOn(calSel); const cl=clashesOn(calSel);
   let body=calView==='month'?monthGrid():calView==='week'?timeGrid(Array.from({length:7},(_,i)=>addDays(iso(weekStart(calSel)),i))):timeGrid([calSel]);
-  let h=reminderBoxes()+`<div class="calbar">
-    <div class="calrow"><b class="caltitle">${calTitle()}</b><button class="btn primary" data-act="calToday">今天</button></div>
-    <div class="calrow"><div class="seg viewseg" role="group" aria-label="檢視方式">${Object.entries(CAL_VIEWS).map(([k,v])=>`<button data-act="calView" data-v="${k}" class="${calView===k?'on-att':''}" aria-pressed="${calView===k}">${v}</button>`).join('')}</div>
-    <div class="row" style="gap:6px"><button class="btn sq-btn" data-act="calNav" data-n="-1" aria-label="上一頁">‹</button><button class="btn sq-btn" data-act="calNav" data-n="1" aria-label="下一頁">›</button></div></div>
-  </div>${body}
-  <div class="legend"><span><i class="mk s"></i>Patty</span><span><i class="mk f"></i>費瑪</span><span><i class="mk r"></i>攝影</span><span><i class="mk y"></i>帶譜</span><span><i class="bang" style="position:static">!</i>撞期</span><span><i class="mk v"></i>休假</span></div>
-  ${vacBoxes()?`<div class="vaclist">${vacBoxes()}</div>`:''}
-  <div class="between" style="margin:22px 2px 10px"><div class="label" style="margin:0">${mdw(calSel)}<span class="en">schedule</span></div>
-  <div class="row"><button class="btn" data-act="goSign" data-d="${calSel}">簽到</button><button class="btn" data-act="newScoreOn" data-d="${calSel}">＋ 帶譜</button><button class="btn" data-act="newPersonal" data-d="${calSel}">＋ 私人</button><button class="btn primary" data-act="newShootOn" data-d="${calSel}">＋ 拍攝</button></div></div>
+  let h=`<div class="calbar1"><b class="caltitle">${calTitle()}</b><button class="btn primary sm" data-act="calToday">今天</button>
+    <div class="seg viewseg" role="group" aria-label="檢視方式">${Object.entries(CAL_VIEWS).map(([k,v])=>`<button data-act="calView" data-v="${k}" class="${calView===k?'on-att':''}" aria-pressed="${calView===k}">${v}</button>`).join('')}</div></div>
+  <div class="calswipe" id="calSwipe">${body}</div>
+  <div class="legend"><span><i class="dot c-self"></i>Patty</span><span><i class="dot c-fama"></i>費瑪</span><span><i class="dot c-photo"></i>攝影</span><span><i class="dot c-score"></i>帶譜</span><span><i class="dot c-private"></i>私人</span><span class="swhint">左右滑換${calView==='month'?'月':calView==='week'?'週':'天'}</span></div>
+  <div class="aghead"><b>${mdw(calSel)}</b>
+  <button class="plusbtn" data-act="calAdd" data-d="${calSel}" aria-label="新增行程到 ${mdw(calSel)}">＋</button></div>
   ${cl.length?`<div class="clashnote" style="margin-bottom:10px">！時間重疊：${cl.map(clashTxt).join('；')}</div>`:''}
-  <div class="panel list">`;
-  if(!ev.length)h+=`<div class="empty">這天沒有課程、拍攝或帶譜。</div>`;
+  <div class="panel list ${calView==='month'?'aglist':''}">`;
+  if(!ev.length)h+=`<div class="empty">這天沒有行程，按右邊的 ＋ 新增</div>`;
   for(const e of ev){
     if(e.k==='shoot'){h+=shootRow(e.i,false);continue}
     if(e.k==='score'){h+=scoreRow(e.s,e.sc,false);continue}
     if(e.k==='personal'){h+=personalRow(e.p);continue}
     if(e.k==='due'){h+=`<div class="item">${camTile()}<div class="main"><div class="name" data-act="editIncome" data-id="${e.i.id}">交件：${esc(e.i.title||'拍攝')}</div><div class="sub">${mdw(e.i.date)} 拍攝</div></div><button class="btn" data-act="delivered" data-id="${e.i.id}">已交件</button></div>`;continue}
-    if(e.k==='extra'){const l=e.l;h+=`<div class="item click" ${l.studentId?`data-act="openStudent" data-id="${l.studentId}"`:`data-act="goSign" data-d="${calSel}"`}><span class="time num">${esc(l.time||'—')}<small>${dur(+l.minutes||60)}</small></span>${l.kind==='trial'?starTile():sInst(ST(l.studentId))}<div class="main"><div class="name">${esc(extraName(l))}</div><div class="row sub"><span class="tag cream">${KIND[l.kind]}</span>${l.fromDate?`<span>原 ${md(l.fromDate)}</span>`:''}${l.status==='attended'?'<span class="tag yellow">出席</span>':l.status==='leave'?'<span class="tag cream">請假</span>':''}</div></div></div>`;continue}
+    if(e.k==='extra'){const l=e.l;h+=`<div class="item click" data-act="goSign" data-d="${calSel}"><span class="time num">${esc(l.time||'—')}<small>${dur(+l.minutes||60)}</small></span>${l.kind==='trial'?starTile():sInst(ST(l.studentId))}<div class="main"><div class="name">${esc(extraName(l))}</div><div class="row sub"><span class="tag cream">${KIND[l.kind]}</span>${l.fromDate?`<span>原 ${md(l.fromDate)}</span>`:''}${l.status==='attended'?'<span class="tag yellow">出席</span>':l.status==='leave'?'<span class="tag cream">請假</span>':''}</div></div></div>`;continue}
     h+=lessonRowCal(e);
   }
   return h+'</div>';
 }
-const KIND={trial:'試上',makeup:'補課',moved:'調課'};
+const KIND={trial:'試上',makeup:'補課',add:'加課',moved:'調課'};
 
 function viewSign(){
   const isToday=signDate===todayISO();
@@ -847,9 +878,9 @@ function periodCard(s,p,first){
     <div class="main"><div class="name" style="cursor:inherit">第 ${p.no} 期${unpaidP?'・尚未繳費':''}</div><div class="sub">${sub}</div></div>${pill}
     ${full&&!first?`<span class="chev" aria-hidden="true">${open?'⌃':'⌄'}</span>`:''}</div>`;
   if(!open)return `<div class="panel period">${head}</div>`;
-  const slots=p.slots.map(x=>x.l?`<div class="slot ${x.l.status==='leaveCharged'?'charged':'done'}"><b>${md(x.l.date)}</b>${x.l.status==='leaveCharged'?'請假扣堂':x.l.kind==='moved'?'調課':x.l.kind==='makeup'?'補課':'出席'}</div>`:`<div class="slot todo"><b>${md(x.date)}</b>${x.kind==='moved'?'調課・待上':x.kind==='makeup'?'補課・待上':'待上'}</div>`).join('');
+  const slots=p.slots.map(x=>x.l?`<div class="slot ${x.l.status==='leaveCharged'?'charged':'done'}"><b>${md(x.l.date)}</b>${x.l.status==='leaveCharged'?'請假扣堂':x.l.kind&&x.l.kind!=='trial'&&KIND[x.l.kind]?KIND[x.l.kind]:'出席'}</div>`:`<div class="slot todo"><b>${md(x.date)}</b>${x.kind&&KIND[x.kind]?KIND[x.kind]+'・待上':'待上'}</div>`).join('');
   const del=p.pay?`<button class="linkbtn" data-act="delPay" data-id="${p.pay.id}">刪除這筆繳費</button>`:'';
-  const freeNote=(p.free||[]).length?`<div class="sub" style="padding:0 14px 10px">提早請假：${p.free.map(l=>md(l.date)).join('、')}（不扣堂）</div>`:'';
+  const freeNote=(p.free||[]).length?`<div class="sub" style="padding:0 14px 10px">提早請假：${p.free.map(l=>md(l.date)+(S.lessons.some(m=>m.kind==='makeup'&&m.studentId===l.studentId&&m.forDate===l.date)?'（已補課）':'')).join('、')}（不扣堂）</div>`:'';
   return `<div class="panel period ${unpaidP?'unpaid':''}">${head}<div class="slots">${slots||'<div class="sub" style="grid-column:1/-1">還沒有排到課</div>'}</div>${freeNote}${del?`<div style="padding:0 14px 10px;text-align:right">${del}</div>`:''}</div>`;
 }
 function tuitionSection(s){
@@ -964,7 +995,7 @@ form.addEventListener('submit',e=>{
   if(v==='ok'&&onSave)onSave(new FormData(form));
   if(v&&v.startsWith('x:')){e.preventDefault();act(v.slice(2))}
 });
-dlg.addEventListener('close',()=>{editing=null});
+dlg.addEventListener('close',()=>{if(!dlg.open)editing=null});
 const srcSelect=sel=>`<select name="source" id="f-src">${Object.entries(SRC).map(([k,v])=>`<option value="${k}" ${(sel||'self')===k?'selected':''}>${v.full}</option>`).join('')}</select>`;
 const clashBox='<div class="clashnote" id="f-clash" hidden></div>';
 /* live clash check inside any dialog that has date/start/end fields */
@@ -979,8 +1010,8 @@ function liveClash(){
   box.innerHTML=msg;box.hidden=!msg;
 }
 
-function dlgStudent(id){
-  const s=ST(id)||{days:[],fee:800,active:true,source:'self',instrument:'鋼琴',minutes:60,time:'',freq:'weekly',startDate:todayISO()};
+function dlgStudent(id,pre){
+  const s=ST(id)||{days:[],fee:800,active:true,source:'self',instrument:'鋼琴',minutes:60,time:'',freq:'weekly',startDate:todayISO(),...(pre||{})};
   const inst=s.instrument||'';const custom=inst&&!INSTR.includes(inst);
   openDlg(id?'編輯學生':'新增學生',`
     <label class="field">姓名<input name="name" id="f-name" required value="${esc(s.name||'')}"></label>
@@ -1053,24 +1084,51 @@ function dlgMove(sid,date){
     toast(c.length?`已調到 ${md(nd)} ${nt}，但和 ${c.map(x=>x.label).join('、')} 撞期`:`已調到 ${mdw(nd)} ${nt}`)},'','確定調課');
   liveClash();
 }
-function dlgExtra(id){
-  const l=S.lessons.find(x=>x.id===id)||{kind:'trial',fee:800,date:signDate,time:'',source:'self'};
+function dlgExtra(id,kindPre,datePre){
+  const l=S.lessons.find(x=>x.id===id)||{kind:kindPre||'trial',fee:800,date:datePre||signDate,time:'',source:'self'};
+  const kind=l.kind,trial=kind==='trial';
   editing={date:'f-edate',start:'f-etime',mins:'f-minutes',key:id||'__new'};
-  openDlg(id?`編輯${KIND[l.kind]||'加課'}`:'新增試上／補課',`
-    <label class="field">類型<select name="kind" id="f-kind"><option value="trial" ${l.kind==='trial'?'selected':''}>試上（新學生）</option><option value="makeup" ${l.kind==='makeup'?'selected':''}>補課（現有學生）</option>${l.kind==='moved'?'<option value="moved" selected>調課</option>':''}</select></label>
-    <label class="field">學生（補課／調課）<select name="studentId" id="f-esid"><option value="">—</option>${S.students.map(s=>`<option value="${s.id}" ${s.id===l.studentId?'selected':''}>${esc(s.name)}</option>`).join('')}</select></label>
-    <label class="field">試上姓名<input name="name" id="f-ename" value="${esc(l.name||'')}" placeholder="例：成人小提琴"></label>
-    <div class="grid2"><label class="field">學生來源${srcSelect(l.source)}</label>
-    <label class="field">時長<select name="minutes" id="f-minutes">${minOpts({source:l.source},l.minutes||src({source:l.source}).def)}</select></label></div>
-    <div class="grid2"><label class="field">日期<input name="date" id="f-edate" type="date" value="${l.date}"></label><label class="field">時間<input name="time" id="f-etime" type="time" step="300" value="${esc(l.time||'')}"></label></div>
+  const stuOpts=`<select name="studentId" id="f-esid" required><option value="">選學生</option>${S.students.filter(s=>s.active!==false||s.id===l.studentId).map(s=>`<option value="${s.id}" ${s.id===l.studentId?'selected':''}>${esc(s.name)}</option>`).join('')}</select>`;
+  const title={trial:'新學生試上',makeup:'舊生補課',add:'舊生加課',moved:'調課'}[kind]||'加課';
+  openDlg(id?`編輯${KIND[kind]||'加課'}`:title,`
+    ${trial?`<label class="field">名字<input name="name" id="f-ename" required value="${esc(l.name||'')}" placeholder="例：王小明、成人小提琴"></label>
+    <div class="grid2"><label class="field">學生來源${srcSelect(l.source)}</label><label class="field">時長<select name="minutes" id="f-minutes">${minOpts({source:l.source},l.minutes||src({source:l.source}).def)}</select></label></div>`
+    :`<label class="field">學生${stuOpts}</label>
+    ${kind==='makeup'?`<label class="field">補哪一堂<select name="forDate" id="f-efor"></select></label>`:''}
+    <label class="field">時長<select name="minutes" id="f-minutes">${minOpts(ST(l.studentId)||{source:'self'},l.minutes||ST(l.studentId)?.minutes||60)}</select></label>`}
+    <div class="grid2"><label class="field">日期<input name="date" id="f-edate" type="date" required value="${l.date}"></label><label class="field">時間<input name="time" id="f-etime" type="time" step="300" value="${esc(l.time||'')}"></label></div>
     ${clashBox}
-    <label class="field">學費<input name="fee" id="f-efee" type="number" value="${l.fee}"></label>`,
-  fd=>{const kind=fd.get('kind');const sid=kind!=='trial'?fd.get('studentId')||null:null;const stu=ST(sid);const date=fd.get('date');
-    const data={kind,studentId:sid,source:stu?.source||fd.get('source'),name:fd.get('name'),date,time:fd.get('time'),status:id?(l.status||''):(date<=todayISO()?'attended':''),fee:+fd.get('fee')||0,minutes:+fd.get('minutes'),note:l.note||''};
+    <label class="field">學費<input name="fee" id="f-efee" type="number" inputmode="numeric" value="${l.fee}"></label>
+    ${kind==='add'?'<div class="sub" style="margin-top:-4px">出席後會用掉這期的一堂</div>':''}`,
+  fd=>{const sid=trial?null:fd.get('studentId')||null;const stu=ST(sid);const date=fd.get('date');
+    const data={kind,studentId:sid,source:stu?.source||fd.get('source')||'self',name:trial?(fd.get('name')||'').trim():'',date,time:fd.get('time'),status:id?(l.status||''):(date<=todayISO()?'attended':''),fee:+fd.get('fee')||0,minutes:+fd.get('minutes'),note:l.note||''};
+    if(kind==='makeup')data.forDate=fd.get('forDate')||'';
     if(l.fromDate)data.fromDate=l.fromDate;
     const nid=id||rid('l');put('lessons',nid,data);
-    if(l.kind==='moved'&&l.fromDate&&sid)patch('lessons',l.fromDate+'_'+sid,{movedTo:date,movedTime:data.time})});
-  liveClash();
+    if(kind==='moved'&&l.fromDate&&sid)patch('lessons',l.fromDate+'_'+sid,{movedTo:date,movedTime:data.time});
+    toast(id?'已儲存':`已新增${KIND[kind]||'課程'}`)},
+  id&&trial?`<button class="btn" value="x:trialToStu:${id}" formnovalidate>轉成正式學生</button>`:'');
+  extraFill(id?l:null,!id);liveClash();
+}
+/* student picked → fill time, length and fee, and list the lessons that can be made up */
+function extraFill(l,fresh){
+  const g=k=>document.getElementById(k);const sel=g('f-esid');if(!sel)return;
+  const s=ST(sel.value);
+  if(s&&fresh!==false&&!l){g('f-etime').value=s.time||'';g('f-efee').value=s.fee||'';g('f-minutes').innerHTML=minOpts(s,s.minutes||src(s).def)}
+  const f=g('f-efor');if(!f)return;
+  const cur=l?.forDate||'';
+  const used=new Set(S.lessons.filter(x=>x.kind==='makeup'&&x.forDate&&x!==l).map(x=>x.studentId+'_'+x.forDate));
+  const opts=s?S.lessons.filter(x=>x.studentId===s.id&&isLeave(x.status)&&(!used.has(s.id+'_'+x.date)||x.date===cur)).sort((a,b)=>b.date.localeCompare(a.date)):[];
+  f.innerHTML=`<option value="">不指定</option>${opts.map(x=>`<option value="${x.date}" ${x.date===cur?'selected':''}>${mdw(x.date)} ${x.status==='leave'?'停課／請假':'請假扣堂'}那堂</option>`).join('')}`;
+}
+/* the ＋ on the calendar: one menu for everything that can go on a day */
+function dlgAdd(date,step){
+  const op=(act,cls,t,s)=>`<button type="button" class="addop" data-act="${act}" data-d="${date}"><i class="dot big ${cls}"></i><span><b>${t}</b><small>${s}</small></span></button>`;
+  const row=(k,t,s)=>`<button type="button" class="addrow" data-act="addExtra" data-k="${k}" data-d="${date}"><span><b>${t}</b><small>${s}</small></span><span aria-hidden="true">›</span></button>`;
+  const body=step==='stu'?`<div class="addlist">${row('trial','新學生試上','還沒建檔的學生，填名字和學費就好')}${row('makeup','舊生補課','之前停課或請假的，補回來那一堂')}${row('add','舊生加課','多上一堂，會算進這期的堂數')}</div>`
+    :`<div class="addgrid">${op('calAddStu','c-self','學生','新生・補課・加課')}${op('newShootOn','c-photo','拍攝','攝影行程')}${op('newPersonal','c-private','私人','行程・休假')}${op('newScoreOn','c-score','帶譜','購譜提醒')}</div>`;
+  openDlg(`新增到 ${mdw(date)}`,body,null,step==='stu'?`<button type="button" class="btn ghost" data-act="calAdd" data-d="${date}">‹ 返回</button>`:'');
+  form.querySelector('button[value="ok"]')?.remove();
 }
 function dlgIncome(id,type,date){
   const def=date||(month===todayISO().slice(0,7)?todayISO():month+'-01');
@@ -1312,6 +1370,7 @@ function todayBoxes(){
   const ds=dueSoon();
   if(ds.length)h+=`<div class="clashbox"><b>攝影快到交件期限</b>${ds.map(i=>`<div class="between"><span>${esc(i.title||'拍攝')}・${deliveryLine(i).replace('已拍攝・','')}</span><button class="btn" data-act="delivered" data-id="${i.id}">已交件</button></div>`).join('')}</div>`;
   h+=vacBoxes();
+  const rb=reminderBoxes();if(rb)h+=rb;
   return h?`<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">${h}</div>`:'';
 }
 
@@ -1366,14 +1425,16 @@ function act(spec){
   if(a==='editStudent')dlgStudent(arg);
   if(a==='setLeave')applyLeave(arg);
   if(a==='delPersonal')del('personal',arg);
+  if(a==='trialToStu'){const l=S.lessons.find(x=>x.id===arg);if(l)dlgStudent(null,{name:l.name||'',source:l.source||'self',fee:l.fee||800,minutes:l.minutes||src(l).def,startDate:todayISO()})}
   if(a==='newScore')dlgScore(arg);
   if(a==='delMat'){const [sid,mid]=arg.split(':');const st=ST(sid);if(st)patch('students',sid,{materials:(st.materials||[]).filter(m=>m.id!==mid)})}
   if(a==='delScore'){const [sid,scid]=arg.split(':');const st=ST(sid);if(st)patch('students',sid,{scores:(st.scores||[]).filter(m=>m.id!==scid)})}
 }
+const DLG_ACTS=new Set(['toggleScore','editScore','calAdd','calAddStu','addExtra','newShootOn','newPersonal','newScoreOn']);
 document.addEventListener('click',e=>{
   if(e.target.closest('a[href]'))return;
   const b=e.target.closest('[data-act]');
-  if(b){const inDlg=b.closest('dialog');if(inDlg&&b.dataset.act!=='toggleScore'&&b.dataset.act!=='editScore')return;handle(b);return}
+  if(b){const inDlg=b.closest('dialog');if(inDlg&&!DLG_ACTS.has(b.dataset.act))return;handle(b);return}
   const tb=e.target.closest('#tabs button');if(tb){if(tb.dataset.tab==='sign')signDate=todayISO();tb.classList.remove('bounce');void tb.offsetWidth;tb.classList.add('bounce');go(tb.dataset.tab)}
 });
 function go(t){tab=t;try{localStorage.setItem('tab',t==='stu'?'students':t==='vac'?'cal':t)}catch{}render();scrollTo(0,0)}
@@ -1384,12 +1445,18 @@ document.addEventListener('change',e=>{
   if(e.target.id==='f-inst'){const w=document.getElementById('f-inst-other-wrap');if(w)w.hidden=e.target.value!=='其他'}
   if(editing&&Object.values(editing).includes(e.target.id))liveClash();
   if(e.target.dataset.mat&&stuId){const st=ST(stuId);if(st){const f=e.target.dataset.f;const v=f==='done'?e.target.checked:e.target.value.trim();patch('students',st.id,{materials:(st.materials||[]).map(m=>m.id===e.target.dataset.mat?{...m,[f]:v}:m)})}}
+  if(e.target.id==='f-esid'){extraFill(null);liveClash()}
   if(e.target.name==='ptype'||['f-pdate2','f-pend2'].includes(e.target.id))pHint();
   if(e.target.id==='f-inodep'){const w=document.getElementById('f-depwrap');if(w)w.hidden=e.target.checked}
   if(e.target.id==='f-iclient'){const c=e.target.value.trim();const prev=S.income.filter(x=>x.type==='photo'&&x.client===c).sort((a,b)=>b.date.localeCompare(a.date))[0];
     if(prev){const nd=document.getElementById('f-inodep');if(nd&&prev.noDeposit&&!nd.checked){nd.checked=true;document.getElementById('f-depwrap').hidden=true}
       const ct=document.getElementById('f-icontact');if(ct&&!ct.value&&prev.contact){ct.value=prev.contact;ct.dispatchEvent(new Event('input',{bubbles:true}))}}}
 });
+/* swipe left/right on the calendar to change month / week / day */
+let swX=null,swY=null,calSlide=0;
+document.addEventListener('touchstart',e=>{if(tab!=='cal'||!e.target.closest('#calSwipe')){swX=null;return}swX=e.touches[0].clientX;swY=e.touches[0].clientY},{passive:true});
+document.addEventListener('touchend',e=>{if(swX==null)return;const dx=e.changedTouches[0].clientX-swX,dy=e.changedTouches[0].clientY-swY;swX=null;
+  if(Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy)*1.4)return;const n=dx<0?1:-1;calSlide=n;handle({dataset:{act:'calNav',n:String(n)}})},{passive:true});
 document.addEventListener('compositionend',e=>{if(e.target.id==='stuSearch'){stuQuery=e.target.value;filterStudents()}});
 document.addEventListener('input',e=>{
   if(e.target.id==='stuSearch'){stuQuery=e.target.value;if(!e.isComposing)filterStudents();return}
@@ -1405,7 +1472,8 @@ function handle(b){
     case 'pick':calSel=d.d;render();break;
     case 'jump':calSel=d.d;go('cal');break;
     case 'calView':calView=d.v;render();break;
-    case 'calNav':{const n=+d.n;if(calView==='month'){const x=parse(calSel);calSel=iso(new Date(x.getFullYear(),x.getMonth()+n,1))}else calSel=addDays(calSel,calView==='week'?7*n:n);render();break}
+    case 'calNav':{const n=+d.n;if(calView==='month'){const x=parse(calSel),t=todayISO(),nm=iso(new Date(x.getFullYear(),x.getMonth()+n,1));calSel=nm.slice(0,7)===t.slice(0,7)?t:nm}else calSel=addDays(calSel,calView==='week'?7*n:n);render();
+      const sw=document.getElementById('calSwipe');if(sw&&calSlide){sw.classList.add(calSlide>0?'in-r':'in-l')}calSlide=0;break}
     case 'calToday':calSel=todayISO();render();break;
     case 'signMode':signMode=d.v;render();break;
     case 'back':go('students');break;
@@ -1429,7 +1497,10 @@ function handle(b){
     case 'move':dlgMove(d.sid,signDate);break;
     case 'undoMove':{const o=S.lessons.find(x=>x.id===signDate+'_'+d.sid);if(o){if(o.movedId)del('lessons',o.movedId);del('lessons',o.id);toast('已取消調課')}break}
     case 'editLesson':dlgLesson(d.sid);break;
-    case 'addLesson':dlgExtra();break;
+    case 'addLesson':dlgAdd(signDate,'stu');break;
+    case 'calAdd':dlgAdd(d.d);break;
+    case 'calAddStu':dlgAdd(d.d,'stu');break;
+    case 'addExtra':dlgExtra(null,d.k,d.d);break;
     case 'editExtra':dlgExtra(d.id);break;
     case 'delLesson':{const l=S.lessons.find(x=>x.id===d.id);del('lessons',d.id);if(l?.kind==='moved'&&l.fromDate&&l.studentId){del('lessons',l.fromDate+'_'+l.studentId);toast('已取消調課，回到原本的時間')}break}
     case 'newStudent':dlgStudent();break;
