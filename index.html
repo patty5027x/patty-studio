@@ -337,6 +337,15 @@ a.tag:hover{background:var(--cream)}
 .addlist{border:1.5px solid var(--ink);border-radius:12px;overflow:hidden;margin:4px 0 8px}
 .addrow{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;border:0;border-bottom:1px solid var(--hair);background:var(--paper);padding:12px 14px;font:inherit;color:var(--ink);text-align:left;cursor:pointer}
 .addrow:last-child{border-bottom:0}
+.bell{padding:0 2px;display:inline-grid;place-items:center;color:var(--ink)}
+.nstat{padding:14px}
+.nrow{cursor:pointer}
+input[type=checkbox].switch{appearance:none;-webkit-appearance:none;width:46px;height:28px;border-radius:14px;border:1.5px solid var(--ink);background:var(--paper);position:relative;flex-shrink:0;cursor:pointer;margin:0;transition:background .15s}
+input[type=checkbox].switch::after{content:"";position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;background:#fff;border:1.5px solid var(--ink);transition:left .15s}
+input[type=checkbox].switch:checked{background:var(--yellow)}
+input[type=checkbox].switch:checked::after{left:19px}
+.switch:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.switch,.switch::after{transition:none}}
 /* nav with raised calendar key */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:var(--line);display:flex;justify-content:center;align-items:flex-end;
   padding:4px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));z-index:20}
@@ -403,7 +412,7 @@ input[type=checkbox]{accent-color:var(--ink);width:16px;height:16px}
 <div class="wrap">
   <header class="mast">
     <div class="brand"><span data-icon="logo" data-size="30"></span><h1>PATTY.STUDIO</h1></div>
-    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v18</span><span id="conn"></span><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
+    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v19</span><span id="conn"></span><button class="btn ghost bell" id="bellBtn" data-act="openNotify" hidden aria-label="通知設定"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
   </header>
   <main id="view"></main>
 </div>
@@ -422,6 +431,7 @@ input[type=checkbox]{accent-color:var(--ink);width:16px;height:16px}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 <script src="config.js"></script>
 <script>
 /* ---------- vector icons (32×32) ---------- */
@@ -497,7 +507,7 @@ const minOpts=(s,sel)=>{const o=src(s).mins.slice();if(sel&&!o.includes(+sel))o.
 const dur=m=>m>=60&&m%60===0?(m/60)+' 小時':m+' 分';
 const S={students:[],lessons:[],payments:[],income:[],vacations:[],personal:[]};
 const loaded=new Set();
-let db=null, tab='sign', signDate=todayISO(), month=todayISO().slice(0,7), calSel=todayISO(), editing=null, signMode='today', calView='month', stuId=null;
+let prevTab='sign', db=null, tab='sign', signDate=todayISO(), month=todayISO().slice(0,7), calSel=todayISO(), editing=null, signMode='today', calView='month', stuId=null;
 
 function todayISO(){return iso(new Date())}
 function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -653,7 +663,7 @@ function render(){
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===(tab==='stu'?'students':tab==='vac'?'cal':tab)));
   const v=document.getElementById('view');
   if(db&&loaded.size<COLS.length){v.innerHTML='<div class="panel empty">讀取資料中…</div>';return}
-  v.innerHTML=({sign:viewSign,students:viewStudents,stu:viewStu,vac:viewVac,cal:viewCal,photo:viewPhoto,money:viewMoney})[tab]();
+  v.innerHTML=({sign:viewSign,students:viewStudents,stu:viewStu,vac:viewVac,notify:viewNotify,cal:viewCal,photo:viewPhoto,money:viewMoney})[tab]();
 }
 
 function lessonRowCal(e){
@@ -1499,6 +1509,11 @@ function handle(b){
     case 'editLesson':dlgLesson(d.sid);break;
     case 'addLesson':dlgAdd(signDate,'stu');break;
     case 'calAdd':dlgAdd(d.d);break;
+    case 'openNotify':if(tab!=='notify')prevTab=tab;go('notify');break;
+    case 'backFromNotify':go(prevTab||'sign');break;
+    case 'notifyOn':notifyOn();break;
+    case 'notifyOff':notifyOff();break;
+    case 'notifyTest':nsSave({testAt:new Date().toISOString()});toast('15 分鐘內會收到測試通知');break;
     case 'calAddStu':dlgAdd(d.d,'stu');break;
     case 'addExtra':dlgExtra(null,d.k,d.d);break;
     case 'editExtra':dlgExtra(d.id);break;
@@ -1577,11 +1592,90 @@ document.addEventListener('submit',async e=>{
   catch(err){showLogin(err.code==='auth/network-request-failed'?'連不上網路，請確認網路後再試。':'Email 或密碼不正確。')}
 });
 
+/* ---------- lock-screen notifications: settings live in users/{uid}/settings/notify; GitHub checks every 15 min and sends ---------- */
+const NOTIFY_TYPES=[['today','今天的行程','每天早上列出課和拍攝',true],['tuition','學費到期','學生剩 1 堂或已經上完',true],['due','攝影交件','到期前 2 天和當天',true],['clash','撞期','新出現的撞期',true],['plan','私人行程還沒安排的課','行程結束前每天早上提醒',true],['score','帶譜','前一晚提醒明天要帶的譜',true],['shootEve','明天的拍攝','前一晚提醒',true],['lesson','每堂課開始前','課前 30 分鐘',false]];
+const VAPID=(window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.vapidKey||'').startsWith('貼上')?'':(window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.vapidKey||'');
+let NS=null,nsUnsub=null;
+const nsRef=()=>firebase.firestore().collection('users').doc(user.uid).collection('settings').doc('notify');
+const myTZ=()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Taipei'}catch{return 'Asia/Taipei'}};
+function nsGet(){const t=Object.fromEntries(NOTIFY_TYPES.map(x=>[x[0],x[3]]));return {morning:'08:00',evening:'21:00',tokens:[],...(NS||{}),types:{...t,...(NS?.types||{})}}}
+function nsSave(patchObj){if(!user)return;nsRef().set(patchObj,{merge:true}).catch(e=>toast('設定沒存到：'+(e.code||e.message)))}
+let myToken='';try{myToken=localStorage.getItem('notifyToken')||''}catch{}
+function startNotify(){
+  if(nsUnsub)nsUnsub();
+  nsUnsub=nsRef().onSnapshot(d=>{NS=d.exists?d.data():null;if(tab==='notify')render();
+    if(!NS||NS.tz!==myTZ())nsSave({tz:myTZ()});},()=>{});
+  /* tokens can change; refresh quietly when notifications are already allowed */
+  setTimeout(async()=>{try{if(VAPID&&window.Notification&&Notification.permission==='granted'&&firebase.messaging&&firebase.messaging.isSupported()){
+    const reg=await navigator.serviceWorker.ready;const tok=await firebase.messaging().getToken({vapidKey:VAPID,serviceWorkerRegistration:reg});
+    if(tok&&tok!==myToken){const old=myToken;myToken=tok;try{localStorage.setItem('notifyToken',tok)}catch{}
+      const F=firebase.firestore.FieldValue;nsSave({tokens:F.arrayUnion(tok)});if(old)nsSave({tokens:F.arrayRemove(old)})}}}catch{}},3000);
+}
+const isStandalone=()=>!!(navigator.standalone||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches));
+const isIOS=()=>/iP(hone|ad|od)/.test(navigator.userAgent||'');
+function viewNotify(){
+  const ns=nsGet();
+  const perm=window.Notification?Notification.permission:'unsupported';
+  const on=perm==='granted'&&myToken&&(ns.tokens||[]).includes(myToken);
+  let st;
+  if(isIOS()&&!isStandalone())st=`<div class="remind"><b>要從主畫面打開才能開通知</b><div class="sub">iPhone 只讓「加入主畫面」的 app 收通知，在 Safari 裡打開的不行。請從主畫面的小花圖示打開 PATTY.STUDIO 再來這裡。</div></div>`;
+  else if(perm==='unsupported')st=`<div class="remind"><b>這個瀏覽器不支援通知</b><div class="sub">iPhone 需要 iOS 16.4 以上，並從主畫面打開。</div></div>`;
+  else if(!VAPID)st=`<div class="remind"><b>還差一個設定</b><div class="sub">config.js 裡還沒貼上推播金鑰（vapidKey），照說明貼上後就能開啟。</div></div>`;
+  else if(perm==='denied')st=`<div class="remind"><b>通知被關掉了</b><div class="sub">到 iPhone「設定 → 通知 → PATTY.STUDIO」打開「允許通知」，再回來按下面的按鈕。</div></div><button class="btn primary" data-act="notifyOn" style="margin-top:10px">重新開啟通知</button>`;
+  else if(on)st=`<div class="panel nstat"><div class="between"><b>✓ 這支手機會收到通知</b><span class="tag yellow">已開啟</span></div>
+    <div class="row" style="margin-top:10px"><button class="btn" data-act="notifyTest">傳一則測試通知</button><button class="btn ghost" data-act="notifyOff">關閉這支手機的通知</button></div>
+    ${ns.testAt?`<div class="sub" style="margin-top:6px">測試通知排隊中，15 分鐘內會收到</div>`:''}</div>`;
+  else st=`<div class="panel nstat"><b>還沒開啟</b><div class="sub" style="margin:4px 0 10px">按下面的按鈕，iPhone 會問你要不要允許通知，選「允許」。</div><button class="btn primary" data-act="notifyOn">開啟通知</button></div>`;
+  const opt=(id,val,from,to)=>{let o='';for(let m=from;m<=to;m+=30){const t=hm(m);o+=`<option value="${t}" ${t===val?'selected':''}>${t}</option>`}return `<select id="${id}" class="inline">${o}</select>`};
+  return `<button class="btn ghost back" data-act="backFromNotify">‹ 返回</button><h2 style="margin:4px 0 12px">通知設定</h2>${st}
+  <div class="label">每天幾點提醒<span class="en">time</span></div>
+  <div class="panel list"><div class="item"><div class="main"><div class="name" style="cursor:default">早上整理</div><div class="sub">今天的課、拍攝和要處理的事</div></div>${opt('n-morning',ns.morning,300,720)}</div>
+  <div class="item"><div class="main"><div class="name" style="cursor:default">前一晚提醒</div><div class="sub">明天要帶的譜、明天的拍攝</div></div>${opt('n-evening',ns.evening,1080,1410)}</div></div>
+  <div class="label">要提醒哪些<span class="en">reminders</span></div>
+  <div class="panel list">${NOTIFY_TYPES.map(([k,t,s])=>`<label class="item nrow"><div class="main"><div class="name">${t}</div><div class="sub">${s}</div></div><input type="checkbox" class="switch" data-ntype="${k}" ${ns.types[k]?'checked':''} aria-label="${t}"></label>`).join('')}</div>
+  <div class="sub" style="margin:12px 4px 0">通知每 15 分鐘檢查一次，可能會比設定的時間晚幾分鐘到。同一件事一天只會提醒一次。</div>`;
+}
+async function notifyOn(){
+  if(!window.Notification){toast('這個瀏覽器不支援通知');return}
+  const ask=Notification.requestPermission();
+  try{
+    const p=await ask;if(p!=='granted'){render();toast('沒有允許通知');return}
+    if(!VAPID){render();return}
+    const reg=await navigator.serviceWorker.ready;
+    const tok=await firebase.messaging().getToken({vapidKey:VAPID,serviceWorkerRegistration:reg});
+    if(!tok)throw new Error('沒有拿到裝置代碼');
+    myToken=tok;try{localStorage.setItem('notifyToken',tok)}catch{}
+    nsSave({tokens:firebase.firestore.FieldValue.arrayUnion(tok),tz:myTZ()});
+    toast('已開啟通知');render();
+  }catch(e){toast('開啟失敗：'+(e.code||e.message||e));render()}
+}
+function notifyOff(){
+  if(myToken)nsSave({tokens:firebase.firestore.FieldValue.arrayRemove(myToken)});
+  try{firebase.messaging().deleteToken()}catch{}
+  myToken='';try{localStorage.removeItem('notifyToken')}catch{};toast('這支手機不會再收到通知');render();
+}
+document.addEventListener('change',e=>{
+  if(e.target.dataset&&e.target.dataset.ntype){nsSave({types:{[e.target.dataset.ntype]:e.target.checked}});return}
+  if(e.target.id==='n-morning')nsSave({morning:e.target.value});
+  if(e.target.id==='n-evening')nsSave({evening:e.target.value});
+});
+/* tapping a notification: open the page it's about */
+function applyGo(url){
+  try{const q=new URL(url,location.href).searchParams;const g=q.get('go');if(!g)return false;
+    if(g==='sign'){signDate=q.get('d')||todayISO()}
+    if(g==='cal'){calSel=q.get('d')||todayISO();calView='month'}
+    if(g==='vac'){vacId=q.get('id');vacMoving=null}
+    if(g==='photo'&&q.get('m'))month=q.get('m');
+    tab=g;return true}catch{return false}
+}
+if(applyGo(location.href))history.replaceState(null,'',location.pathname);
+if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.go&&applyGo(e.data.go))go(tab)});
+
 function startData(){
   nav.hidden=false;
   const root=firebase.firestore().collection('users').doc(user.uid);
   db={collection:c=>root.collection(c)};
-  loaded.clear();render();setConn();
+  loaded.clear();render();setConn();startNotify();
   unsubs=COLS.map(c=>db.collection(c).onSnapshot(snap=>{S[c]=snap.docs.map(d=>({id:d.id,...d.data()}));loaded.add(c);render();maybeOfferImport();migrateVacations()},e=>{conn.textContent='同步錯誤';toast(e.message||e.code)}));
 }
 /* first run: bring over what was in the Claude version of the ledger */
@@ -1620,7 +1714,7 @@ document.addEventListener('click',e=>{
   viewEl.innerHTML='<div class="panel empty">讀取中…</div>';
   firebase.auth().onAuthStateChanged(u=>{
     user=u; setConn();
-    document.getElementById('logoutBtn').hidden=!u;
+    document.getElementById('logoutBtn').hidden=!u;document.getElementById('bellBtn').hidden=!u;
     if(!u){db=null;showLogin();return}
     startData();
   });
