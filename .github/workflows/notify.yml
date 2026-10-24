@@ -1,0 +1,24 @@
+name: 鎖定螢幕通知
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}
+concurrency:
+  group: notify
+  cancel-in-progress: false
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 安裝 Firebase 工具
+        working-directory: notify
+        run: npm install --no-save --no-package-lock --silent firebase-admin@12.7.0
+      - name: 檢查並傳送通知
+        run: node notify/notify.js
+        env:
+          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
