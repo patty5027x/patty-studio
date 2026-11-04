@@ -69,10 +69,40 @@ h2 small{font-size:11px;color:var(--muted);letter-spacing:.2em;font-weight:400}
 .empty{text-align:center;color:var(--muted);font-size:14px;padding:30px 10px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:10px;font-size:14px;max-width:90vw;z-index:9}
 .foot{margin-top:24px;text-align:center;color:var(--muted);font-size:13px}
+.wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+.pnav{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,1fr);border-top:var(--line);background:var(--paper);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+.pnav button{border:0;background:none;padding:7px 0 9px;font:inherit;font-size:12px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+.pnav .ic{width:48px;height:38px;display:grid;place-items:center;border-radius:12px;transition:background .15s}
+.pnav button[aria-selected="true"]{color:var(--ink);font-weight:700}
+.pnav button[aria-selected="true"] .ic{background:var(--cream)}
+.pnav button:focus-visible{outline:2px solid var(--ink);outline-offset:-4px}
+.more{display:block;width:100%;border:0;border-top:1px solid var(--hair);background:none;padding:8px 0 0;margin-top:4px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer}
+.seg{display:flex;border:var(--line);border-radius:var(--r-sm);overflow:hidden;margin-top:10px}
+.seg button{flex:1;border:0;background:none;font:inherit;font-size:13px;padding:6px 0;color:var(--ink);cursor:pointer}
+.seg button+button{border-left:var(--line)}
+.seg button[aria-pressed="true"]{background:var(--yellow);font-weight:700}
+.vid{border:var(--line);border-radius:var(--r);overflow:hidden;background:#fff;margin-top:12px}
+.vth{display:block;width:100%;aspect-ratio:16/9;position:relative;border:0;padding:0;background:#2E2A28;cursor:pointer;border-bottom:var(--line)}
+.vth img{width:100%;height:100%;object-fit:cover;display:block}
+.vth .pl{position:absolute;inset:0;margin:auto;width:54px;height:54px;border-radius:50%;background:rgba(255,252,246,.92);border:var(--line);display:grid;place-items:center;font-size:20px;color:var(--ink)}
+.vid iframe{display:block;width:100%;aspect-ratio:16/9;border:0;border-bottom:var(--line)}
+.vinfo{padding:9px 12px}
+.vinfo b{color:var(--ink)}
+.vnote{font-size:13px;background:var(--cream);border-radius:var(--r-sm);padding:6px 10px;margin-top:6px}
+.vmini{display:flex;gap:10px;align-items:center;cursor:pointer;border:0;background:none;padding:0;font:inherit;color:inherit;text-align:left;width:100%}
+.vmini img{width:104px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:var(--line);flex-shrink:0}
+.h2link{margin-left:auto;font-size:12px;color:var(--muted);letter-spacing:.04em;font-weight:400;border:0;background:none;font-family:inherit;cursor:pointer;padding:0}
+.ptitle{font-size:19px;color:var(--ink);font-weight:700;letter-spacing:.08em}
+
 </style>
 </head>
 <body>
 <div class="wrap" id="app"><div class="empty">讀取中…</div></div>
+<nav class="pnav" id="pnav" role="tablist" aria-label="頁面" hidden>
+  <button role="tab" data-tab="home" aria-selected="true"><span class="ic"><svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="#3E3A39" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M7.5 13.8V26h17V13.8" fill="#97D7FF"/><path d="M5 15.5 16 6l11 9.5"/><rect x="13" y="18.5" width="6" height="7.5" rx="3" fill="#F2C46A"/><path d="M21.5 8.5v3.2"/><circle cx="20.3" cy="11.9" r="1.3" fill="#3E3A39" stroke="none"/><path d="M21.5 8.5l2.2.8"/><circle cx="11" cy="16.6" r="1.6" fill="#FFFCF6"/></svg></span>首頁</button>
+  <button role="tab" data-tab="vid" aria-selected="false"><span class="ic"><svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="#3E3A39" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="4" y="10" width="17" height="14" rx="3.5" fill="#EB895B"/><path d="M21 14.5l6-3.2v11.4l-6-3.2z" fill="#F2C46A"/><circle cx="9" cy="7" r="3" fill="#FFFCF6"/><circle cx="16" cy="7" r="3" fill="#FFFCF6"/><path d="M10.5 14.2v5.6l4.8-2.8z" fill="#FFFCF6"/></svg></span>影片</button>
+  <button role="tab" data-tab="gift" aria-selected="false"><span class="ic"><svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="#3E3A39" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="6" y="15" width="20" height="11" rx="2" fill="#F4C0D1"/><rect x="4.5" y="11" width="23" height="5" rx="1.6" fill="#FCF0DA"/><path d="M16 11v15"/><path d="M16 11c-2.5-4.5-7-4-6.5-1.2.4 2 4 1.6 6.5 1.2z" fill="#F2C46A"/><path d="M16 11c2.5-4.5 7-4 6.5-1.2-.4 2-4 1.6-6.5 1.2z" fill="#F2C46A"/></svg></span>禮物</button>
+</nav>
 <div class="toast" id="toast" hidden role="status"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -97,6 +127,9 @@ else{
   const fs=firebase.firestore();
   const ref=fs.collection('share').doc(K);
   let D=null,G=[],R=[],pick=null,giftsFor=null,busy=false;
+  let tab='home',histN=3,onlyOk=false,playing=null;
+  const nav=document.getElementById('pnav');
+  const thumb=id=>`https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
   ref.onSnapshot(doc=>{
     if(!doc.exists){D=null;app.innerHTML='<div class="empty">這個連結已經停用了。<br>請跟老師要新的連結☺️</div>';return}
     D=doc.data();
@@ -106,37 +139,62 @@ else{
   },()=>{app.innerHTML='<div class="empty">讀取失敗，請確認網路後重新整理。</div>'});
   ref.collection('requests').onSnapshot(s=>{R=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.at||'').localeCompare(a.at||''));draw()},()=>{});
 
+  function setTab(t){tab=t;playing=null;nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));draw();scrollTo(0,0)}
   function draw(){
     if(!D)return;
+    nav.hidden=false;
     const t=today(),pend=R.find(r=>r.status==='pending');
-    const next=(D.upcoming||[]).find(u=>u.date>=t);
-    const p=D.period;
     const tiers=[...new Set(G.map(g=>g.tier))].sort((a,b)=>a-b);
-    const nx=tiers.find(x=>x>D.points);
-    const prev=[...tiers].reverse().find(x=>x<=D.points)||0;
-    let h=`<div class="head"><div class="avatar" style="background:${D.source==='fama'?'var(--orange)':'var(--sky)'}">${D.instrument==='鋼琴'?'🎹':D.instrument==='小提琴'?'🎻':'🎵'}</div>
-      <div><h1>${esc(D.name)}</h1><div class="sub">${esc([D.instrument,D.schedule].filter(Boolean).join('・'))}</div></div></div>`;
-    h+=`<h2>下一堂課<small>NEXT</small></h2><div class="panel">${next?`<div class="big">${mdw(next.date)} ${esc(next.time||'')}</div>${next.kind?`<span class="tag">${KIND[next.kind]||''}</span>`:''}`:'<span class="sub">還沒有排到課</span>'}</div>`;
-    if(p){h+=`<h2>第 ${p.no} 期<small>LESSONS</small></h2><div class="panel"><div class="between"><span>${p.unpaid?'這期還沒繳費':'這期上課進度'}</span><span class="tag ${p.unpaid?'y':''}">上到 ${p.used} / ${p.cap}</span></div>
-      <div class="slots">${(p.slots||[]).map(x=>`<div class="slot ${x.st}"><b>${md(x.date)}</b>${x.st==='todo'?(KIND[x.kind]?KIND[x.kind]+'・待上':'待上'):x.st==='charged'?'請假':(KIND[x.kind]||'出席')}</div>`).join('')}</div></div>`}
-    h+=`<h2>我的點數<small>POINTS</small></h2><div class="panel"><div class="between"><span class="pts num">⭐ ${D.points}</span>${pend?'<span class="tag y">兌換申請中</span>':''}</div>
-      ${tiers.length?`<div class="bar"><i style="width:${nx?Math.max(0,Math.min(100,(D.points-prev)/(nx-prev)*100)):100}%"></i></div><div class="sub">${nx?`再 ${nx-D.points} 點可以換 ${nx} 點的禮物`:'所有禮物都換得起了！'}</div>`:''}</div>`;
-    if(pend){h+=`<div class="confirm"><b style="color:var(--ink)">已送出：想換「${esc(pend.giftName)}」（${pend.tier} 點）</b><div class="sub">等老師確認後，下次上課就能拿到禮物☺️</div><div class="row"><button class="btn" data-act="cancel" data-id="${pend.id}">取消申請</button></div></div>`}
-    else if(pick){const g=G.find(x=>x.id===pick);if(g)h+=`<div class="confirm"><b style="color:var(--ink)">確定要用 ${g.tier} 點換「${esc(g.name)}」嗎？</b><div class="sub">送出後老師會收到通知，確認了才會扣點。</div><div class="row"><button class="btn primary" data-act="send">確定兌換</button><button class="btn" data-act="unpick">再想想</button></div></div>`}
-    if(G.length){h+=`<h2>禮物<small>GIFTS</small></h2>`;
-      for(const tr of tiers){const gs=G.filter(g=>g.tier===tr),lack=tr-D.points;
-        h+=`<div class="tierh"><b>${tr} 點</b>${lack>0?`<span class="sub">還差 ${lack} 點</span>`:''}</div><div class="grid">${gs.map(g=>`<button class="gift" data-act="pick" data-id="${g.id}" ${lack>0||pend?'disabled':''} aria-label="${esc(g.name)}，${g.tier} 點">${g.img?`<img src="${g.img}" alt="">`:'<span class="ph">🎁</span>'}<span class="n">${esc(g.name)}</span>${lack>0?'<span class="lock">🔒</span>':''}</button>`).join('')}</div>`}}
-    const done=R.filter(r=>r.status!=='pending').slice(0,5);
-    if(done.length)h+=`<h2>兌換紀錄<small>HISTORY</small></h2><div class="panel list">${done.map(r=>`<div><span class="d">${md((r.doneAt||r.at||'').slice(0,10)||t)}</span><span class="m">${esc(r.giftName)}</span><span class="tag ${r.status==='done'?'y':''}">${r.status==='done'?'已兌換':'老師婉拒了'}</span></div>`).join('')}</div>`;
-    if((D.history||[]).length)h+=`<h2>點數紀錄<small>RECORD</small></h2><div class="panel list">${D.history.slice(0,10).map(x=>`<div><span class="d">${md(x.date)}</span><span class="m">${esc(x.reason||(x.delta>0?'加點':'扣點'))}</span><b class="num" style="color:var(--ink)">${x.delta>0?'+':''}${x.delta}</b></div>`).join('')}</div>`;
-    if((D.scores||[]).length)h+=`<h2>要帶的譜<small>SHEET MUSIC</small></h2><div class="panel list">${D.scores.map(x=>`<div><span class="d">${md(x.date)}</span><span class="m">${esc(x.title)}</span></div>`).join('')}</div>`;
-    if((D.materials||[]).length)h+=`<h2>正在學<small>BOOKS</small></h2><div class="panel">${D.materials.map(esc).join('<br>')}</div>`;
-    h+=`<div class="foot">要請假或調課，請直接 LINE 老師喔☺️</div>`;
+    const nx=tiers.find(x=>x>D.points),prev=[...tiers].reverse().find(x=>x<=D.points)||0;
+    const ptCard=`<div class="between"><span class="pts num">⭐ ${D.points}</span>${pend?'<span class="tag y">兌換申請中</span>':''}</div>
+      ${tiers.length?`<div class="bar"><i style="width:${nx?Math.max(0,Math.min(100,(D.points-prev)/(nx-prev)*100)):100}%"></i></div><div class="sub">${nx?`再 ${nx-D.points} 點可以換 ${nx} 點的禮物`:'所有禮物都換得起了！'}</div>`:''}`;
+    const vids=D.videos||[];
+    let h='';
+    if(tab==='home'){
+      const next=(D.upcoming||[]).find(u=>u.date>=t),p=D.period,hist=D.history||[];
+      h+=`<div class="head"><div class="avatar" style="background:${D.source==='fama'?'var(--orange)':'var(--sky)'}">${D.instrument==='鋼琴'?'🎹':D.instrument==='小提琴'?'🎻':'🎵'}</div>
+        <div><h1>${esc(D.name)}</h1><div class="sub">${esc([D.instrument,D.schedule].filter(Boolean).join('・'))}</div></div></div>`;
+      h+=`<h2>下一堂課<small>NEXT</small></h2><div class="panel">${next?`<div class="big">${mdw(next.date)} ${esc(next.time||'')}</div>${next.kind?`<span class="tag">${KIND[next.kind]||''}</span>`:''}`:'<span class="sub">還沒有排到課</span>'}</div>`;
+      if(p)h+=`<h2>第 ${p.no} 期<small>LESSONS</small></h2><div class="panel"><div class="between"><span>${p.unpaid?'這期還沒繳費':'這期上課進度'}</span><span class="tag ${p.unpaid?'y':''}">上到 ${p.used} / ${p.cap}</span></div>
+        <div class="slots">${(p.slots||[]).map(x=>`<div class="slot ${x.st}"><b>${md(x.date)}</b>${x.st==='todo'?(KIND[x.kind]?KIND[x.kind]+'・待上':'待上'):x.st==='charged'?'請假':(KIND[x.kind]||'出席')}</div>`).join('')}</div></div>`;
+      h+=`<h2>我的點數<small>POINTS</small><button class="h2link" data-act="tab" data-t="gift">看禮物 ›</button></h2><div class="panel">${ptCard}
+        ${hist.length?`<div class="list" style="margin-top:10px">${hist.slice(0,histN).map(x=>`<div><span class="d">${md(x.date)}</span><span class="m">${esc(x.reason||(x.delta>0?'加點':'扣點'))}</span><b class="num" style="color:var(--ink)">${x.delta>0?'+':''}${x.delta}</b></div>`).join('')}</div>
+        ${hist.length>histN?`<button class="more" data-act="histMore">看更多（還有 ${hist.length-histN} 筆）</button>`:''}`:''}</div>`;
+      if(vids.length)h+=`<h2>最新影片<small>VIDEO</small><button class="h2link" data-act="tab" data-t="vid">全部 ›</button></h2><div class="panel"><button class="vmini" data-act="tab" data-t="vid"><img src="${thumb(vids[0].yt)}" alt=""><span><b style="color:var(--ink)">${esc(vids[0].title||'演奏影片')}</b><br><span class="sub">${vids[0].date?md(vids[0].date):''}</span></span></button></div>`;
+      if((D.scores||[]).length)h+=`<h2>要帶的譜<small>SHEET MUSIC</small></h2><div class="panel list">${D.scores.map(x=>`<div><span class="d">${md(x.date)}</span><span class="m">${esc(x.title)}</span></div>`).join('')}</div>`;
+      if((D.materials||[]).length)h+=`<h2>正在學<small>BOOKS</small></h2><div class="panel">${D.materials.map(esc).join('<br>')}</div>`;
+      h+=`<div class="foot">要請假或調課，請直接 LINE 老師喔☺️</div>`;
+    }
+    if(tab==='vid'){
+      h+=`<div class="ptitle">演奏影片</div><div class="sub">${vids.length?'點影片就能直接播放':''}</div>`;
+      if(!vids.length)h+='<div class="empty">還沒有影片，老師錄好之後會放在這裡☺️</div>';
+      vids.forEach((v,i)=>{h+=`<div class="vid">${playing===i?`<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(v.yt)}?autoplay=1&playsinline=1&rel=0&modestbranding=1" title="${esc(v.title||'演奏影片')}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`
+        :`<button class="vth" data-act="play" data-i="${i}" aria-label="播放 ${esc(v.title||'演奏影片')}"><img src="${thumb(v.yt)}" alt="" loading="lazy"><span class="pl">▶</span></button>`}
+        <div class="vinfo"><b>${esc(v.title||'演奏影片')}</b><div class="sub">${v.date?mdw(v.date):''}</div>${v.note?`<div class="vnote">老師的話：${esc(v.note)}</div>`:''}</div></div>`});
+    }
+    if(tab==='gift'){
+      h+=`<div class="between"><span class="ptitle">禮物</span><span class="big num">⭐ ${D.points}</span></div>`;
+      if(pend)h+=`<div class="confirm"><b style="color:var(--ink)">已送出：想換「${esc(pend.giftName)}」（${pend.tier} 點）</b><div class="sub">等老師確認後，下次上課就能拿到禮物☺️</div><div class="row"><button class="btn" data-act="cancel" data-id="${pend.id}">取消申請</button></div></div>`;
+      else if(pick){const g=G.find(x=>x.id===pick);if(g)h+=`<div class="confirm"><b style="color:var(--ink)">確定要用 ${g.tier} 點換「${esc(g.name)}」嗎？</b><div class="sub">送出後老師會收到通知，確認了才會扣點。</div><div class="row"><button class="btn primary" data-act="send">確定兌換</button><button class="btn" data-act="unpick">再想想</button></div></div>`}
+      if(!G.length)h+='<div class="empty">老師還沒放禮物喔</div>';
+      else{h+=`<div class="seg" role="group" aria-label="顯示"><button data-act="ok" data-v="0" aria-pressed="${!onlyOk}">全部</button><button data-act="ok" data-v="1" aria-pressed="${onlyOk}">換得起</button></div>`;
+        let any=false;
+        for(const tr of tiers){const lack=tr-D.points;if(onlyOk&&lack>0)continue;any=true;const gs=G.filter(g=>g.tier===tr);
+          h+=`<div class="tierh"><b>${tr} 點</b>${lack>0?`<span class="sub">還差 ${lack} 點</span>`:''}</div><div class="grid">${gs.map(g=>`<button class="gift" data-act="pick" data-id="${g.id}" ${lack>0||pend?'disabled':''} aria-label="${esc(g.name)}，${g.tier} 點">${g.img?`<img src="${g.img}" alt="">`:'<span class="ph">🎁</span>'}<span class="n">${esc(g.name)}</span>${lack>0?'<span class="lock">🔒</span>':''}</button>`).join('')}</div>`}
+        if(!any)h+=`<div class="empty">再 ${(nx||0)-D.points} 點就能換第一個禮物了，加油☺️</div>`}
+      const done=R.filter(r=>r.status!=='pending').slice(0,8);
+      if(done.length)h+=`<h2>兌換紀錄<small>HISTORY</small></h2><div class="panel list">${done.map(r=>`<div><span class="d">${md((r.doneAt||r.at||'').slice(0,10)||t)}</span><span class="m">${esc(r.giftName)}</span><span class="tag ${r.status==='done'?'y':''}">${r.status==='done'?'已兌換':'老師婉拒了'}</span></div>`).join('')}</div>`;
+    }
     app.innerHTML=h;
   }
+  nav.addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(b)setTab(b.dataset.tab)});
   document.addEventListener('click',async e=>{
     const b=e.target.closest('[data-act]');if(!b||b.disabled)return;
     const a=b.dataset.act;
+    if(a==='tab'){setTab(b.dataset.t);return}
+    if(a==='histMore'){histN+=10;draw();return}
+    if(a==='play'){playing=+b.dataset.i;draw();return}
+    if(a==='ok'){onlyOk=b.dataset.v==='1';draw();return}
     if(a==='pick'){pick=b.dataset.id;draw();scrollTo({top:0,behavior:'smooth'});return}
     if(a==='unpick'){pick=null;draw();return}
     if(a==='send'&&!busy){const g=G.find(x=>x.id===pick);if(!g)return;busy=true;

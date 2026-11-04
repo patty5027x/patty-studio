@@ -372,6 +372,10 @@ input[type=checkbox].switch:checked::after{left:19px}
 .gopt small{display:block;color:var(--muted);font-size:12px}
 .reqrow{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
 .reqrow .main{flex:1;min-width:140px}
+.vthumb{width:96px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:1.5px solid var(--ink);flex-shrink:0;background:var(--ink)}
+.vprev{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink);min-height:0}
+.vprev img{width:120px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:1.5px solid var(--ink)}
+.vprev .bad{color:var(--red)}
 /* nav with raised calendar key */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:var(--line);display:flex;justify-content:center;align-items:flex-end;
   padding:4px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));z-index:20}
@@ -438,7 +442,7 @@ input[type=checkbox]{accent-color:var(--ink);width:16px;height:16px}
 <div class="wrap">
   <header class="mast">
     <div class="brand"><span data-icon="logo" data-size="30"></span><h1>PATTY.STUDIO</h1></div>
-    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v21</span><span id="conn"></span><button class="btn ghost bell" id="bellBtn" data-act="openNotify" hidden aria-label="通知設定"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
+    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v22</span><span id="conn"></span><button class="btn ghost bell" id="bellBtn" data-act="openNotify" hidden aria-label="通知設定"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
   </header>
   <main id="view"></main>
 </div>
@@ -523,7 +527,7 @@ const scoreTile=()=>`<span class="tile score">${pix('memo',26)}</span>`;
 
 /* ---------- data ---------- */
 const WD=['日','一','二','三','四','五','六'];
-const COLS=['students','lessons','payments','income','vacations','personal','points'];
+const COLS=['students','lessons','payments','income','vacations','personal','points','videos'];
 const PHOTO_CATS=['音樂會','棚拍','外拍','活動','其他'];
 const INSTR=['鋼琴','小提琴','其他'];
 const DEPOSIT=1000;
@@ -531,7 +535,7 @@ const SRC={self:{label:'Patty',full:'Patty（自己的學生）',mins:[30,60,90,
 const src=s=>SRC[s?.source]||SRC.self;
 const minOpts=(s,sel)=>{const o=src(s).mins.slice();if(sel&&!o.includes(+sel))o.push(+sel);return o.sort((a,b)=>a-b).map(m=>`<option value="${m}" ${+sel===m?'selected':''}>${m} 分鐘</option>`).join('')};
 const dur=m=>m>=60&&m%60===0?(m/60)+' 小時':m+' 分';
-const S={students:[],lessons:[],payments:[],income:[],vacations:[],personal:[],points:[]};
+const S={students:[],lessons:[],payments:[],income:[],vacations:[],personal:[],points:[],videos:[]};
 const loaded=new Set();
 let prevTab='sign', db=null, tab='sign', signDate=todayISO(), month=todayISO().slice(0,7), calSel=todayISO(), editing=null, signMode='today', calView='month', stuId=null;
 
@@ -960,6 +964,8 @@ function viewStu(){
   ${tuitionSection(s)}
 
   ${sec('點數','points')}${pointsSection(s)}
+
+  ${sec('演奏影片','videos',`<button class="btn" data-act="newVideo" data-id="${s.id}">＋ 影片</button>`)}${videoSection(s)}
 
   ${sec('購譜提醒','sheet music',`<button class="btn" data-act="newScoreFor" data-id="${s.id}">＋ 購譜</button>`)}
   <div class="panel list">${scores.map(sc=>scoreRow(s,sc,true)).join('')||'<div class="empty" style="padding:14px">還沒有購譜紀錄</div>'}</div>
@@ -1471,6 +1477,7 @@ function act(spec){
   if(a==='editStudent')dlgStudent(arg);
   if(a==='setLeave')applyLeave(arg);
   if(a==='delPersonal')del('personal',arg);
+  if(a==='delVideo'){del('videos',arg);toast('已刪除影片')}
   if(a==='delGift'){giftsRef().doc(arg).delete().then(()=>toast('已刪除禮物'),e=>toast('刪除失敗：'+(e.code||e.message)))}
   if(a==='trialToStu'){const l=S.lessons.find(x=>x.id===arg);if(l)dlgStudent(null,{name:l.name||'',source:l.source||'self',fee:l.fee||800,minutes:l.minutes||src(l).def,startDate:todayISO()})}
   if(a==='newScore')dlgScore(arg);
@@ -1559,7 +1566,7 @@ function handle(b){
     case 'editExtra':dlgExtra(d.id);break;
     case 'delLesson':{const l=S.lessons.find(x=>x.id===d.id);del('lessons',d.id);if(l?.kind==='moved'&&l.fromDate&&l.studentId){del('lessons',l.fromDate+'_'+l.studentId);toast('已取消調課，回到原本的時間')}break}
     case 'newStudent':dlgStudent();break;
-    case 'openStudent':stuId=d.id;logShown=4;ptShown=8;openPeriods=new Set();go('stu');break;
+    case 'openStudent':stuId=d.id;logShown=4;ptShown=3;openPeriods=new Set();go('stu');break;
     case 'newPay':dlgPay(d.id);break;
     case 'newMat':dlgMat(d.id);break;
     case 'signToday':signDate=todayISO();render();break;
@@ -1569,7 +1576,10 @@ function handle(b){
     case 'addPts':dlgPoints(d.sid);break;
     case 'redeemFor':dlgRedeem(d.id);break;
     case 'delPts':del('points',d.id);toast('已刪除這筆點數');break;
-    case 'ptMore':ptShown+=10;render();break;
+    case 'ptMore':ptShown=1e9;render();break;
+    case 'ptLess':ptShown=3;render();break;
+    case 'newVideo':dlgVideo(d.id);break;
+    case 'editVideo':dlgVideo(null,d.id);break;
     case 'shareMake':shareMake(d.id);break;
     case 'shareRenew':shareMake(d.id,true);break;
     case 'shareStop':shareStop(d.id);break;
@@ -1757,7 +1767,8 @@ function sharePayload(s){
     schedule:(s.days||[]).length?`${freqLabel(s)}${s.days.map(d=>WD[d]).join('、')} ${s.time||''}`.trim():'',
     upcoming:upcomingLessons(s,4).map(u=>({date:u.date,kind:u.kind||'',time:(u.kind?S.lessons.find(l=>l.studentId===s.id&&l.date===u.date&&l.kind)?.time:s.time)||''})),period,points:ptsOf(s.id),history:hist,
     scores:(s.scores||[]).filter(x=>!x.brought&&x.date).map(x=>({title:x.title||'樂譜',date:x.date})),
-    materials:(s.materials||[]).filter(m=>!m.done).map(m=>m.title||'')};
+    materials:(s.materials||[]).filter(m=>!m.done).map(m=>m.title||''),
+    videos:vidsOf(s.id).slice(0,60).map(v=>({yt:v.yt,title:v.title||'',date:v.date||'',note:v.note||''}))};
 }
 let shareLast={},shareTimer=null;
 function syncShares(){
@@ -1771,7 +1782,7 @@ function syncShares(){
   },1200);
 }
 function newShareCode(){const a='abcdefghijkmnpqrstuvwxyz23456789';return Array.from(crypto.getRandomValues(new Uint8Array(20)),b=>a[b%32]).join('')}
-const shareMsg=s=>`${parentOf(s)}您好，這是${s.name}的上課小頁面，可以看上課紀錄和點數，也可以自己選要兌換的禮物喔：\n${parentURL(s.shareCode)}\n用 Safari 打開後按「分享 →加入主畫面」，下次就能直接點開☺️`;
+const shareMsg=s=>`${parentOf(s)}您好，這是${s.name}的上課小頁面，可以看上課紀錄、演奏影片和點數，也可以自己選要兌換的禮物喔：\n${parentURL(s.shareCode)}\n用 Safari 打開後按「分享 →加入主畫面」，下次就能直接點開☺️`;
 async function shareMake(sid,renew){
   const s=ST(sid);if(!s)return;const old=s.shareCode,code=newShareCode();
   try{await shareRef(code).set({...sharePayload(s),updatedAt:new Date().toISOString()});
@@ -1792,13 +1803,13 @@ function pointsSection(s){
     <div class="vbar"><i style="width:${nx?Math.max(0,Math.min(100,(pts-prev)/(nx-prev)*100)):100}%"></i></div>
     <div class="sub">${nx?`再 ${nx-pts} 點可以換 ${nx} 點的禮物`:'所有等級的禮物都換得起了'}</div></div>
   <div class="panel list" style="margin-top:8px">${hist.slice(0,ptShown).map(p=>`<div class="item"><span class="num" style="width:44px;color:var(--ink)">${md(p.date)}</span><div class="main">${esc(p.reason||(p.delta>0?'加點':'扣點'))}</div><b class="num" style="color:${p.delta<0?'var(--muted)':'var(--ink)'}">${p.delta>0?'+':''}${p.delta}</b><button class="btn ghost danger" data-act="delPts" data-id="${p.id}" aria-label="刪除這筆點數">×</button></div>`).join('')||'<div class="empty" style="padding:14px">還沒有點數紀錄</div>'}
-    ${hist.length>ptShown?`<button class="morebtn" data-act="ptMore">再看更多（還有 ${hist.length-ptShown} 筆）</button>`:''}</div>
+    ${hist.length>ptShown?`<button class="morebtn" data-act="ptMore">看全部紀錄（共 ${hist.length} 筆）</button>`:hist.length>3?`<button class="morebtn" data-act="ptLess">收起</button>`:''}</div>
   <div class="panel" style="margin-top:8px;padding:12px 14px">${s.shareCode
     ?`<div class="between"><b style="color:var(--ink)">家長頁面</b><span class="tag yellow">已開啟</span></div><div class="sub" style="margin:4px 0 10px">家長用這個連結看上課紀錄和點數，也可以申請兌換禮物</div>
       <div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn primary" data-act="shareCopy" data-id="${s.id}">複製給家長的訊息</button><a class="btn" href="${parentURL(s.shareCode)}" target="_blank" rel="noopener">預覽</a><button class="btn" data-act="shareRenew" data-id="${s.id}">換新連結</button><button class="btn ghost danger" data-act="shareStop" data-id="${s.id}">停用</button></div>`
     :`<b style="color:var(--ink)">家長頁面</b><div class="sub" style="margin:4px 0 10px">建立後把連結用 LINE 傳給家長。家長只看得到${esc(s.name)}的上課紀錄、點數和禮物，看不到收入和其他學生。</div><button class="btn primary" data-act="shareMake" data-id="${s.id}">建立家長連結</button>`}</div>`;
 }
-let ptShown=8;
+let ptShown=3;
 function dlgPoints(sid){
   const s=ST(sid);if(!s)return;
   const ch=(n,v,l,on)=>`<label class="pchip"><input type="radio" name="${n}" value="${v}" ${on?'checked':''}><span>${l}</span></label>`;
@@ -1857,6 +1868,35 @@ function reqBox(){
     return `<div class="reqrow">${giftImgTag(g,'sm')}<div class="main"><div style="font-weight:700;color:var(--ink)">${esc(r.s.name)}想換「${esc(r.giftName)}」</div><div class="sub">${r.tier} 點・目前有 ${pts} 點${pts<r.tier?'（不夠）':''}</div></div>
       <div class="row" style="gap:6px"><button class="btn primary" data-act="reqOk" data-code="${r.code}" data-id="${r.id}">確認</button><button class="btn" data-act="reqNo" data-code="${r.code}" data-id="${r.id}">婉拒</button></div></div>`}).join('')}</div>`;
 }
+
+/* ---------- performance videos: YouTube (unlisted) links; parents watch them on their page ---------- */
+function ytId(u){const s=String(u||'').trim();const m=s.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/))([\w-]{11})/i)||s.match(/^([\w-]{11})$/);return m?m[1]:''}
+const ytThumb=id=>`https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
+const vidsOf=sid=>S.videos.filter(v=>v.studentId===sid).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.at||'').localeCompare(a.at||''));
+function videoSection(s){
+  const vs=vidsOf(s.id);
+  return `<div class="panel list">${vs.map(v=>`<div class="item click" data-act="editVideo" data-id="${v.id}"><img class="vthumb" src="${ytThumb(v.yt)}" alt="" loading="lazy"><div class="main"><div class="name one">${esc(v.title||'演奏影片')}</div><div class="sub">${v.date?mdw(v.date):''}${v.note?'・'+esc(v.note):''}</div></div><span class="chev" aria-hidden="true">›</span></div>`).join('')
+    ||'<div class="empty" style="padding:14px">還沒有影片。用 YouTube 上傳成「不公開」，再把連結貼進來。</div>'}</div>`;
+}
+function dlgVideo(sid,id){
+  const v=S.videos.find(x=>x.id===id)||{studentId:sid,url:'',yt:'',title:'',date:todayISO(),note:''};
+  const s=ST(v.studentId);
+  openDlg(`${id?'編輯':'新增'}影片・${esc(s?.name||'')}`,`
+    <label class="field">YouTube 連結（不公開影片）<input name="url" id="f-vurl" required value="${esc(v.url||'')}" placeholder="https://youtu.be/…" inputmode="url" autocomplete="off"></label>
+    <div id="f-vprev" class="vprev">${v.yt?`<img src="${ytThumb(v.yt)}" alt=""><span>✓ 找到影片</span>`:''}</div>
+    <div class="grid2"><label class="field">曲名<input name="title" id="f-vtitle" value="${esc(v.title||'')}" placeholder="例：小星星變奏曲"></label>
+    <label class="field">日期<input type="date" name="date" id="f-vdate" value="${v.date||todayISO()}"></label></div>
+    <label class="field">老師的話（家長看得到，可不填）<textarea name="note" id="f-vnote" rows="2" placeholder="例：左手音準進步很多！">${esc(v.note||'')}</textarea></label>`,
+  fd=>{const yt=ytId(fd.get('url'));if(!yt){toast('看不懂這個連結，請貼 YouTube 的分享連結');return}
+    put('videos',id||rid('v'),{studentId:v.studentId,url:(fd.get('url')||'').trim(),yt,title:(fd.get('title')||'').trim(),date:fd.get('date')||todayISO(),note:(fd.get('note')||'').trim(),at:v.at||new Date().toISOString()});
+    toast(id?'已更新影片':'已新增影片，家長頁也看得到了')},
+  id?`<button class="btn ghost danger" value="x:delVideo:${id}" formnovalidate>刪除</button>`:'');
+}
+document.addEventListener('input',e=>{
+  if(e.target.id!=='f-vurl')return;
+  const id=ytId(e.target.value),p=document.getElementById('f-vprev');if(!p)return;
+  p.innerHTML=id?`<img src="${ytThumb(id)}" alt=""><span>✓ 找到影片</span>`:(e.target.value.trim()?'<span class="bad">還認不出影片，請貼 YouTube 的分享連結</span>':'');
+});
 
 function startData(){
   nav.hidden=false;
