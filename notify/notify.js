@@ -42,7 +42,7 @@ function localNow(tz, at = new Date()) {
   return { date: `${p.year}-${p.month}-${p.day}`, min: (+p.hour % 24) * 60 + (+p.minute) };
 }
 
-const DEFAULT_TYPES = { today: true, tuition: true, due: true, clash: true, plan: true, score: true, shootEve: true, lesson: false };
+const DEFAULT_TYPES = { today: true, tuition: true, due: true, clash: true, plan: true, score: true, shootEve: true, lesson: false, redeem: true };
 const strip = s => String(s).replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
 
 /* what is due right now: morning / evening windows (up to 3 hours late is still fine), lessons starting within 30 minutes, test */
@@ -55,7 +55,8 @@ function whatsDue(ns, now) {
     morning: inWin(ns.morning || '08:00') && !sent['m:' + now.date],
     evening: inWin(ns.evening || '21:00') && !sent['e:' + now.date],
     lesson: !!T.lesson && now.min >= 6 * 60 && now.min < 23 * 60,
-    test: !!ns.testAt
+    test: !!ns.testAt,
+    redeem: T.redeem !== false
   };
 }
 
@@ -165,12 +166,25 @@ async function main() {
       const ns = nsSnap.exists ? nsSnap.data() : null;
       if (!ns || !(ns.tokens || []).length) continue;
       const now = localNow(ns.tz), due = whatsDue(ns, now);
-      if (!due.morning && !due.evening && !due.lesson && !due.test) continue;
+      if (!due.morning && !due.evening && !due.lesson && !due.test && !due.redeem) continue;
       const full = due.morning || due.evening;
-      const data = full ? await loadCols(u, ['students', 'lessons', 'payments', 'income', 'personal'])
-        : due.lesson ? await loadCols(u, ['students', 'lessons', 'personal'], now.date) : {};
+      const cols = full ? ['students', 'lessons', 'payments', 'income', 'personal', 'points']
+        : [...new Set([...(due.lesson ? ['students', 'lessons', 'personal'] : []), ...(due.redeem ? ['students'] : [])])];
+      const data = cols.length ? await loadCols(u, cols, full ? null : now.date) : {};
       api.load(data);
       const { msgs, update } = plan(api, ns, now, due);
+      /* parents asking for a gift: tell the teacher once per request */
+      if (due.redeem) for (const s of (data.students || [])) {
+        if (!s.shareCode) continue;
+        const q = await db.collection('share').doc(s.shareCode).collection('requests').where('status', '==', 'pending').get();
+        for (const d of q.docs) {
+          const r = d.data(), key = 'r:' + d.id;
+          if (update.sent[key]) continue;
+          msgs.push({ title: `${s.name}想換「${r.giftName || '禮物'}」`, body: `${r.tier} 點・打開 app 確認兌換`, url: './?go=sign', tag: 'redeem-' + d.id });
+          update.sent[key] = now.date;
+        }
+      }
+      const changed = msgs.length || due.morning || due.evening || due.test;
       console.log(`${now.date} ${String(Math.floor(now.min / 60)).padStart(2, '0')}:${String(now.min % 60).padStart(2, '0')} ${ns.tz}: ${msgs.length} 則`);
       const bad = new Set();
       for (const m of msgs) for (const token of ns.tokens) {
@@ -185,7 +199,7 @@ async function main() {
       }
       if (bad.size) update.tokens = admin.firestore.FieldValue.arrayRemove(...bad);
       if (update.testAt === null) update.testAt = admin.firestore.FieldValue.delete();
-      if (!dry) await nsRef.set(update, { merge: true });
+      if (!dry && (changed || bad.size)) await nsRef.set(update, { merge: true });
     } catch (e) { console.error('使用者', u.id, '出錯：', e.message) }
   }
 }
