@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>上課小頁面</title>
+<meta name="theme-color" content="#FFFCF6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="上課小頁面" id="appTitle">
+<meta name="robots" content="noindex,nofollow">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon.png">
+<style>
+@font-face{font-family:"GenSen Rounded";src:url("fonts/gensen-R.woff") format("woff");font-weight:400 500;font-display:swap}
+@font-face{font-family:"GenSen Rounded";src:url("fonts/gensen-B.woff") format("woff");font-weight:600 900;font-display:swap}
+/* Parent page: same notebook look as the teacher app — paper, 1.5px ink lines, medium radii. Read-only except asking for a gift. */
+:root{
+  color-scheme:light;
+  --paper:#FFFCF6; --ink:#3E3A39; --brown:#4C4541; --yellow:#F2C46A; --cream:#FCF0DA;
+  --orange:#EB895B; --sky:#97D7FF; --muted:#8A817A; --hair:#E4DBCD;
+  --line:1.5px solid var(--ink); --r:12px; --r-sm:8px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--paper);margin:0}
+body{color:var(--brown);font-family:"GenSen Rounded","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;font-size:15px;line-height:1.6;letter-spacing:.03em;-webkit-text-size-adjust:100%;touch-action:manipulation}
+.wrap{max-width:560px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-left,0px)) calc(40px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:20px;margin:0;color:var(--ink);letter-spacing:.08em}
+h2{font-size:15px;margin:22px 2px 8px;color:var(--ink);letter-spacing:.12em;display:flex;align-items:baseline;gap:8px}
+h2 small{font-size:11px;color:var(--muted);letter-spacing:.2em;font-weight:400}
+.sub{color:var(--muted);font-size:13px}
+.panel{border:var(--line);border-radius:var(--r);background:#fff;padding:12px 14px}
+.head{display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:var(--line)}
+.avatar{width:46px;height:46px;border-radius:12px;border:var(--line);display:grid;place-items:center;font-size:22px;flex-shrink:0}
+.between{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.big{font-size:19px;font-weight:700;color:var(--ink)}
+.tag{display:inline-block;font-size:12px;border:1px solid var(--ink);border-radius:6px;padding:0 7px;background:var(--cream);color:var(--ink);white-space:nowrap}
+.tag.y{background:var(--yellow)}
+.slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
+.slot{border:1.5px solid var(--ink);border-radius:var(--r-sm);text-align:center;font-size:12px;padding:5px 0;line-height:1.3}
+.slot b{display:block;font-size:13px;color:var(--ink)}
+.slot.done{background:var(--sky)}
+.slot.charged{background:var(--cream)}
+.slot.todo{border-style:dashed;color:var(--muted)}
+.pts{font-size:30px;font-weight:700;color:var(--ink);line-height:1.1}
+.bar{height:10px;border:var(--line);border-radius:6px;overflow:hidden;background:var(--paper);margin:8px 0 4px}
+.bar i{display:block;height:100%;background:var(--yellow)}
+.tierh{display:flex;justify-content:space-between;align-items:baseline;margin:16px 2px 8px}
+.tierh b{color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.gift{border:var(--line);border-radius:var(--r);overflow:hidden;background:#fff;padding:0;font:inherit;color:var(--ink);text-align:left;cursor:pointer;position:relative}
+.gift img,.gift .ph{width:100%;aspect-ratio:1;object-fit:cover;display:block;border-bottom:var(--line);background:var(--cream)}
+.gift .ph{display:grid;place-items:center;font-size:34px}
+.gift span.n{display:block;padding:7px 9px;font-size:14px}
+.gift[disabled]{cursor:default}
+.gift[disabled] img,.gift[disabled] .ph{filter:grayscale(.8);opacity:.55}
+.gift .lock{position:absolute;top:6px;right:6px;font-size:11px;background:var(--ink);color:var(--paper);border-radius:6px;padding:1px 6px}
+.btn{font:inherit;font-size:14px;border:var(--line);border-radius:var(--r-sm);background:var(--paper);color:var(--ink);padding:7px 14px;cursor:pointer}
+.btn.primary{background:var(--yellow);font-weight:700}
+.btn:focus-visible,.gift:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.confirm{border:var(--line);border-radius:var(--r);background:var(--cream);padding:12px 14px;margin-top:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.list>div{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--hair)}
+.list>div:first-child{border-top:0;padding-top:0}
+.list .d{width:44px;color:var(--ink);font-variant-numeric:tabular-nums;flex-shrink:0}
+.list .m{flex:1;min-width:0}
+.num{font-variant-numeric:tabular-nums}
+.empty{text-align:center;color:var(--muted);font-size:14px;padding:30px 10px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:10px;font-size:14px;max-width:90vw;z-index:9}
+.foot{margin-top:24px;text-align:center;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="empty">讀取中…</div></div>
+<div class="toast" id="toast" hidden role="status"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="config.js"></script>
+<script>
+const app=document.getElementById('app');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+const WD='日一二三四五六';
+const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const md=s=>{const d=parse(s);return (d.getMonth()+1)+'/'+d.getDate()};
+const mdw=s=>`${md(s)}（${WD[parse(s).getDay()]}）`;
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const KIND={moved:'調課',makeup:'補課',add:'加課'};
+let toastT;function toast(t){const e=document.getElementById('toast');e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>e.hidden=true,2600)}
+
+/* the link carries the code; remember it so the home-screen icon keeps working */
+let K=new URLSearchParams(location.search).get('k')||'';
+try{if(K)localStorage.setItem('k',K);else K=localStorage.getItem('k')||''}catch{}
+if(!K){app.innerHTML='<div class="empty">這個連結不完整，請跟老師要一次新的連結。</div>'}
+else{
+  firebase.initializeApp(window.FIREBASE_CONFIG);
+  const fs=firebase.firestore();
+  const ref=fs.collection('share').doc(K);
+  let D=null,G=[],R=[],pick=null,giftsFor=null,busy=false;
+  ref.onSnapshot(doc=>{
+    if(!doc.exists){D=null;app.innerHTML='<div class="empty">這個連結已經停用了。<br>請跟老師要新的連結☺️</div>';return}
+    D=doc.data();
+    document.title=`${D.name}的上課小頁面`;document.getElementById('appTitle').content=`${D.name}的上課`;
+    if(D.uid&&giftsFor!==D.uid){giftsFor=D.uid;fs.collection('pubGifts').doc(D.uid).collection('items').onSnapshot(s=>{G=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.tier-b.tier)||((a.order||0)-(b.order||0)));draw()},()=>{})}
+    draw();
+  },()=>{app.innerHTML='<div class="empty">讀取失敗，請確認網路後重新整理。</div>'});
+  ref.collection('requests').onSnapshot(s=>{R=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.at||'').localeCompare(a.at||''));draw()},()=>{});
+
+  function draw(){
+    if(!D)return;
+    const t=today(),pend=R.find(r=>r.status==='pending');
+    const next=(D.upcoming||[]).find(u=>u.date>=t);
+    const p=D.period;
+    const tiers=[...new Set(G.map(g=>g.tier))].sort((a,b)=>a-b);
+    const nx=tiers.find(x=>x>D.points);
+    const prev=[...tiers].reverse().find(x=>x<=D.points)||0;
+    let h=`<div class="head"><div class="avatar" style="background:${D.source==='fama'?'var(--orange)':'var(--sky)'}">${D.instrument==='鋼琴'?'🎹':D.instrument==='小提琴'?'🎻':'🎵'}</div>
+      <div><h1>${esc(D.name)}</h1><div class="sub">${esc([D.instrument,D.schedule].filter(Boolean).join('・'))}</div></div></div>`;
+    h+=`<h2>下一堂課<small>NEXT</small></h2><div class="panel">${next?`<div class="big">${mdw(next.date)} ${esc(next.time||'')}</div>${next.kind?`<span class="tag">${KIND[next.kind]||''}</span>`:''}`:'<span class="sub">還沒有排到課</span>'}</div>`;
+    if(p){h+=`<h2>第 ${p.no} 期<small>LESSONS</small></h2><div class="panel"><div class="between"><span>${p.unpaid?'這期還沒繳費':'這期上課進度'}</span><span class="tag ${p.unpaid?'y':''}">上到 ${p.used} / ${p.cap}</span></div>
+      <div class="slots">${(p.slots||[]).map(x=>`<div class="slot ${x.st}"><b>${md(x.date)}</b>${x.st==='todo'?(KIND[x.kind]?KIND[x.kind]+'・待上':'待上'):x.st==='charged'?'請假':(KIND[x.kind]||'出席')}</div>`).join('')}</div></div>`}
+    h+=`<h2>我的點數<small>POINTS</small></h2><div class="panel"><div class="between"><span class="pts num">⭐ ${D.points}</span>${pend?'<span class="tag y">兌換申請中</span>':''}</div>
+      ${tiers.length?`<div class="bar"><i style="width:${nx?Math.max(0,Math.min(100,(D.points-prev)/(nx-prev)*100)):100}%"></i></div><div class="sub">${nx?`再 ${nx-D.points} 點可以換 ${nx} 點的禮物`:'所有禮物都換得起了！'}</div>`:''}</div>`;
+    if(pend){h+=`<div class="confirm"><b style="color:var(--ink)">已送出：想換「${esc(pend.giftName)}」（${pend.tier} 點）</b><div class="sub">等老師確認後，下次上課就能拿到禮物☺️</div><div class="row"><button class="btn" data-act="cancel" data-id="${pend.id}">取消申請</button></div></div>`}
+    else if(pick){const g=G.find(x=>x.id===pick);if(g)h+=`<div class="confirm"><b style="color:var(--ink)">確定要用 ${g.tier} 點換「${esc(g.name)}」嗎？</b><div class="sub">送出後老師會收到通知，確認了才會扣點。</div><div class="row"><button class="btn primary" data-act="send">確定兌換</button><button class="btn" data-act="unpick">再想想</button></div></div>`}
+    if(G.length){h+=`<h2>禮物<small>GIFTS</small></h2>`;
+      for(const tr of tiers){const gs=G.filter(g=>g.tier===tr),lack=tr-D.points;
+        h+=`<div class="tierh"><b>${tr} 點</b>${lack>0?`<span class="sub">還差 ${lack} 點</span>`:''}</div><div class="grid">${gs.map(g=>`<button class="gift" data-act="pick" data-id="${g.id}" ${lack>0||pend?'disabled':''} aria-label="${esc(g.name)}，${g.tier} 點">${g.img?`<img src="${g.img}" alt="">`:'<span class="ph">🎁</span>'}<span class="n">${esc(g.name)}</span>${lack>0?'<span class="lock">🔒</span>':''}</button>`).join('')}</div>`}}
+    const done=R.filter(r=>r.status!=='pending').slice(0,5);
+    if(done.length)h+=`<h2>兌換紀錄<small>HISTORY</small></h2><div class="panel list">${done.map(r=>`<div><span class="d">${md((r.doneAt||r.at||'').slice(0,10)||t)}</span><span class="m">${esc(r.giftName)}</span><span class="tag ${r.status==='done'?'y':''}">${r.status==='done'?'已兌換':'老師婉拒了'}</span></div>`).join('')}</div>`;
+    if((D.history||[]).length)h+=`<h2>點數紀錄<small>RECORD</small></h2><div class="panel list">${D.history.slice(0,10).map(x=>`<div><span class="d">${md(x.date)}</span><span class="m">${esc(x.reason||(x.delta>0?'加點':'扣點'))}</span><b class="num" style="color:var(--ink)">${x.delta>0?'+':''}${x.delta}</b></div>`).join('')}</div>`;
+    if((D.scores||[]).length)h+=`<h2>要帶的譜<small>SHEET MUSIC</small></h2><div class="panel list">${D.scores.map(x=>`<div><span class="d">${md(x.date)}</span><span class="m">${esc(x.title)}</span></div>`).join('')}</div>`;
+    if((D.materials||[]).length)h+=`<h2>正在學<small>BOOKS</small></h2><div class="panel">${D.materials.map(esc).join('<br>')}</div>`;
+    h+=`<div class="foot">要請假或調課，請直接 LINE 老師喔☺️</div>`;
+    app.innerHTML=h;
+  }
+  document.addEventListener('click',async e=>{
+    const b=e.target.closest('[data-act]');if(!b||b.disabled)return;
+    const a=b.dataset.act;
+    if(a==='pick'){pick=b.dataset.id;draw();scrollTo({top:0,behavior:'smooth'});return}
+    if(a==='unpick'){pick=null;draw();return}
+    if(a==='send'&&!busy){const g=G.find(x=>x.id===pick);if(!g)return;busy=true;
+      try{await ref.collection('requests').add({giftId:g.id,giftName:String(g.name||'禮物').slice(0,60),tier:+g.tier,at:new Date().toISOString(),status:'pending',uid:D.uid});pick=null;toast('已送出，老師會收到通知')}
+      catch(err){toast('送出失敗，請稍後再試')}busy=false;draw();return}
+    if(a==='cancel'){try{await ref.collection('requests').doc(b.dataset.id).delete();toast('已取消申請')}catch{toast('取消失敗，可能老師已經處理了')}}
+  });
+}
+</script>
+</body>
+</html>

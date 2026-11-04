@@ -347,6 +347,31 @@ input[type=checkbox].switch:checked::after{left:19px}
 .switch:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.switch,.switch::after{transition:none}}
 .allatt{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+.ptbtn{font:inherit;font-size:13px;border:1.5px solid var(--ink);border-radius:var(--r-sm);background:var(--cream);color:var(--ink);padding:4px 8px;cursor:pointer;white-space:nowrap}
+.ptpanel{padding:12px 14px}
+.ptbig{font-size:26px;font-weight:700;color:var(--ink);line-height:1.2}
+.pchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.pchip{position:relative;cursor:pointer}
+.pchip input{position:absolute;opacity:0;pointer-events:none}
+.pchip span{display:block;border:1.5px solid var(--ink);border-radius:var(--r-sm);padding:5px 11px;font-size:14px;background:var(--paper);color:var(--ink)}
+.pchip input:checked+span{background:var(--yellow);font-weight:700}
+.pchip input:focus-visible+span{outline:2px solid var(--ink);outline-offset:2px}
+.gimg{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--cream)}
+.gimg.none{display:grid;place-items:center;font-size:30px}
+.gimg.sm{width:44px;height:44px;border-radius:8px;border:1.5px solid var(--ink);flex-shrink:0;font-size:20px}
+.ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.gcard{border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden;background:var(--paper);padding:0;font:inherit;color:var(--ink);text-align:left;cursor:pointer}
+.gcard .gimg{border-bottom:1.5px solid var(--ink)}
+.gname{display:block;padding:7px 9px;font-size:14px}
+.gpick{display:flex;justify-content:center;margin-bottom:6px}
+.gphoto{width:150px;height:150px;border:1.5px dashed var(--ink);border-radius:var(--r);display:grid;place-items:center;text-align:center;color:var(--muted);font-size:13px;cursor:pointer;overflow:hidden;background:var(--cream)}
+.gphoto img{width:100%;height:100%;object-fit:cover}
+.glist{display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow:auto;margin:6px 0}
+.gopt{display:flex;align-items:center;gap:10px;border:1.5px solid var(--ink);border-radius:var(--r-sm);padding:6px 10px;cursor:pointer}
+.gopt input{accent-color:var(--ink)}
+.gopt small{display:block;color:var(--muted);font-size:12px}
+.reqrow{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+.reqrow .main{flex:1;min-width:140px}
 /* nav with raised calendar key */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:var(--line);display:flex;justify-content:center;align-items:flex-end;
   padding:4px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));z-index:20}
@@ -413,7 +438,7 @@ input[type=checkbox]{accent-color:var(--ink);width:16px;height:16px}
 <div class="wrap">
   <header class="mast">
     <div class="brand"><span data-icon="logo" data-size="30"></span><h1>PATTY.STUDIO</h1></div>
-    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v20</span><span id="conn"></span><button class="btn ghost bell" id="bellBtn" data-act="openNotify" hidden aria-label="通知設定"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
+    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v21</span><span id="conn"></span><button class="btn ghost bell" id="bellBtn" data-act="openNotify" hidden aria-label="通知設定"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
   </header>
   <main id="view"></main>
 </div>
@@ -498,7 +523,7 @@ const scoreTile=()=>`<span class="tile score">${pix('memo',26)}</span>`;
 
 /* ---------- data ---------- */
 const WD=['日','一','二','三','四','五','六'];
-const COLS=['students','lessons','payments','income','vacations','personal'];
+const COLS=['students','lessons','payments','income','vacations','personal','points'];
 const PHOTO_CATS=['音樂會','棚拍','外拍','活動','其他'];
 const INSTR=['鋼琴','小提琴','其他'];
 const DEPOSIT=1000;
@@ -506,7 +531,7 @@ const SRC={self:{label:'Patty',full:'Patty（自己的學生）',mins:[30,60,90,
 const src=s=>SRC[s?.source]||SRC.self;
 const minOpts=(s,sel)=>{const o=src(s).mins.slice();if(sel&&!o.includes(+sel))o.push(+sel);return o.sort((a,b)=>a-b).map(m=>`<option value="${m}" ${+sel===m?'selected':''}>${m} 分鐘</option>`).join('')};
 const dur=m=>m>=60&&m%60===0?(m/60)+' 小時':m+' 分';
-const S={students:[],lessons:[],payments:[],income:[],vacations:[],personal:[]};
+const S={students:[],lessons:[],payments:[],income:[],vacations:[],personal:[],points:[]};
 const loaded=new Set();
 let prevTab='sign', db=null, tab='sign', signDate=todayISO(), month=todayISO().slice(0,7), calSel=todayISO(), editing=null, signMode='today', calView='month', stuId=null;
 
@@ -661,10 +686,10 @@ function reminderBoxes(){
 
 /* ---------- views ---------- */
 function render(){
-  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===(tab==='stu'?'students':tab==='vac'?'cal':tab)));
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===(tab==='stu'||tab==='gifts'?'students':tab==='vac'?'cal':tab)));
   const v=document.getElementById('view');
   if(db&&loaded.size<COLS.length){v.innerHTML='<div class="panel empty">讀取資料中…</div>';return}
-  v.innerHTML=({sign:viewSign,students:viewStudents,stu:viewStu,vac:viewVac,notify:viewNotify,cal:viewCal,photo:viewPhoto,money:viewMoney})[tab]();
+  v.innerHTML=({sign:viewSign,students:viewStudents,stu:viewStu,vac:viewVac,notify:viewNotify,gifts:viewGifts,cal:viewCal,photo:viewPhoto,money:viewMoney})[tab]();
 }
 
 function lessonRowCal(e){
@@ -810,7 +835,7 @@ function viewSignCore(){
     h+=`<div class="item wrapline" style="${!isSched&&!st?'opacity:.75':''}"><span class="time num">${esc(s.time||'—')}<small>${isSched?dur(+(l?.minutes??s.minutes??src(s).def)):'週'+(s.days||[]).map(d=>WD[d]).join('')}</small></span>${sInst(s)}<div class="main">
       <div class="name" data-act="editLesson" data-sid="${s.id}">${esc(s.name)}</div>
       <div class="row sub">${famaTag(s)}${isSched?'':'<span class="tag">非固定日</span>'}<span class="num">${money(l?.fee??s.fee)}</span>${clashKeys.has(s.id)?'<span class="tag clash">撞期</span>':''}${b!==null&&b<=0?'<span class="tag ink">需繳費</span>':''}${sc.map(x=>`<span class="tag ${x.brought?'cream':'yellow'}">帶譜：${esc(x.title)}${x.paid?'':' 收'+money(x.price)}</span>`).join('')}${l?.note?`<span>${esc(l.note)}</span>`:''}</div>${matLine(s)}</div>
-      <div class="acts">${isSched?`<button class="btn" data-act="move" data-sid="${s.id}">調課</button>`:''}${seg('mark',`data-sid="${s.id}"`,st)}</div></div>`;
+      <div class="acts"><button class="ptbtn num" data-act="addPts" data-sid="${s.id}" aria-label="幫${esc(s.name)}加點，目前 ${ptsOf(s.id)} 點">⭐ ${ptsOf(s.id)}</button>${isSched?`<button class="btn" data-act="move" data-sid="${s.id}">調課</button>`:''}${seg('mark',`data-sid="${s.id}"`,st)}</div></div>`;
   }
   h+='</div>';
   if(extra.length){
@@ -831,7 +856,7 @@ function stuRow(s,showTime){
 }
 /* student list grouped by weekday (Mon → Sun); a student with two lesson days appears in both */
 function viewStudents(){
-  let h=`<div class="between" style="margin-bottom:4px"><h2>我的學生</h2><button class="btn primary" data-act="newStudent">＋ 新增學生</button></div>`;
+  let h=`<div class="between" style="margin-bottom:4px"><h2>我的學生</h2><div class="row" style="gap:6px"><button class="btn" data-act="openGifts">🎁 禮物</button><button class="btn primary" data-act="newStudent">＋ 新增學生</button></div></div>`;
   if(!S.students.length)return h+'<div class="panel empty" style="margin-top:12px">還沒有學生。新增時設定樂器、上課日、時間和學費，簽到頁和行事曆就會自動帶出來。</div>';
   h+=`<div class="searchbox"><input type="search" id="stuSearch" class="inline" placeholder="搜尋學生名字" value="${esc(stuQuery)}" autocomplete="off" aria-label="搜尋學生"></div>`;
   const act=S.students.filter(s=>s.active!==false), byTime=(a,b)=>(a.time||'99').localeCompare(b.time||'99');
@@ -933,6 +958,8 @@ function viewStu(){
   </section>
 
   ${tuitionSection(s)}
+
+  ${sec('點數','points')}${pointsSection(s)}
 
   ${sec('購譜提醒','sheet music',`<button class="btn" data-act="newScoreFor" data-id="${s.id}">＋ 購譜</button>`)}
   <div class="panel list">${scores.map(sc=>scoreRow(s,sc,true)).join('')||'<div class="empty" style="padding:14px">還沒有購譜紀錄</div>'}</div>
@@ -1383,7 +1410,7 @@ function copyText(txt,msg){
   if(navigator.clipboard?.writeText)navigator.clipboard.writeText(txt).then(done,fallback);else fallback();
 }
 function todayBoxes(){
-  let h='';
+  let h=reqBox();
   const ta=tuitionAlerts();
   if(ta.length)h+=`<div class="remind"><b>這週要收學費</b>${ta.map(x=>`<div class="tuitionmsg"><div class="between"><span style="font-weight:700">${esc(x.s.name)}・${x.left>0?`剩 ${x.left} 堂`:x.used?`已經上了 ${x.used} 堂未繳`:'這期用完了'}</span><button class="btn" data-act="copyMsg" data-id="${x.s.id}">複製提醒訊息</button></div><div class="msgtxt">${esc(tuitionMsg(x.s))}</div></div>`).join('')}</div>`;
   const ds=dueSoon();
@@ -1444,6 +1471,7 @@ function act(spec){
   if(a==='editStudent')dlgStudent(arg);
   if(a==='setLeave')applyLeave(arg);
   if(a==='delPersonal')del('personal',arg);
+  if(a==='delGift'){giftsRef().doc(arg).delete().then(()=>toast('已刪除禮物'),e=>toast('刪除失敗：'+(e.code||e.message)))}
   if(a==='trialToStu'){const l=S.lessons.find(x=>x.id===arg);if(l)dlgStudent(null,{name:l.name||'',source:l.source||'self',fee:l.fee||800,minutes:l.minutes||src(l).def,startDate:todayISO()})}
   if(a==='newScore')dlgScore(arg);
   if(a==='delMat'){const [sid,mid]=arg.split(':');const st=ST(sid);if(st)patch('students',sid,{materials:(st.materials||[]).filter(m=>m.id!==mid)})}
@@ -1531,13 +1559,29 @@ function handle(b){
     case 'editExtra':dlgExtra(d.id);break;
     case 'delLesson':{const l=S.lessons.find(x=>x.id===d.id);del('lessons',d.id);if(l?.kind==='moved'&&l.fromDate&&l.studentId){del('lessons',l.fromDate+'_'+l.studentId);toast('已取消調課，回到原本的時間')}break}
     case 'newStudent':dlgStudent();break;
-    case 'openStudent':stuId=d.id;logShown=4;openPeriods=new Set();go('stu');break;
+    case 'openStudent':stuId=d.id;logShown=4;ptShown=8;openPeriods=new Set();go('stu');break;
     case 'newPay':dlgPay(d.id);break;
     case 'newMat':dlgMat(d.id);break;
     case 'signToday':signDate=todayISO();render();break;
     case 'newPersonal':dlgPersonal(null,d.d);break;
     case 'editPersonal':{const p=S.personal.find(x=>x.id===d.id);if(p&&!d.plain&&tab!=='vac'&&vacLessons(p).length){vacId=p.id;vacMoving=null;go('vac')}else dlgPersonal(d.id);break}
     case 'copyTxt':copyText(d.t,d.msg);break;
+    case 'addPts':dlgPoints(d.sid);break;
+    case 'redeemFor':dlgRedeem(d.id);break;
+    case 'delPts':del('points',d.id);toast('已刪除這筆點數');break;
+    case 'ptMore':ptShown+=10;render();break;
+    case 'shareMake':shareMake(d.id);break;
+    case 'shareRenew':shareMake(d.id,true);break;
+    case 'shareStop':shareStop(d.id);break;
+    case 'shareCopy':{const s=ST(d.id);if(s?.shareCode)copyText(shareMsg(s),'已複製，可以貼到 LINE 給家長');break}
+    case 'openGifts':go('gifts');break;
+    case 'newGift':dlgGift(null);break;
+    case 'editGift':dlgGift(d.id);break;
+    case 'reqOk':{const r=pendingReqs().find(x=>x.id===d.id&&x.code===d.code);if(!r)break;
+      put('points',rid('pt'),{studentId:r.s.id,date:todayISO(),delta:-(+r.tier||0),reason:'兌換：'+r.giftName,kind:'redeem',at:new Date().toISOString()});
+      shareRef(r.code).collection('requests').doc(r.id).update({status:'done',doneAt:new Date().toISOString()}).catch(e=>toast('更新失敗：'+(e.code||e.message)));
+      toast(`已兌換「${r.giftName}」，扣 ${r.tier} 點`);break}
+    case 'reqNo':shareRef(d.code).collection('requests').doc(d.id).update({status:'declined',doneAt:new Date().toISOString()}).then(()=>toast('已婉拒，點數不會扣'),e=>toast('更新失敗：'+(e.code||e.message)));break;
     case 'copyMsg':{const s=ST(d.id);if(s)copyText(tuitionMsg(s));break}
     case 'delivered':patch('income',d.id,{delivered:true,deliveredDate:todayISO()});toast('已標記交件');break;
     case 'openVac':vacId=d.id;vacMoving=null;go('vac');break;
@@ -1605,7 +1649,7 @@ document.addEventListener('submit',async e=>{
 });
 
 /* ---------- lock-screen notifications: settings live in users/{uid}/settings/notify; GitHub checks every 15 min and sends ---------- */
-const NOTIFY_TYPES=[['today','今天的行程','每天早上列出課和拍攝',true],['tuition','學費到期','學生剩 1 堂或已經上完',true],['due','攝影交件','到期前 2 天和當天',true],['clash','撞期','新出現的撞期',true],['plan','私人行程還沒安排的課','行程結束前每天早上提醒',true],['score','帶譜','前一晚提醒明天要帶的譜',true],['shootEve','明天的拍攝','前一晚提醒',true],['lesson','每堂課開始前','課前 30 分鐘',false]];
+const NOTIFY_TYPES=[['today','今天的行程','每天早上列出課和拍攝',true],['tuition','學費到期','學生剩 1 堂或已經上完',true],['due','攝影交件','到期前 2 天和當天',true],['clash','撞期','新出現的撞期',true],['plan','私人行程還沒安排的課','行程結束前每天早上提醒',true],['score','帶譜','前一晚提醒明天要帶的譜',true],['shootEve','明天的拍攝','前一晚提醒',true],['lesson','每堂課開始前','課前 30 分鐘',false],['redeem','兌換申請','家長申請兌換禮物時通知',true]];
 const VAPID=(window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.vapidKey||'').startsWith('貼上')?'':(window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.vapidKey||'');
 let NS=null,nsUnsub=null;
 const nsRef=()=>firebase.firestore().collection('users').doc(user.uid).collection('settings').doc('notify');
@@ -1683,12 +1727,143 @@ function applyGo(url){
 if(applyGo(location.href))history.replaceState(null,'',location.pathname);
 if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.go&&applyGo(e.data.go))go(tab)});
 
+/* ---------- 集點 and gifts; parents see a copy of their own child's data at share/{secret code} ---------- */
+const TIERS=[50,100,200,300,400,500,600,700,800,900,1000];
+const ptsOf=sid=>S.points.filter(p=>p.studentId===sid).reduce((a,p)=>a+(+p.delta||0),0);
+let GIFTS=[],giftUnsub=null,REQS={},reqUnsubs={},giftImg='';
+const giftsRef=()=>firebase.firestore().collection('pubGifts').doc(user.uid).collection('items');
+const shareRef=code=>firebase.firestore().collection('share').doc(code);
+const parentURL=code=>new URL('parent.html?k='+code,location.href.split('?')[0]).href;
+const giftImgTag=(g,cls='')=>g?.img?`<img class="gimg ${cls}" src="${g.img}" alt="">`:`<span class="gimg none ${cls}" aria-hidden="true">🎁</span>`;
+function startGifts(){
+  if(giftUnsub)giftUnsub();
+  giftUnsub=giftsRef().onSnapshot(s=>{GIFTS=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.tier-b.tier)||((a.order||0)-(b.order||0)));render()},()=>{});
+}
+function watchRequests(){
+  const codes=new Set(S.students.map(s=>s.shareCode).filter(Boolean));
+  for(const c of Object.keys(reqUnsubs))if(!codes.has(c)){reqUnsubs[c]();delete reqUnsubs[c];delete REQS[c]}
+  for(const c of codes)if(!reqUnsubs[c])reqUnsubs[c]=shareRef(c).collection('requests').where('status','==','pending')
+    .onSnapshot(s=>{REQS[c]=s.docs.map(d=>({id:d.id,code:c,...d.data()}));render()},()=>{});
+}
+const pendingReqs=()=>Object.values(REQS).flat().map(r=>({...r,s:S.students.find(s=>s.shareCode===r.code)})).filter(r=>r.s).sort((a,b)=>(a.at||'').localeCompare(b.at||''));
+/* what the parent page shows: no money, nothing about other students */
+function sharePayload(s){
+  const per=tuitionPeriods(s)[0];
+  const period=per?{no:per.no,used:per.used,cap:per.cap,unpaid:!per.pay,
+    slots:per.slots.map(x=>x.l?{date:x.l.date,st:x.l.status==='leaveCharged'?'charged':'done',kind:x.l.kind||''}:{date:x.date,st:'todo',kind:x.kind||''})}:null;
+  const hist=S.points.filter(p=>p.studentId===s.id).sort((a,b)=>(b.date+(b.at||'')).localeCompare(a.date+(a.at||''))).slice(0,20)
+    .map(p=>({date:p.date,delta:+p.delta||0,reason:p.reason||''}));
+  return {uid:user.uid,studentId:s.id,name:s.name||'',instrument:s.instrument||'',source:s.source||'self',
+    schedule:(s.days||[]).length?`${freqLabel(s)}${s.days.map(d=>WD[d]).join('、')} ${s.time||''}`.trim():'',
+    upcoming:upcomingLessons(s,4).map(u=>({date:u.date,kind:u.kind||'',time:(u.kind?S.lessons.find(l=>l.studentId===s.id&&l.date===u.date&&l.kind)?.time:s.time)||''})),period,points:ptsOf(s.id),history:hist,
+    scores:(s.scores||[]).filter(x=>!x.brought&&x.date).map(x=>({title:x.title||'樂譜',date:x.date})),
+    materials:(s.materials||[]).filter(m=>!m.done).map(m=>m.title||'')};
+}
+let shareLast={},shareTimer=null;
+function syncShares(){
+  clearTimeout(shareTimer);
+  shareTimer=setTimeout(()=>{
+    if(!user||!db||loaded.size<COLS.length)return;
+    for(const s of S.students){if(!s.shareCode)continue;
+      const p=sharePayload(s),j=JSON.stringify(p);if(shareLast[s.shareCode]===j)continue;shareLast[s.shareCode]=j;
+      shareRef(s.shareCode).set({...p,updatedAt:new Date().toISOString()}).catch(()=>{delete shareLast[s.shareCode]})}
+    watchRequests();
+  },1200);
+}
+function newShareCode(){const a='abcdefghijkmnpqrstuvwxyz23456789';return Array.from(crypto.getRandomValues(new Uint8Array(20)),b=>a[b%32]).join('')}
+const shareMsg=s=>`${parentOf(s)}您好，這是${s.name}的上課小頁面，可以看上課紀錄和點數，也可以自己選要兌換的禮物喔：\n${parentURL(s.shareCode)}\n用 Safari 打開後按「分享 →加入主畫面」，下次就能直接點開☺️`;
+async function shareMake(sid,renew){
+  const s=ST(sid);if(!s)return;const old=s.shareCode,code=newShareCode();
+  try{await shareRef(code).set({...sharePayload(s),updatedAt:new Date().toISOString()});
+    await db.collection('students').doc(sid).update({shareCode:code});
+    if(old)await shareRef(old).delete().catch(()=>{});
+    copyText(shareMsg({...s,shareCode:code}),renew?'已換新連結，新的訊息已複製，舊連結不能再用了':'已建立，訊息已複製，可以貼到 LINE 給家長')}
+  catch(e){toast('建立失敗：'+(e.code||e.message)+'（Firestore 規則更新了嗎？）')}
+}
+async function shareStop(sid){
+  const s=ST(sid);if(!s?.shareCode)return;
+  try{await shareRef(s.shareCode).delete();await db.collection('students').doc(sid).update({shareCode:''});toast('已停用，這個連結打不開了')}catch(e){toast('停用失敗：'+(e.code||e.message))}
+}
+function pointsSection(s){
+  const pts=ptsOf(s.id),nx=TIERS.find(t=>t>pts),prev=[...TIERS].reverse().find(t=>t<=pts)||0;
+  const hist=S.points.filter(p=>p.studentId===s.id).sort((a,b)=>(b.date+(b.at||'')).localeCompare(a.date+(a.at||'')));
+  return `<div class="panel ptpanel"><div class="between"><div><div class="sub">目前點數</div><div class="ptbig num">⭐ ${pts}</div></div>
+    <div class="row" style="gap:6px"><button class="btn" data-act="redeemFor" data-id="${s.id}">兌換</button><button class="btn primary" data-act="addPts" data-sid="${s.id}">＋ 加點</button></div></div>
+    <div class="vbar"><i style="width:${nx?Math.max(0,Math.min(100,(pts-prev)/(nx-prev)*100)):100}%"></i></div>
+    <div class="sub">${nx?`再 ${nx-pts} 點可以換 ${nx} 點的禮物`:'所有等級的禮物都換得起了'}</div></div>
+  <div class="panel list" style="margin-top:8px">${hist.slice(0,ptShown).map(p=>`<div class="item"><span class="num" style="width:44px;color:var(--ink)">${md(p.date)}</span><div class="main">${esc(p.reason||(p.delta>0?'加點':'扣點'))}</div><b class="num" style="color:${p.delta<0?'var(--muted)':'var(--ink)'}">${p.delta>0?'+':''}${p.delta}</b><button class="btn ghost danger" data-act="delPts" data-id="${p.id}" aria-label="刪除這筆點數">×</button></div>`).join('')||'<div class="empty" style="padding:14px">還沒有點數紀錄</div>'}
+    ${hist.length>ptShown?`<button class="morebtn" data-act="ptMore">再看更多（還有 ${hist.length-ptShown} 筆）</button>`:''}</div>
+  <div class="panel" style="margin-top:8px;padding:12px 14px">${s.shareCode
+    ?`<div class="between"><b style="color:var(--ink)">家長頁面</b><span class="tag yellow">已開啟</span></div><div class="sub" style="margin:4px 0 10px">家長用這個連結看上課紀錄和點數，也可以申請兌換禮物</div>
+      <div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn primary" data-act="shareCopy" data-id="${s.id}">複製給家長的訊息</button><a class="btn" href="${parentURL(s.shareCode)}" target="_blank" rel="noopener">預覽</a><button class="btn" data-act="shareRenew" data-id="${s.id}">換新連結</button><button class="btn ghost danger" data-act="shareStop" data-id="${s.id}">停用</button></div>`
+    :`<b style="color:var(--ink)">家長頁面</b><div class="sub" style="margin:4px 0 10px">建立後把連結用 LINE 傳給家長。家長只看得到${esc(s.name)}的上課紀錄、點數和禮物，看不到收入和其他學生。</div><button class="btn primary" data-act="shareMake" data-id="${s.id}">建立家長連結</button>`}</div>`;
+}
+let ptShown=8;
+function dlgPoints(sid){
+  const s=ST(sid);if(!s)return;
+  const ch=(n,v,l,on)=>`<label class="pchip"><input type="radio" name="${n}" value="${v}" ${on?'checked':''}><span>${l}</span></label>`;
+  openDlg(`加點・${esc(s.name)}`,`<div class="sub" style="margin-top:-6px">目前 ⭐ ${ptsOf(sid)} 點</div>
+    <div class="field">加幾點<div class="pchips">${[5,10,20,30,50,100].map(n=>ch('amt',n,'＋'+n,n===10)).join('')}</div></div>
+    <label class="field">或自己輸入（扣點打負數，例：-20）<input type="number" name="custom" id="f-ptcustom" inputmode="numeric" placeholder="例：35"></label>
+    <div class="field">原因（可不選）<div class="pchips">${['準時','練習認真','表現好','完成功課'].map(w=>ch('why',w,w,false)).join('')}</div></div>
+    <label class="field">其他原因<input name="note" id="f-ptnote" placeholder="例：比賽得獎"></label>`,
+  fd=>{const n=Math.round(+fd.get('custom'))||+fd.get('amt')||0;if(!n)return;const why=(fd.get('note')||'').trim()||fd.get('why')||'';
+    put('points',rid('pt'),{studentId:sid,date:tab==='sign'?signDate:todayISO(),delta:n,reason:why,kind:n>0?'add':'fix',at:new Date().toISOString()});
+    toast(`${s.name} ${n>0?'＋':''}${n} 點，現在 ${ptsOf(sid)+n} 點`)},'','加點');
+}
+function dlgRedeem(sid){
+  const s=ST(sid);if(!s)return;const pts=ptsOf(sid);const ok=GIFTS.filter(g=>g.tier<=pts);
+  if(!GIFTS.length){toast('還沒有禮物，先到「學生 → 🎁 禮物」新增');return}
+  openDlg(`兌換・${esc(s.name)}`,`<div class="sub" style="margin-top:-6px">目前 ⭐ ${pts} 點</div>
+    ${ok.length?`<div class="glist">${ok.map((g,i)=>`<label class="gopt"><input type="radio" name="gift" value="${g.id}" ${i===0?'checked':''}>${giftImgTag(g,'sm')}<span><b>${esc(g.name)}</b><small>${g.tier} 點</small></span></label>`).join('')}</div>`
+      :'<div class="empty" style="padding:14px">點數還不夠換任何禮物</div>'}`,
+  ok.length?fd=>{const g=GIFTS.find(x=>x.id===fd.get('gift'));if(!g)return;put('points',rid('pt'),{studentId:sid,date:todayISO(),delta:-g.tier,reason:'兌換：'+g.name,kind:'redeem',at:new Date().toISOString()});toast(`已兌換「${g.name}」，扣 ${g.tier} 點`)}:null,'','兌換');
+  if(!ok.length)form.querySelector('button[value="ok"]')?.remove();
+}
+function viewGifts(){
+  let h=`<button class="btn ghost back" data-act="back">‹ 學生名單</button><div class="between" style="margin-bottom:6px"><h2>🎁 禮物清單</h2><button class="btn primary" data-act="newGift">＋ 新增禮物</button></div>
+  <div class="sub" style="margin-bottom:6px">所有學生共用。改了之後家長頁會馬上更新，已經換過的紀錄不會變。</div>`;
+  if(!GIFTS.length)return h+'<div class="panel empty" style="margin-top:12px">還沒有禮物。按「新增禮物」，拍張照片、選點數等級就好。</div>';
+  for(const t of TIERS){const gs=GIFTS.filter(g=>g.tier===t);if(!gs.length)continue;
+    h+=`<div class="label">${t} 點<span class="en">${gs.length} 個</span></div><div class="ggrid">${gs.map(g=>`<button class="gcard" data-act="editGift" data-id="${g.id}">${giftImgTag(g)}<span class="gname">${esc(g.name)}</span></button>`).join('')}</div>`}
+  return h;
+}
+function dlgGift(id){
+  const g=GIFTS.find(x=>x.id===id)||{tier:50,name:'',img:''};giftImg=g.img||'';
+  openDlg(id?'編輯禮物':'新增禮物',`
+    <div class="gpick"><label class="gphoto" for="f-gimg">${g.img?`<img id="f-gprev" src="${g.img}" alt="">`:'<img id="f-gprev" alt="" hidden>'}<span id="f-gph" ${g.img?'hidden':''}>📷<br>拍照或選照片</span></label>
+    <input type="file" id="f-gimg" accept="image/*" hidden></div>
+    <label class="field">禮物名稱<input name="name" id="f-gname" required value="${esc(g.name)}" placeholder="例：音符橡皮擦"></label>
+    <label class="field">要幾點<select name="tier" id="f-gtier">${TIERS.map(t=>`<option value="${t}" ${t===g.tier?'selected':''}>${t} 點</option>`).join('')}</select></label>`,
+  fd=>{const nid=id||rid('g');giftsRef().doc(nid).set({tier:+fd.get('tier'),name:(fd.get('name')||'').trim(),img:giftImg||'',order:g.order||Date.now()})
+    .then(()=>toast(id?'已更新禮物':'已新增禮物'),e=>toast('儲存失敗：'+(e.code||e.message)+'（Firestore 規則更新了嗎？）'))},
+  id?`<button class="btn ghost danger" value="x:delGift:${id}" formnovalidate>刪除</button>`:'');
+}
+/* photos are cut to a square and shrunk to about 40KB so they fit in Firestore without paid storage */
+async function shrinkImg(file){
+  const url=URL.createObjectURL(file);const img=new Image();img.src=url;await img.decode();
+  const side=Math.min(img.width,img.height),M=420,c=document.createElement('canvas');c.width=c.height=Math.min(M,side);
+  c.getContext('2d').drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,c.width,c.height);URL.revokeObjectURL(url);
+  let q=.75,out=c.toDataURL('image/jpeg',q);while(out.length>120000&&q>.4){q-=.1;out=c.toDataURL('image/jpeg',q)}return out;
+}
+document.addEventListener('change',async e=>{
+  if(e.target.id!=='f-gimg'||!e.target.files?.[0])return;
+  try{giftImg=await shrinkImg(e.target.files[0]);const p=document.getElementById('f-gprev');p.src=giftImg;p.hidden=false;document.getElementById('f-gph').hidden=true}
+  catch{toast('這張照片讀不了，換一張試試')}
+});
+function reqBox(){
+  const rs=pendingReqs();if(!rs.length)return '';
+  return `<div class="remind"><b>兌換申請</b>${rs.map(r=>{const g=GIFTS.find(x=>x.id===r.giftId);const pts=ptsOf(r.s.id);
+    return `<div class="reqrow">${giftImgTag(g,'sm')}<div class="main"><div style="font-weight:700;color:var(--ink)">${esc(r.s.name)}想換「${esc(r.giftName)}」</div><div class="sub">${r.tier} 點・目前有 ${pts} 點${pts<r.tier?'（不夠）':''}</div></div>
+      <div class="row" style="gap:6px"><button class="btn primary" data-act="reqOk" data-code="${r.code}" data-id="${r.id}">確認</button><button class="btn" data-act="reqNo" data-code="${r.code}" data-id="${r.id}">婉拒</button></div></div>`}).join('')}</div>`;
+}
+
 function startData(){
   nav.hidden=false;
   const root=firebase.firestore().collection('users').doc(user.uid);
   db={collection:c=>root.collection(c)};
-  loaded.clear();render();setConn();startNotify();
-  unsubs=COLS.map(c=>db.collection(c).onSnapshot(snap=>{S[c]=snap.docs.map(d=>({id:d.id,...d.data()}));loaded.add(c);render();maybeOfferImport();migrateVacations()},e=>{conn.textContent='同步錯誤';toast(e.message||e.code)}));
+  loaded.clear();render();setConn();startNotify();startGifts();
+  unsubs=COLS.map(c=>db.collection(c).onSnapshot(snap=>{S[c]=snap.docs.map(d=>({id:d.id,...d.data()}));loaded.add(c);render();maybeOfferImport();migrateVacations();syncShares()},e=>{conn.textContent='同步錯誤';toast(e.message||e.code)}));
 }
 /* first run: bring over what was in the Claude version of the ledger */
 let importOffered=false;
@@ -1712,7 +1887,7 @@ function exportBackup(){
 }
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]');if(!b)return;
-  if(b.dataset.act==='logout'){unsubs.forEach(u=>u());unsubs=[];COLS.forEach(c=>S[c]=[]);firebase.auth().signOut()}
+  if(b.dataset.act==='logout'){unsubs.forEach(u=>u());unsubs=[];if(giftUnsub)giftUnsub();giftUnsub=null;Object.values(reqUnsubs).forEach(u=>u());reqUnsubs={};REQS={};GIFTS=[];shareLast={};if(nsUnsub)nsUnsub();nsUnsub=null;COLS.forEach(c=>S[c]=[]);firebase.auth().signOut()}
   if(b.dataset.act==='backup')exportBackup();
   if(b.dataset.act==='resetPw'){const em=document.getElementById('f-email')?.value.trim();if(!em){toast('先在上面填 Email');return}
     firebase.auth().sendPasswordResetEmail(em).then(()=>toast('已寄出重設密碼信'),()=>toast('寄送失敗，請確認 Email'))}
