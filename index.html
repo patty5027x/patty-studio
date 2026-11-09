@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>PATTY.STUDIO</title>
-<meta name="theme-color" content="#FFFCF6">
+<meta name="theme-color" content="#F3EDE4">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="PATTY.STUDIO">
@@ -449,6 +449,153 @@ input[type=checkbox]{accent-color:var(--ink);width:16px;height:16px}
 }
 @media (min-width:900px){.wrap{max-width:860px}.summary.wide{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
 @media (max-width:420px){.day{min-height:54px}.time{width:38px}.item{gap:10px;padding:11px 12px}}
+/* ===== Theme: 北歐森林 — warm milk-tea background, white rounded cards, forest green accents, no heavy ink frames ===== */
+:root{
+  --bg:#F3EDE4; --paper:#FFFFFF; --ink:#2F3A33; --brown:#3D4740; --muted:#8A938B; --hair:#EEE8DE;
+  --green:#3F5A47; --sage:#E3EBE0; --sand:#EAE4D9; --edge:#DCD5C8;
+  --yellow:#E3EBE0; --cream:#F1ECE3; --olive:#C9D3C3;
+  --line:1px solid var(--edge); --r:18px; --r-sm:12px;
+  --shadow:0 0 0 1px rgba(47,58,51,.06),0 1px 3px rgba(47,58,51,.05);
+}
+html,body{background:var(--bg)}
+body{letter-spacing:.02em}
+.mast{border-bottom:0;padding-bottom:2px}
+.mast h1{letter-spacing:.22em;font-weight:600}
+h2{letter-spacing:.06em;font-weight:600}
+.panel{background:var(--paper);border:0;box-shadow:var(--shadow)}
+.list>*+*{border-top:1px solid var(--hair)}
+.item .name{font-weight:600;letter-spacing:.03em}
+.btn{border:0;background:var(--paper);box-shadow:inset 0 0 0 1px var(--edge);border-radius:999px;padding:5px 14px;font-weight:500;letter-spacing:.04em}
+.btn.primary{background:var(--green);color:#fff;box-shadow:none}
+.btn.ghost{background:transparent;box-shadow:none}
+.btn.ghost.danger{color:#9B4A3E}
+.tag{border:0;background:var(--cream);height:22px;padding:0 10px;letter-spacing:.03em}
+.tag.yellow{background:var(--sage);color:var(--green)}
+.tag.cream{background:var(--cream)}
+.tag.ink{background:var(--green);color:#fff}
+.tag.self{background:#DDF1FD}
+.tag.fama{background:#FBE3D6}
+.tag.photo{background:#790D16;color:#fff}
+.tag.clash{background:#F8E6E3;color:#9B2C2C}
+.seg{border:0;background:var(--sand);border-radius:999px;padding:3px;gap:2px}
+.seg button{background:transparent;border-radius:999px;padding:4px 12px;transition:background .18s,color .18s}
+.seg button+button{border-left:0}
+.seg button.on-att{background:var(--green);color:#fff}
+.seg button.on-leave{background:var(--paper);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.calbar1 .seg button.on-att,.viewseg button.on-att{background:var(--paper);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.label{letter-spacing:.1em;font-weight:600}
+.datebar input{border:0;box-shadow:inset 0 0 0 1px var(--edge);border-radius:999px;background:var(--paper)}
+.datebar .btn{border-radius:50%}
+.stat.total{background:var(--green);color:#fff;box-shadow:none}
+.stat.total .k,.stat.total .v{color:#fff}
+.stat.total.red{background:#790D16}
+.tile{border:0;border-radius:12px;background:var(--cream)}
+.tile.self{background:#DDF1FD}
+.tile.fama{background:#FBE3D6}
+.tile.score{background:#F4EACB}
+.tile.private{background:var(--sand)}
+.tile.paper{background:var(--cream)}
+.remind{border:0;background:var(--sage);color:var(--ink)}
+.clashbox{border:0;background:#F8E9E6}
+.clashnote{border:0;background:#F8E9E6}
+.vacbox{border:0;background:var(--paper);box-shadow:var(--shadow);border-radius:var(--r)}
+.vacbox.ok{background:var(--paper)}
+.msgtxt{background:rgba(255,255,255,.7);border:0}
+.mgrid{border-top:1px solid var(--hair)}
+.mgrid .mcell{background:transparent;border-color:var(--hair)}
+.mcell.sel{background:#EEF3EC}
+.mcell.today .d{background:var(--green);color:#fff}
+.mcell.vac{background-image:repeating-linear-gradient(135deg,transparent 0 6px,rgba(63,90,71,.08) 6px 10px)}
+.vactag{background:var(--green)}
+.slot{border:0;background:#F4F0E8;color:var(--ink)}
+.slot.done{background:var(--sage);color:var(--green)}
+.slot.charged{background:#F6E7DD}
+.slot.todo{background:transparent;box-shadow:inset 0 0 0 1px var(--edge);color:var(--muted)}
+.period.unpaid .ph{background:#F6EEE2}
+dialog{border:0;border-radius:24px;background:#FBF8F3;box-shadow:0 24px 60px rgba(47,58,51,.22)}
+dialog::backdrop{background:rgba(47,58,51,.35)}
+.field input,.field select,.field textarea{border:0;box-shadow:inset 0 0 0 1px var(--edge);background:var(--paper);border-radius:12px}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;box-shadow:inset 0 0 0 2px var(--green)}
+.days label{border:0;box-shadow:inset 0 0 0 1px var(--edge)}
+.days label:has(input:checked){background:var(--green);color:#fff}
+input[type=checkbox]{accent-color:var(--green)}
+.toast{background:var(--green);border-radius:999px;padding:7px 16px}
+.ptbtn{border:0;background:var(--cream);border-radius:999px}
+.plusbtn{border:0;background:var(--green);color:#fff;border-radius:50%}
+.pchip span{border:0;box-shadow:inset 0 0 0 1px var(--edge);border-radius:999px;background:var(--paper)}
+.pchip input:checked+span{background:var(--green);color:#fff;box-shadow:none}
+input[type=checkbox].switch{border:0;background:#D8D2C6}
+input[type=checkbox].switch::after{border:0;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+input[type=checkbox].switch:checked{background:var(--green)}
+.pseg{border:0;background:var(--sand);border-radius:999px;padding:3px}
+.pseg label+label{border-left:0}
+.pseg span{border-radius:999px}
+.pseg input:checked+span{background:var(--paper);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.vacacts .btn.on{background:var(--green);color:#fff;box-shadow:none}
+.slotbtn{border:0;box-shadow:inset 0 0 0 1px var(--edge);border-radius:999px;background:var(--paper)}
+.slotbtn:not(.other){background:#E6F2FA;box-shadow:none}
+.vbar{border:0;background:var(--sand);border-radius:999px}
+.vbar i{background:var(--green)}
+.gcard,.gopt{border:0;box-shadow:var(--shadow)}
+.gcard .gimg{border-bottom:0}
+.gimg.sm{border:0}
+.gphoto{border:1.5px dashed var(--edge)}
+.cic{border:0;box-shadow:inset 0 0 0 1px var(--edge);border-radius:10px}
+.sdate{border-right-color:var(--hair)}
+.vthumb,.vprev img,.mpimg{border:0}
+.mpic.add{border:1.5px dashed var(--edge)}
+.addop,.addlist,.addrow{border:0}
+.addop{box-shadow:var(--shadow);background:var(--paper)}
+.addlist{box-shadow:var(--shadow)}
+.morebtn{color:var(--green)}
+.late{background:var(--green)}
+/* bottom bar: flat, thin line icons, soft pill on the current page */
+nav.tabs{background:rgba(243,237,228,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--edge);align-items:stretch}
+nav.tabs button{color:var(--muted);font-weight:500}
+nav.tabs button .ic{opacity:1;width:52px;height:32px;border-radius:12px;transition:background .2s,color .2s,transform .2s}
+nav.tabs button.on{color:var(--green);font-weight:600}
+nav.tabs button.on .ic{background:var(--sage)}
+nav.tabs button::after{display:none!important}
+nav.tabs .lic{width:24px;height:24px}
+/* shoot detail page */
+.shead{padding:2px 2px 0}
+.shead h2{font-size:22px;margin:6px 0 2px;letter-spacing:.03em}
+.skv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--hair);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-top:12px}
+.skv>div{background:var(--paper);padding:10px 14px;min-width:0}
+.skv .k{font-size:12px;color:var(--muted)}
+.skv .v{font-weight:600;color:var(--ink);overflow-wrap:anywhere}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px}
+.smemo{padding:12px 14px;white-space:pre-wrap;color:var(--ink);font-size:14px}
+.spics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:0 14px 14px}
+.spics button{aspect-ratio:1;border:0;padding:0;border-radius:12px;overflow:hidden;background:var(--cream);cursor:zoom-in}
+.spics img{width:100%;height:100%;object-fit:cover;display:block}
+body>.mview{position:fixed;inset:0;z-index:60}
+/* motion: pages slide in, lists rise in, everything you tap gives a little press */
+@media (prefers-reduced-motion:no-preference){
+  #view.in-fwd{animation:pgFwd .32s cubic-bezier(.2,.75,.25,1) both}
+  #view.in-back{animation:pgBack .32s cubic-bezier(.2,.75,.25,1) both}
+  #view.in-tab>*{animation:riseIn .34s cubic-bezier(.2,.75,.25,1) both}
+  #view.in-tab>*:nth-child(2){animation-delay:.03s}#view.in-tab>*:nth-child(3){animation-delay:.06s}#view.in-tab>*:nth-child(4){animation-delay:.09s}
+  #view.in-tab>*:nth-child(5){animation-delay:.12s}#view.in-tab>*:nth-child(6){animation-delay:.15s}#view.in-tab>*:nth-child(n+7){animation-delay:.18s}
+  .item.click,.btn,.tag[data-act],.seg button,.ptbtn,.plusbtn,.gcard,.addop,.addrow,.vacbox,nav.tabs button .ic,.slotbtn,.pchip span,.spics button,.mpimg,.cic{transition:transform .14s ease,background-color .18s,color .18s,box-shadow .18s}
+  .item.click:active,.btn:active,.tag[data-act]:active,.seg button:active,.ptbtn:active,.plusbtn:active,.gcard:active,.addop:active,.addrow:active,.vacbox:active,.slotbtn:active,.pchip:active span,.spics button:active,.mpimg:active,.cic:active{transform:scale(.96)}
+  .item.click:active{transform:scale(.985);background:#FAF7F2}
+  nav.tabs button:active .ic{transform:scale(.9)}
+  nav.tabs button.on .ic{animation:tabPop .3s cubic-bezier(.3,1.4,.5,1)}
+  .seg button.on-att,.vacacts .btn.on{animation:pop .28s cubic-bezier(.3,1.5,.5,1)}
+  dialog[open]{animation:sheetUp .32s cubic-bezier(.2,.8,.25,1) both}
+  .mview{animation:fade .2s ease both}
+  .mview img{animation:zoomIn .26s cubic-bezier(.2,.8,.25,1) both}
+}
+.c-score,.blk.c-score,.chip.c-score,.dot.c-score,.mk.y{background:#EBCB7A}
+.tile.score{background:#F4EACB}
+@keyframes pgFwd{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes pgBack{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+@keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes tabPop{0%{transform:scale(.8)}100%{transform:scale(1)}}
+@keyframes pop{0%{transform:scale(.88)}100%{transform:scale(1)}}
+@keyframes sheetUp{from{opacity:0;transform:translateY(40px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes zoomIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -457,17 +604,17 @@ input[type=checkbox]{accent-color:var(--ink);width:16px;height:16px}
 <div class="wrap">
   <header class="mast">
     <div class="brand"><span data-icon="logo" data-size="30"></span><h1>PATTY.STUDIO</h1></div>
-    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v23</span><span id="conn"></span><button class="btn ghost bell" id="bellBtn" data-act="openNotify" hidden aria-label="通知設定"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
+    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v24</span><span id="conn"></span><button class="btn ghost bell" id="bellBtn" data-act="openNotify" hidden aria-label="通知設定"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
   </header>
   <main id="view"></main>
 </div>
 
 <nav class="tabs" id="tabs">
-  <button data-tab="cal"><span class="ic"><span data-icon="calheart" data-size="28"></span></span>行事曆</button>
-  <button data-tab="students"><span class="ic"><span data-icon="bear" data-size="28"></span></span>學生</button>
-  <button data-tab="sign" class="mid"><span class="key"><span data-icon="sun" data-size="40"></span></span>今天</button>
-  <button data-tab="photo"><span class="ic"><span data-icon="polaroid" data-size="28"></span></span>攝影</button>
-  <button data-tab="money"><span class="ic"><span data-icon="bag" data-size="28"></span></span>月收入</button>
+  <button data-tab="cal"><span class="ic"><svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="4"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 16.6c-1.6-1-2.6-1.9-2.6-3a1.3 1.3 0 0 1 2.6-.3 1.3 1.3 0 0 1 2.6.3c0 1.1-1 2-2.6 3z" fill="currentColor" stroke="none" opacity=".5"/></svg></span>行事曆</button>
+  <button data-tab="students"><span class="ic"><svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="4"/><path d="M8.2 7.2c1.4.9 4.8 1.2 7.6-.2"/><path d="M5 20c.8-3.3 3.6-5.2 7-5.2s6.2 1.9 7 5.2"/></svg></span>學生</button>
+  <button data-tab="sign"><span class="ic"><svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg></span>今天</button>
+  <button data-tab="photo"><span class="ic"><svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5h3l1.6-2.2h6.8L17 8.5h3v10H4z"/><circle cx="12" cy="13.3" r="3.3"/></svg></span>攝影</button>
+  <button data-tab="money"><span class="ic"><svg class="lic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9h14l-1 11H6z"/><path d="M9 9V7a3 3 0 0 1 6 0v2"/><path d="M10 14.5h4"/></svg></span>月收入</button>
 </nav>
 
 <dialog id="dlg"><form id="dlgForm" method="dialog"></form></dialog>
@@ -707,11 +854,17 @@ function reminderBoxes(){
 }
 
 /* ---------- views ---------- */
+const DEPTH={stu:1,vac:1,gifts:1,notify:1,shoot:1};
+let lastView='',lastDepth=0;
 function render(){
-  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===(tab==='stu'||tab==='gifts'?'students':tab==='vac'?'cal':tab)));
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===(tab==='stu'||tab==='gifts'?'students':tab==='vac'?'cal':tab==='shoot'?'photo':tab)));
   const v=document.getElementById('view');
   if(db&&loaded.size<COLS.length){v.innerHTML='<div class="panel empty">讀取資料中…</div>';return}
-  v.innerHTML=({sign:viewSign,students:viewStudents,stu:viewStu,vac:viewVac,notify:viewNotify,gifts:viewGifts,cal:viewCal,photo:viewPhoto,money:viewMoney})[tab]();
+  const vk=tab+'|'+(tab==='stu'?stuId:tab==='vac'?vacId:tab==='shoot'?shootId:'')+(tab==='cal'?'':'');
+  v.innerHTML=({sign:viewSign,students:viewStudents,stu:viewStu,vac:viewVac,notify:viewNotify,gifts:viewGifts,shoot:viewShoot,cal:viewCal,photo:viewPhoto,money:viewMoney})[tab]();
+  if(vk!==lastView){const dp=DEPTH[tab]||0;v.classList.remove('in-fwd','in-back','in-tab');void v.offsetWidth;
+    v.classList.add(dp>lastDepth?'in-fwd':dp<lastDepth?'in-back':'in-tab');lastView=vk;lastDepth=dp;
+    clearTimeout(render._t);render._t=setTimeout(()=>v.classList.remove('in-fwd','in-back','in-tab'),520)}
 }
 
 function lessonRowCal(e){
@@ -1237,7 +1390,7 @@ function dlgIncome(id,type,date){
       if(d.perDay)form.querySelectorAll('#f-iperdays input[data-day]').forEach(x=>{(d.dayTimes[x.dataset.day]=d.dayTimes[x.dataset.day]||{})[x.dataset.f]=x.value});
       d.memo=(fd.get('memo')||'').trim();d.memoImgN=memoSt?(memoSt.loading?(i.memoImgN||0):memoSt.existing.filter(x=>!memoSt.removed.has(x.id)).length)+memoSt.added.length:(i.memoImgN||0)}
     const nid=id||rid('i');put('income',nid,d);
-    if(photo){saveMemoImgs(nid);const c=[];for(const dd of shootDays(d)){const t=dayTime(d,dd);for(const x of clashFor(dd,t.time,t.endTime,nid))c.push(md(dd)+' '+x.label)}if(c.length)toast(`已儲存。注意：和 ${c.join('、')} 撞期`)}},
+    if(photo){saveMemoImgs(nid).then(()=>{delete memoCache[nid];if(tab==='shoot')render()});const c=[];for(const dd of shootDays(d)){const t=dayTime(d,dd);for(const x of clashFor(dd,t.time,t.endTime,nid))c.push(md(dd)+' '+x.label)}if(c.length)toast(`已儲存。注意：和 ${c.join('、')} 撞期`)}},
   id?`<button class="btn ghost danger" value="x:delIncome:${id}" formnovalidate>刪除</button>`:'');
   if(photo){memoSt={existing:[],added:[],removed:new Set(),dayTimes:i.dayTimes||{},loading:!!(id&&i.memoImgN)};memoPics();iDaysUpdate();liveClash();
     if(id&&i.memoImgN&&db)db.collection('memoImgs').where('incomeId','==',id).get().then(q=>{if(!memoSt)return;memoSt.existing=q.docs.map(x=>({id:x.id,...x.data()})).sort((a,b)=>(a.order||0)-(b.order||0));memoSt.loading=false;memoPics()},()=>{if(memoSt){memoSt.loading=false;memoPics()}})}
@@ -1504,7 +1657,7 @@ function act(spec){
   dlg.close();
   if(a==='askDelStudent')confirmDelStudent(arg);
   if(a==='delPay'){del('payments',arg);toast('已刪除繳費')}
-  if(a==='delIncome'){del('income',arg);delMemoImgs(arg)}
+  if(a==='delIncome'){del('income',arg);delMemoImgs(arg);delete memoCache[arg];if(tab==='shoot'&&shootId===arg)go(shootPrev||'photo')}
   if(a==='editStudent')dlgStudent(arg);
   if(a==='setLeave')applyLeave(arg);
   if(a==='delPersonal')del('personal',arg);
@@ -1644,7 +1797,10 @@ function handle(b){
     case 'togglePeriod':openPeriods.has(d.id)?openPeriods.delete(d.id):openPeriods.add(d.id);render();break;
     case 'logMore':logShown+=4;render();break;
     case 'logLess':logShown=4;render();break;
-    case 'editIncome':dlgIncome(d.id);break;
+    case 'editIncome':{const i=S.income.find(x=>x.id===d.id);if(i&&i.type==='photo'){if(tab!=='shoot')shootPrev=tab;shootId=i.id;go('shoot')}else dlgIncome(d.id);break}
+    case 'editShoot':dlgIncome(d.id);break;
+    case 'shootBack':go(shootPrev||'photo');break;
+    case 'shootPic':{const m=memoCache[shootId]?.imgs?.[+d.k];if(!m)break;const v=document.createElement('div');v.className='mview';v.innerHTML=`<img src="${m.img}" alt=""><button type="button" class="btn">關閉</button>`;v.addEventListener('click',()=>v.remove());document.body.appendChild(v);break}
     case 'newPhoto':dlgIncome(null,'photo');break;
     case 'newOther':dlgIncome(null,'other');break;
     case 'togglePaid':{const i=S.income.find(x=>x.id===d.id);patch('income',d.id,i.paid?{paid:false}:{paid:true,depositPaid:true});break}
@@ -1978,6 +2134,45 @@ document.addEventListener('change',async e=>{
     for(const f of files){try{memoSt.added.push(await shrinkBig(f));memoPics()}catch{toast('有一張照片讀不了')}}
     e.target.value='';
   }
+});
+
+/* ---------- shoot detail: tap a shoot to read everything first; editing is one more tap ---------- */
+let shootId=null,shootPrev='photo',memoCache={};
+function loadMemo(id){
+  if(memoCache[id]||!db)return;memoCache[id]={loading:true,imgs:[]};
+  db.collection('memoImgs').where('incomeId','==',id).get().then(q=>{memoCache[id]={imgs:q.docs.map(d=>d.data()).sort((a,b)=>(a.order||0)-(b.order||0))};if(tab==='shoot'&&shootId===id)render()},()=>{memoCache[id]={imgs:[]}});
+}
+function viewShoot(){
+  const i=S.income.find(x=>x.id===shootId);
+  const back=`<button class="btn ghost back" data-act="shootBack">‹ 返回</button>`;
+  if(!i)return back+'<div class="panel empty">找不到這個拍攝，可能已經刪除。</div>';
+  const days=shootDays(i),n=days.length;
+  const when=n>1?`${mdw(i.date)} – ${mdw(shootEnd(i))}・連續 ${n} 天`:mdw(i.date);
+  const tline=i.perDay&&n>1?days.map(d=>{const t=dayTime(i,d);return `${md(d)} ${t.time||'—'}${t.endTime?'–'+t.endTime:''}`}).join('<br>'):(i.time?`${n>1?'每天 ':''}${esc(i.time)}${i.endTime?'–'+esc(i.endTime):''}`:'—');
+  const dep=+i.deposit||0,owe=shootDue(i);
+  if(i.memoImgN)loadMemo(i.id);
+  const mc=memoCache[i.id];
+  let h=`<div class="between">${back}<button class="btn primary" data-act="editShoot" data-id="${i.id}">編輯</button></div>
+  <div class="shead">${i.category?`<span class="tag yellow">${esc(i.category)}</span>`:''}<h2>${esc(i.title||'拍攝')}</h2><div class="sub">${when}</div></div>
+  <div class="skv"><div><div class="k">時間</div><div class="v">${tline}</div></div><div><div class="k">地點</div><div class="v">${esc(i.place||'—')}</div></div>
+    <div><div class="k">客戶</div><div class="v">${esc(i.client||'—')}</div></div><div><div class="k">聯絡</div><div class="v">${i.contact?`<span class="cics" style="margin-top:3px">${contactIcons(i.contact)}</span>`:'—'}</div></div></div>
+  <div class="label">收款與交件<span class="en">payment</span></div>
+  <div class="panel list"><div class="srow"><div><div class="sub">總金額</div><div style="font-size:20px;font-weight:700;color:var(--ink)" class="num">${i.amount?money(i.amount):'還沒談好'}</div></div>${i.amount?`<div style="text-align:right"><div class="sub">${owe>0?'還沒收':'款項'}</div><b class="num" style="color:var(--ink)">${owe>0?money(owe):'都收齊了'}</b></div>`:''}</div>
+    ${i.noDeposit?'<div class="srow"><span>常客，不收定金</span></div>':`<label class="srow"><span>已收定金 ${money(dep||DEPOSIT)}</span><input type="checkbox" class="switch" data-shootf="depositPaid" ${i.depositPaid?'checked':''} aria-label="已收定金"></label>`}
+    <label class="srow"><span>已收全額</span><input type="checkbox" class="switch" data-shootf="paid" ${i.paid?'checked':''} aria-label="已收全額"></label>
+    <label class="srow"><span>已交件<span class="sub">・期限 ${md(dueOf(i))}${i.delivered&&i.deliveredDate?'，'+md(i.deliveredDate)+' 交件':''}</span></span><input type="checkbox" class="switch" data-shootf="delivered" ${i.delivered?'checked':''} aria-label="已交件"></label></div>`;
+  if(i.memo||i.memoImgN){
+    h+=`<div class="label">備忘錄<span class="en">memo</span></div><div class="panel">${i.memo?`<div class="smemo">${esc(i.memo)}</div>`:''}
+      ${i.memoImgN?(mc&&!mc.loading?`<div class="spics" style="${i.memo?'':'padding-top:14px'}">${mc.imgs.map((m,k)=>`<button data-act="shootPic" data-k="${k}" aria-label="放大照片 ${k+1}"><img src="${m.img}" alt=""></button>`).join('')}</div>`:'<div class="sub" style="padding:0 14px 14px">照片讀取中…</div>'):''}</div>`;
+  }
+  return h;
+}
+document.addEventListener('change',e=>{
+  const f=e.target.dataset?.shootf;if(!f||!shootId)return;
+  const on=e.target.checked,p={[f]:on};
+  if(f==='paid'&&on)p.depositPaid=true;
+  if(f==='delivered')p.deliveredDate=on?todayISO():'';
+  patch('income',shootId,p);toast({depositPaid:on?'已收定金':'取消已收定金',paid:on?'已收全額':'取消已收全額',delivered:on?'已交件':'取消已交件'}[f]);
 });
 
 function startData(){

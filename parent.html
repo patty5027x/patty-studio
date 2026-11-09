@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <title>上課小頁面</title>
-<meta name="theme-color" content="#FFFCF6">
+<meta name="theme-color" content="#F3EDE4">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="上課小頁面" id="appTitle">
@@ -94,14 +94,63 @@ h2 small{font-size:11px;color:var(--muted);letter-spacing:.2em;font-weight:400}
 .h2link{margin-left:auto;font-size:12px;color:var(--muted);letter-spacing:.04em;font-weight:400;border:0;background:none;font-family:inherit;cursor:pointer;padding:0}
 .ptitle{font-size:19px;color:var(--ink);font-weight:700;letter-spacing:.08em}
 
+
+/* ===== Theme: 北歐森林 ===== */
+:root{--paper:#F3EDE4;--ink:#2F3A33;--brown:#3D4740;--muted:#8A938B;--hair:#EEE8DE;--cream:#F1ECE3;--yellow:#E3EBE0;--green:#3F5A47;--sage:#E3EBE0;--edge:#DCD5C8;--line:1px solid var(--edge);--r:18px;--shadow:0 0 0 1px rgba(47,58,51,.06),0 1px 3px rgba(47,58,51,.05)}
+html,body{background:var(--paper)}
+.head{border-bottom:0;padding-bottom:4px}
+.avatar{border:0;border-radius:16px}
+h2{letter-spacing:.08em}
+.panel,.gift,.vid{border:0;box-shadow:var(--shadow);background:#fff}
+.tag{border:0;background:var(--cream)}
+.tag.y{background:var(--sage);color:var(--green)}
+.slot{border:0;background:#F4F0E8}
+.slot.done{background:var(--sage);color:var(--green)}
+.slot.done b{color:var(--green)}
+.slot.charged{background:#F6E7DD}
+.slot.todo{background:transparent;box-shadow:inset 0 0 0 1px var(--edge)}
+.bar{border:0;background:#EAE4D9;border-radius:999px}
+.bar i{background:var(--green)}
+.gift img,.gift .ph,.vth{border-bottom:0}
+.gift .lock{background:var(--green)}
+.vid iframe{border-bottom:0}
+.vth .pl{border:0;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.vmini img{border:0}
+.btn{border:0;box-shadow:inset 0 0 0 1px var(--edge);border-radius:999px;background:#fff}
+.btn.primary{background:var(--green);color:#fff;box-shadow:none}
+.seg{border:0;background:#EAE4D9;border-radius:999px;padding:3px;gap:2px}
+.seg button{border-radius:999px;transition:background .18s}
+.seg button+button{border-left:0}
+.seg button[aria-pressed="true"]{background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.confirm{border:0;background:var(--sage)}
+.vnote{background:var(--cream)}
+.toast{background:var(--green);border-radius:999px}
+.pnav{background:rgba(243,237,228,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--edge)}
+.pnav button{color:var(--muted)}
+.pnav .ic{width:56px;height:32px}
+.pnav button[aria-selected="true"]{color:var(--green)}
+.pnav button[aria-selected="true"] .ic{background:var(--sage)}
+@media (prefers-reduced-motion:no-preference){
+  #app.in>*{animation:riseIn .34s cubic-bezier(.2,.75,.25,1) both}
+  #app.in>*:nth-child(2){animation-delay:.03s}#app.in>*:nth-child(3){animation-delay:.06s}#app.in>*:nth-child(4){animation-delay:.09s}#app.in>*:nth-child(5){animation-delay:.12s}#app.in>*:nth-child(n+6){animation-delay:.15s}
+  .btn,.gift,.vth,.vmini,.seg button,.pnav .ic,.h2link{transition:transform .14s ease,background-color .18s}
+  .btn:active,.gift:not([disabled]):active,.vth:active,.vmini:active,.seg button:active{transform:scale(.96)}
+  .pnav button:active .ic{transform:scale(.9)}
+  .pnav button[aria-selected="true"] .ic{animation:tabPop .3s cubic-bezier(.3,1.4,.5,1)}
+  .confirm{animation:riseIn .28s cubic-bezier(.2,.75,.25,1) both}
+  .vid iframe{animation:fadeIn .3s ease both}
+}
+@keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes tabPop{0%{transform:scale(.8)}100%{transform:scale(1)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 <body>
 <div class="wrap" id="app"><div class="empty">讀取中…</div></div>
 <nav class="pnav" id="pnav" role="tablist" aria-label="頁面" hidden>
-  <button role="tab" data-tab="home" aria-selected="true"><span class="ic"><svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="#3E3A39" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M7.5 13.8V26h17V13.8" fill="#97D7FF"/><path d="M5 15.5 16 6l11 9.5"/><rect x="13" y="18.5" width="6" height="7.5" rx="3" fill="#F2C46A"/><path d="M21.5 8.5v3.2"/><circle cx="20.3" cy="11.9" r="1.3" fill="#3E3A39" stroke="none"/><path d="M21.5 8.5l2.2.8"/><circle cx="11" cy="16.6" r="1.6" fill="#FFFCF6"/></svg></span>首頁</button>
-  <button role="tab" data-tab="vid" aria-selected="false"><span class="ic"><svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="#3E3A39" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="4" y="10" width="17" height="14" rx="3.5" fill="#EB895B"/><path d="M21 14.5l6-3.2v11.4l-6-3.2z" fill="#F2C46A"/><circle cx="9" cy="7" r="3" fill="#FFFCF6"/><circle cx="16" cy="7" r="3" fill="#FFFCF6"/><path d="M10.5 14.2v5.6l4.8-2.8z" fill="#FFFCF6"/></svg></span>影片</button>
-  <button role="tab" data-tab="gift" aria-selected="false"><span class="ic"><svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="#3E3A39" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="6" y="15" width="20" height="11" rx="2" fill="#F4C0D1"/><rect x="4.5" y="11" width="23" height="5" rx="1.6" fill="#FCF0DA"/><path d="M16 11v15"/><path d="M16 11c-2.5-4.5-7-4-6.5-1.2.4 2 4 1.6 6.5 1.2z" fill="#F2C46A"/><path d="M16 11c2.5-4.5 7-4 6.5-1.2-.4 2-4 1.6-6.5 1.2z" fill="#F2C46A"/></svg></span>禮物</button>
+  <button role="tab" data-tab="home" aria-selected="true"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11 12 4.5 20 11"/><path d="M6 9.6V20h12V9.6"/><path d="M10 20v-5a2 2 0 0 1 4 0v5"/></svg></span>首頁</button>
+  <button role="tab" data-tab="vid" aria-selected="false"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="6.5" width="12.5" height="11" rx="3"/><path d="M16 10.5l4.5-2.5v8l-4.5-2.5"/><path d="M8.5 9.8v4.4l3.6-2.2z" fill="currentColor" stroke="none"/></svg></span>影片</button>
+  <button role="tab" data-tab="gift" aria-selected="false"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="11" width="15" height="9" rx="2"/><rect x="3.5" y="7.5" width="17" height="3.5" rx="1.2"/><path d="M12 7.5V20"/><path d="M12 7.5c-1.8-3.2-5.2-3-4.8-.9.3 1.4 3 1.2 4.8.9zM12 7.5c1.8-3.2 5.2-3 4.8-.9-.3 1.4-3 1.2-4.8.9z"/></svg></span>禮物</button>
 </nav>
 <div class="toast" id="toast" hidden role="status"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -139,7 +188,7 @@ else{
   },()=>{app.innerHTML='<div class="empty">讀取失敗，請確認網路後重新整理。</div>'});
   ref.collection('requests').onSnapshot(s=>{R=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.at||'').localeCompare(a.at||''));draw()},()=>{});
 
-  function setTab(t){tab=t;playing=null;nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));draw();scrollTo(0,0)}
+  function setTab(t){tab=t;playing=null;nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));draw();scrollTo(0,0);app.classList.remove('in');void app.offsetWidth;app.classList.add('in');clearTimeout(setTab._t);setTab._t=setTimeout(()=>app.classList.remove('in'),520)}
   function draw(){
     if(!D)return;
     nav.hidden=false;
@@ -152,7 +201,7 @@ else{
     let h='';
     if(tab==='home'){
       const next=(D.upcoming||[]).find(u=>u.date>=t),p=D.period,hist=D.history||[];
-      h+=`<div class="head"><div class="avatar" style="background:${D.source==='fama'?'var(--orange)':'var(--sky)'}">${D.instrument==='鋼琴'?'🎹':D.instrument==='小提琴'?'🎻':'🎵'}</div>
+      h+=`<div class="head"><div class="avatar" style="background:${D.source==='fama'?'#FBE3D6':'#DDF1FD'}">${D.instrument==='鋼琴'?'🎹':D.instrument==='小提琴'?'🎻':'🎵'}</div>
         <div><h1>${esc(D.name)}</h1><div class="sub">${esc([D.instrument,D.schedule].filter(Boolean).join('・'))}</div></div></div>`;
       h+=`<h2>下一堂課<small>NEXT</small></h2><div class="panel">${next?`<div class="big">${mdw(next.date)} ${esc(next.time||'')}</div>${next.kind?`<span class="tag">${KIND[next.kind]||''}</span>`:''}`:'<span class="sub">還沒有排到課</span>'}</div>`;
       if(p)h+=`<h2>第 ${p.no} 期<small>LESSONS</small></h2><div class="panel"><div class="between"><span>${p.unpaid?'這期還沒繳費':'這期上課進度'}</span><span class="tag ${p.unpaid?'y':''}">上到 ${p.used} / ${p.cap}</span></div>
