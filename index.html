@@ -376,6 +376,21 @@ input[type=checkbox].switch:checked::after{left:19px}
 .vprev{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink);min-height:0}
 .vprev img{width:120px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:1.5px solid var(--ink)}
 .vprev .bad{color:var(--red)}
+.sdate.multi{width:66px}
+.sdate.multi b{font-size:12.5px;letter-spacing:0}
+.mspan{display:block;align-self:stretch;height:5px;background:var(--red);margin-top:3px}
+.mspan.s{margin-left:5px;border-radius:3px 0 0 3px}
+.mspan.e{margin-right:5px;border-radius:0 3px 3px 0}
+.perdays{display:flex;flex-direction:column;gap:8px}
+.perday input{height:40px;border:var(--line);border-radius:var(--r-sm);padding:0 10px;background:var(--paper);font-size:16px;width:100%}
+.mpics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.mpic{position:relative;aspect-ratio:1}
+.mpimg{width:100%;height:100%;padding:0;border:var(--line);border-radius:var(--r-sm);overflow:hidden;background:var(--cream);cursor:zoom-in}
+.mpimg img{width:100%;height:100%;object-fit:cover;display:block}
+.mpx{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);font-size:13px;line-height:1;cursor:pointer;padding:0}
+.mpic.add{display:grid;place-items:center;text-align:center;border:1.5px dashed var(--ink);border-radius:var(--r-sm);color:var(--muted);font-size:12px;cursor:pointer;line-height:1.3}
+.mview{position:fixed;inset:0;background:rgba(30,26,24,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:20;padding:16px}
+.mview img{max-width:100%;max-height:80vh;object-fit:contain;border-radius:8px}
 /* nav with raised calendar key */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:var(--line);display:flex;justify-content:center;align-items:flex-end;
   padding:4px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));z-index:20}
@@ -442,7 +457,7 @@ input[type=checkbox]{accent-color:var(--ink);width:16px;height:16px}
 <div class="wrap">
   <header class="mast">
     <div class="brand"><span data-icon="logo" data-size="30"></span><h1>PATTY.STUDIO</h1></div>
-    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v22</span><span id="conn"></span><button class="btn ghost bell" id="bellBtn" data-act="openNotify" hidden aria-label="通知設定"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
+    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v23</span><span id="conn"></span><button class="btn ghost bell" id="bellBtn" data-act="openNotify" hidden aria-label="通知設定"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
   </header>
   <main id="view"></main>
 </div>
@@ -576,7 +591,7 @@ function eventsOn(d){
     const s=ST(l.studentId); seen.add(l.studentId); if(l.status==='moved')continue; ev.push({k:'lesson',time:s?.time||'',s,l});
   }
   if(d>=todayISO())for(const s of S.students)if(!seen.has(s.id)&&occurs(s,d))ev.push({k:'lesson',time:s.time||'',s,l:null});
-  for(const i of S.income)if(i.type==='photo'&&i.date===d)ev.push({k:'shoot',time:i.time||'',i});
+  for(const i of S.income)if(i.type==='photo'&&i.date<=d&&d<=shootEnd(i)){const days=shootDays(i),t=dayTime(i,d);ev.push({k:'shoot',time:t.time||'',end:t.endTime||'',i,d,day:days.indexOf(d)+1,total:days.length})}
   for(const s of S.students)for(const sc of (s.scores||[]))if(sc.date===d)ev.push({k:'score',time:'',s,sc});
   for(const i of S.income)if(i.type==='photo'&&!i.delivered&&dueOf(i)===d)ev.push({k:'due',time:'',i});
   for(const p of S.personal)if(p.date<=d&&d<=pEnd(p))ev.push({k:'personal',time:p.allDay?'':(p.time||''),p});
@@ -590,7 +605,7 @@ function spansOn(d){
     if(e.k==='score'||e.k==='due')continue;
     if(e.k==='personal'){const p=e.p;if(p.allDay){out.push({key:p.id,kind:'personal',s:0,end:1440,label:p.title||'私人行程'});continue}
       const s=toMin(p.time);if(s==null)continue;const en=toMin(p.endTime);out.push({key:p.id,kind:'personal',s,end:en>s?en:s+60,label:p.title||'私人行程'});continue}
-    if(e.k==='shoot'){const s=toMin(e.i.time);if(s==null)continue;const en=toMin(e.i.endTime);out.push({key:e.i.id,kind:'shoot',s,end:en>s?en:s+60,label:e.i.title||'拍攝'});continue}
+    if(e.k==='shoot'){const s=toMin(e.time);if(s==null)continue;const en=toMin(e.end);out.push({key:e.i.id,kind:'shoot',s,end:en>s?en:s+60,label:e.i.title||'拍攝'});continue}
     const l=e.l; if(l&&(isLeave(l.status)||l.status==='moved'))continue;
     const s=toMin(e.time); if(s==null)continue;
     const mins=+(l?.minutes??e.s?.minutes??src(e.s).def)||60;
@@ -662,11 +677,14 @@ function shootStatus(i){
   return '<span class="tag ink">未收定金</span>';
 }
 /* compact row: big date (or start time inside a day view), title, amount, one status; details live in the dialog */
-function shootRow(i,withDate=true){
-  const clash=clashesOn(i.date).some(c=>c.a.key===i.id||c.b.key===i.id);
-  const d=parse(i.date);
-  const left=withDate?`<span class="sdate num"><b>${d.getMonth()+1}/${d.getDate()}</b><small>週${WD[d.getDay()]}</small></span>`:`<span class="time num">${esc(i.time||'—')}</span>${camTile()}`;
-  return `<div class="item click shootrow" data-act="editIncome" data-id="${i.id}">${left}<div class="main"><div class="name one">${esc(i.title||'未命名')}</div>${deliveryLine(i)?`<div class="sub">${deliveryLine(i)}</div>`:''}${clash?'<div class="row sub"><span class="tag clash">撞期</span></div>':''}</div>
+function shootRow(i,withDate=true,ev=null){
+  const days=shootDays(i),n=days.length;
+  const clash=(ev?[ev.d]:days).some(dd=>clashesOn(dd).some(c=>c.a.key===i.id||c.b.key===i.id));
+  const d=parse(i.date),t=ev?{time:ev.time}:dayTime(i,i.date);
+  const left=withDate?(n>1?`<span class="sdate multi num"><b>${shortRange(i)}</b><small>${n} 天</small></span>`:`<span class="sdate num"><b>${d.getMonth()+1}/${d.getDate()}</b><small>週${WD[d.getDay()]}</small></span>`)
+    :`<span class="time num">${esc(t.time||'—')}</span>${camTile()}`;
+  const memo=i.memo||i.memoImgN?`<div class="sub">📝 備忘錄${i.memoImgN?`・${i.memoImgN} 張照片`:''}</div>`:'';
+  return `<div class="item click shootrow" data-act="editIncome" data-id="${i.id}">${left}<div class="main"><div class="name one">${esc(i.title||'未命名')}</div>${ev&&ev.total>1?`<div class="sub">第 ${ev.day} / ${ev.total} 天${i.place?'・'+esc(i.place):''}</div>`:''}${deliveryLine(i)?`<div class="sub">${deliveryLine(i)}</div>`:''}${memo}${clash?'<div class="row sub"><span class="tag clash">撞期</span></div>':''}</div>
     ${i.contact?`<div class="cics">${contactIcons(i.contact)}</div>`:''}<div class="paycol"><span class="num" style="font-weight:700;color:var(--ink)">${i.amount?money(i.amount):'—'}</span>${shootStatus(i)}</div></div>`;
 }
 function scoreRow(s,sc,showDate){
@@ -706,7 +724,7 @@ function lessonRowCal(e){
 const CAL_VIEWS={month:'月',week:'週',day:'日'};
 function evMeta(e){
   /* label, colour class, time span, action for a calendar event */
-  if(e.k==='shoot'){const s=toMin(e.i.time),en=toMin(e.i.endTime);return {cls:'c-photo',label:e.i.title||'拍攝',s,end:s==null?null:(en>s?en:s+60),act:`data-act="editIncome" data-id="${e.i.id}"`}}
+  if(e.k==='shoot'){const s=toMin(e.time),en=toMin(e.end);return {cls:'c-photo',label:(e.i.title||'拍攝')+(e.total>1?`・${e.day}/${e.total}`:''),s,end:s==null?null:(en>s?en:s+60),act:`data-act="editIncome" data-id="${e.i.id}"`}}
   if(e.k==='personal'){const p=e.p,s=p.allDay?null:toMin(p.time),en=toMin(p.endTime);return {cls:'c-private',label:(p.title||'私人行程'),s,end:s==null?null:(en>s?en:s+60),act:`data-act="editPersonal" data-id="${p.id}"`}}
   if(e.k==='due')return {cls:'c-due',label:'交件：'+(e.i.title||'拍攝'),s:null,act:`data-act="editIncome" data-id="${e.i.id}"`};
   if(e.k==='score')return {cls:'c-score',label:'帶譜：'+(e.sc.title||'樂譜')+'（'+e.s.name+'）',s:null,act:`data-act="editScore" data-sid="${e.s.id}" data-scid="${e.sc.id}"`};
@@ -729,10 +747,11 @@ function monthGrid(){
   for(let i=0;i<off;i++)cells+='<div class="mcell out"></div>';
   for(let d=1;d<=days;d++){
     const ds=iso(new Date(y,m-1,d)); const ev=eventsOn(ds); const cl=clashesOn(ds).length;
-    const dots=ev.map(e=>`<i class="dot ${evMeta(e).cls}"></i>`);
+    const dots=ev.filter(e=>!(e.k==='shoot'&&e.total>1)).map(e=>`<i class="dot ${evMeta(e).cls}"></i>`);
+    const bars=ev.filter(e=>e.k==='shoot'&&e.total>1).map(e=>`<i class="mspan ${e.day===1?'s':e.day===e.total?'e':'m'}"></i>`).join('');
     const vac=vacOn(ds);
     cells+=`<button class="mcell ${vac?'vac':''} ${ds===today?'today':''} ${ds===calSel?'sel':''} ${new Date(y,m-1,d).getDay()===0?'sun':''}" data-act="pick" data-d="${ds}" aria-label="${m}月${d}日，${ev.length} 個行程${cl?'，有撞期':''}">
-      <span class="d">${d}</span>${cl?'<span class="bang">!</span>':''}<span class="dots">${dots.slice(0,4).join('')}${dots.length>4?'<b>+</b>':''}</span></button>`;
+      <span class="d">${d}</span>${cl?'<span class="bang">!</span>':''}<span class="dots">${dots.slice(0,4).join('')}${dots.length>4?'<b>+</b>':''}</span>${bars}</button>`;
   }
   const rest=(7-(off+days)%7)%7;for(let i=0;i<rest;i++)cells+='<div class="mcell out"></div>';
   return `<div class="panel" style="overflow:hidden"><div class="calhead">${WD.map(w=>`<div>${w}</div>`).join('')}</div><div class="mgrid">${cells}</div></div>`;
@@ -780,7 +799,7 @@ function viewCal(){
   <div class="panel list ${calView==='month'?'aglist':''}">`;
   if(!ev.length)h+=`<div class="empty">這天沒有行程，按右邊的 ＋ 新增</div>`;
   for(const e of ev){
-    if(e.k==='shoot'){h+=shootRow(e.i,false);continue}
+    if(e.k==='shoot'){h+=shootRow(e.i,false,e);continue}
     if(e.k==='score'){h+=scoreRow(e.s,e.sc,false);continue}
     if(e.k==='personal'){h+=personalRow(e.p);continue}
     if(e.k==='due'){h+=`<div class="item">${camTile()}<div class="main"><div class="name" data-act="editIncome" data-id="${e.i.id}">交件：${esc(e.i.title||'拍攝')}</div><div class="sub">${mdw(e.i.date)} 拍攝</div></div><button class="btn" data-act="delivered" data-id="${e.i.id}">已交件</button></div>`;continue}
@@ -794,9 +813,9 @@ const KIND={trial:'試上',makeup:'補課',add:'加課',moved:'調課'};
 function viewSign(){
   const isToday=signDate===todayISO();
   let h=(isToday?todayBoxes():'')+viewSignCore();
-  const shoots=S.income.filter(i=>i.type==='photo'&&i.date===signDate).sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
+  const shoots=eventsOn(signDate).filter(e=>e.k==='shoot').sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
   const scs=[];for(const s of S.students)for(const sc of (s.scores||[]))if(sc.date===signDate)scs.push([s,sc]);
-  if(shoots.length)h+=`<div class="label">拍攝<span class="en">photo</span></div><div class="panel list">${shoots.map(i=>shootRow(i,false)).join('')}</div>`;
+  if(shoots.length)h+=`<div class="label">拍攝<span class="en">photo</span></div><div class="panel list">${shoots.map(e=>shootRow(e.i,false,e)).join('')}</div>`;
   if(scs.length)h+=`<div class="label">帶譜<span class="en">sheet music</span></div><div class="panel list">${scs.map(([s,sc])=>scoreRow(s,sc,false)).join('')}</div>`;
   const pv=S.personal.filter(p=>p.date===signDate).sort((a,b)=>(a.allDay?'00':a.time||'99').localeCompare(b.allDay?'00':b.time||'99'));
   if(pv.length)h+=`<div class="label">私人行程<span class="en">private</span></div><div class="panel list">${pv.map(personalRow).join('')}</div>`;
@@ -1196,21 +1215,33 @@ function dlgIncome(id,type,date){
     ${photo?`<datalist id="clientList">${clients.map(c=>`<option value="${esc(c)}"></option>`).join('')}</datalist>
     <label class="field">聯絡方式<input name="contact" id="f-icontact" value="${esc(i.contact||'')}" placeholder="貼上客戶 IG 網址，或輸入電話、LINE 等"></label>
     <div class="sub" id="f-icontact-preview" style="margin-top:-6px">${contactHtml(i.contact)||'貼上 IG 網址會自動變成可點的 IG 連結'}</div>`:''}
-    <label class="field">日期<input name="date" id="f-idate" type="date" required value="${i.date}"></label>
-    ${photo?`<div class="grid2"><label class="field">開始時間<input name="time" id="f-itime" type="time" step="300" value="${esc(i.time||'')}"></label>
-    <label class="field">結束時間<input name="endTime" id="f-iend" type="time" step="300" value="${esc(i.endTime||'')}"></label></div>${clashBox}`:''}
+    ${photo?`<div class="grid2"><label class="field">開始日期<input name="date" id="f-idate" type="date" required value="${i.date}"></label>
+    <label class="field">結束日期<input name="endDate" id="f-iend2" type="date" value="${shootEnd(i)}"></label></div>
+    <div class="row" style="gap:10px;margin-top:-4px"><span class="tag yellow" id="f-idays" hidden></span><label class="row sub" id="f-iperw" hidden><input type="checkbox" name="perDay" id="f-iperday" ${i.perDay?'checked':''}> 每天時間不一樣</label></div>
+    <div class="grid2" id="f-isame"><label class="field">開始時間<input name="time" id="f-itime" type="time" step="300" value="${esc(i.time||'')}"></label>
+    <label class="field">結束時間<input name="endTime" id="f-iend" type="time" step="300" value="${esc(i.endTime||'')}"></label></div>
+    <div id="f-iperdays" class="perdays" hidden></div>${clashBox}`
+    :`<label class="field">日期<input name="date" id="f-idate" type="date" required value="${i.date}"></label>`}
     <label class="field">${photo?'總金額（還沒談好可以先空著）':'金額（支出填負數）'}<input name="amount" id="f-iamount" type="number" ${photo?'':'required'} value="${i.amount}"></label>
     ${photo?`<label class="row sub"><input type="checkbox" name="noDeposit" id="f-inodep" ${i.noDeposit?'checked':''}> 常客，不收定金</label>
     <div id="f-depwrap" ${i.noDeposit?'hidden':''} style="display:flex;flex-direction:column;gap:10px"><div class="grid2"><label class="field">定金<input name="deposit" id="f-idep" type="number" value="${i.deposit??DEPOSIT}"></label><span></span></div>
     <label class="row sub"><input type="checkbox" name="depositPaid" id="f-idepp" ${i.depositPaid?'checked':''}> 已收定金</label></div>
     <label class="row sub"><input type="checkbox" name="paid" id="f-ipaid" ${i.paid?'checked':''}> 已收全額</label>
-    <label class="row sub"><input type="checkbox" name="delivered" id="f-idel" ${i.delivered?'checked':''}> 已交件（拍攝後 7 天內）</label>`:''}`,
+    <label class="row sub"><input type="checkbox" name="delivered" id="f-idel" ${i.delivered?'checked':''}> 已交件（拍攝後 7 天內）</label>
+    <label class="field">備忘錄（只有你看得到）<textarea name="memo" id="f-imemo" rows="3" placeholder="例：後台入口在側門、客戶想要黑白大合照">${esc(i.memo||'')}</textarea></label>
+    <div class="mpics" id="f-mpics"></div><input type="file" id="f-mimg" accept="image/*" multiple hidden>
+    <div class="sub" style="margin-top:-4px">場地圖、流程表、參考照都可以放，最多 9 張</div>`:''}`,
   fd=>{const d={type:i.type,title:fd.get('title'),client:fd.get('client'),date:fd.get('date'),amount:+fd.get('amount')||0};
-    if(photo){const nd=fd.get('noDeposit')==='on';Object.assign(d,{category:fd.get('category'),contact:(fd.get('contact')||'').trim(),noDeposit:nd,paid:fd.get('paid')==='on',depositPaid:!nd&&(fd.get('depositPaid')==='on'||fd.get('paid')==='on'),deposit:nd?0:(+fd.get('deposit')||0),place:fd.get('place'),time:fd.get('time'),endTime:fd.get('endTime'),delivered:fd.get('delivered')==='on',deliveredDate:fd.get('delivered')==='on'?(i.deliveredDate||todayISO()):''})}
+    if(photo){const nd=fd.get('noDeposit')==='on';Object.assign(d,{category:fd.get('category'),contact:(fd.get('contact')||'').trim(),noDeposit:nd,paid:fd.get('paid')==='on',depositPaid:!nd&&(fd.get('depositPaid')==='on'||fd.get('paid')==='on'),deposit:nd?0:(+fd.get('deposit')||0),place:fd.get('place'),time:fd.get('time'),endTime:fd.get('endTime'),delivered:fd.get('delivered')==='on',deliveredDate:fd.get('delivered')==='on'?(i.deliveredDate||todayISO()):''});
+      const e=fd.get('endDate');d.endDate=e&&e>d.date?e:'';const multi=!!d.endDate;d.perDay=multi&&fd.get('perDay')==='on';d.dayTimes={};
+      if(d.perDay)form.querySelectorAll('#f-iperdays input[data-day]').forEach(x=>{(d.dayTimes[x.dataset.day]=d.dayTimes[x.dataset.day]||{})[x.dataset.f]=x.value});
+      d.memo=(fd.get('memo')||'').trim();d.memoImgN=memoSt?(memoSt.loading?(i.memoImgN||0):memoSt.existing.filter(x=>!memoSt.removed.has(x.id)).length)+memoSt.added.length:(i.memoImgN||0)}
     const nid=id||rid('i');put('income',nid,d);
-    if(photo){const c=clashFor(d.date,d.time,d.endTime,nid);if(c.length)toast(`已儲存。注意：和 ${c.map(x=>x.label).join('、')} 撞期`)}},
+    if(photo){saveMemoImgs(nid);const c=[];for(const dd of shootDays(d)){const t=dayTime(d,dd);for(const x of clashFor(dd,t.time,t.endTime,nid))c.push(md(dd)+' '+x.label)}if(c.length)toast(`已儲存。注意：和 ${c.join('、')} 撞期`)}},
   id?`<button class="btn ghost danger" value="x:delIncome:${id}" formnovalidate>刪除</button>`:'');
-  if(photo)liveClash();
+  if(photo){memoSt={existing:[],added:[],removed:new Set(),dayTimes:i.dayTimes||{},loading:!!(id&&i.memoImgN)};memoPics();iDaysUpdate();liveClash();
+    if(id&&i.memoImgN&&db)db.collection('memoImgs').where('incomeId','==',id).get().then(q=>{if(!memoSt)return;memoSt.existing=q.docs.map(x=>({id:x.id,...x.data()})).sort((a,b)=>(a.order||0)-(b.order||0));memoSt.loading=false;memoPics()},()=>{if(memoSt){memoSt.loading=false;memoPics()}})}
+  else memoSt=null;
 }
 
 /* ---------- contact shortcuts on a shoot: IG, phone, LINE, link, or copy ---------- */
@@ -1385,16 +1416,16 @@ function migrateVacations(){
 }
 
 /* ---------- photo delivery: due 7 days after the shoot ---------- */
-const dueOf=i=>addDays(i.date,7);
+const dueOf=i=>addDays(shootEnd(i),7);
 const daysBetween=(a,b)=>Math.round((parse(b)-parse(a))/864e5);
 function deliveryLine(i){
   const t=todayISO();
   if(i.delivered)return `已交件${i.deliveredDate?' '+md(i.deliveredDate):''}`;
-  if(i.date>t)return '';
+  if(shootEnd(i)>t)return '';
   const left=daysBetween(t,dueOf(i));
   return `已拍攝・交件期限 ${md(dueOf(i))}${left>0?`（還有 ${left} 天）`:left===0?'（今天）':`（過期 ${-left} 天）`}`;
 }
-const dueSoon=()=>{const t=todayISO();return S.income.filter(i=>i.type==='photo'&&!i.delivered&&i.date<=t&&daysBetween(t,dueOf(i))<=2).sort((a,b)=>a.date.localeCompare(b.date))};
+const dueSoon=()=>{const t=todayISO();return S.income.filter(i=>i.type==='photo'&&!i.delivered&&shootEnd(i)<=t&&daysBetween(t,dueOf(i))<=2).sort((a,b)=>a.date.localeCompare(b.date))};
 
 /* ---------- tuition reminders ---------- */
 function tuitionAlerts(){
@@ -1473,7 +1504,7 @@ function act(spec){
   dlg.close();
   if(a==='askDelStudent')confirmDelStudent(arg);
   if(a==='delPay'){del('payments',arg);toast('已刪除繳費')}
-  if(a==='delIncome')del('income',arg);
+  if(a==='delIncome'){del('income',arg);delMemoImgs(arg)}
   if(a==='editStudent')dlgStudent(arg);
   if(a==='setLeave')applyLeave(arg);
   if(a==='delPersonal')del('personal',arg);
@@ -1484,7 +1515,7 @@ function act(spec){
   if(a==='delMat'){const [sid,mid]=arg.split(':');const st=ST(sid);if(st)patch('students',sid,{materials:(st.materials||[]).filter(m=>m.id!==mid)})}
   if(a==='delScore'){const [sid,scid]=arg.split(':');const st=ST(sid);if(st)patch('students',sid,{scores:(st.scores||[]).filter(m=>m.id!==scid)})}
 }
-const DLG_ACTS=new Set(['toggleScore','editScore','calAdd','calAddStu','addExtra','newShootOn','newPersonal','newScoreOn']);
+const DLG_ACTS=new Set(['memoDel','memoView','memoClose','toggleScore','editScore','calAdd','calAddStu','addExtra','newShootOn','newPersonal','newScoreOn']);
 document.addEventListener('click',e=>{
   if(e.target.closest('a[href]'))return;
   const b=e.target.closest('[data-act]');
@@ -1556,6 +1587,9 @@ function handle(b){
     case 'editLesson':dlgLesson(d.sid);break;
     case 'addLesson':dlgAdd(signDate,'stu');break;
     case 'calAdd':dlgAdd(d.d);break;
+    case 'memoDel':{if(!memoSt)break;const k=d.k;if(k.startsWith('a:'))memoSt.added.splice(+k.slice(2),1);else memoSt.removed.add(k.slice(2));memoPics();break}
+    case 'memoView':{const img=memoSt&&memoImgOf(d.k);if(!img)break;const v=document.createElement('div');v.className='mview';v.innerHTML=`<img src="${img}" alt=""><button type="button" class="btn" data-act="memoClose">關閉</button>`;form.appendChild(v);break}
+    case 'memoClose':form.querySelector('.mview')?.remove();break;
     case 'openNotify':if(tab!=='notify')prevTab=tab;go('notify');break;
     case 'backFromNotify':go(prevTab||'sign');break;
     case 'notifyOn':notifyOn();break;
@@ -1896,6 +1930,54 @@ document.addEventListener('input',e=>{
   if(e.target.id!=='f-vurl')return;
   const id=ytId(e.target.value),p=document.getElementById('f-vprev');if(!p)return;
   p.innerHTML=id?`<img src="${ytThumb(id)}" alt=""><span>✓ 找到影片</span>`:(e.target.value.trim()?'<span class="bad">還認不出影片，請貼 YouTube 的分享連結</span>':'');
+});
+
+/* ---------- shoots over several days, and a memo with photos ---------- */
+const shootEnd=i=>i.endDate&&i.endDate>i.date?i.endDate:i.date;
+function shootDays(i){const out=[];let d=i.date;const e=shootEnd(i);for(let k=0;k<62&&d<=e;k++){out.push(d);d=addDays(d,1)}return out}
+const dayTime=(i,d)=>i.perDay&&i.dayTimes&&i.dayTimes[d]?i.dayTimes[d]:{time:i.time||'',endTime:i.endTime||''};
+function shortRange(i){const e=shootEnd(i);if(e===i.date)return md(i.date);const a=parse(i.date),b=parse(e);return a.getMonth()===b.getMonth()?`${md(i.date)}–${b.getDate()}`:`${md(i.date)}–${md(e)}`}
+let memoSt=null;
+function iDaysUpdate(){
+  const g=k=>document.getElementById(k);const s=g('f-idate')?.value,e0=g('f-iend2')?.value;if(!s)return;
+  const e=e0&&e0>s?e0:s,days=shootDays({date:s,endDate:e}),n=days.length;
+  g('f-idays').textContent=n>1?`連續 ${n} 天`:'';g('f-idays').hidden=n<2;g('f-iperw').hidden=n<2;
+  const per=n>1&&g('f-iperday').checked,box=g('f-iperdays');box.hidden=!per;g('f-isame').hidden=per;
+  if(!per)return;
+  const keep={};box.querySelectorAll('input[data-day]').forEach(x=>{(keep[x.dataset.day]=keep[x.dataset.day]||{})[x.dataset.f]=x.value});
+  const base=memoSt?.dayTimes||{},def={time:g('f-itime').value,endTime:g('f-iend').value};
+  box.innerHTML=days.map(d=>{const v={...def,...(base[d]||{}),...(keep[d]||{})};return `<div class="perday"><span class="sub">${mdw(d)}</span><div class="grid2"><input type="time" step="300" data-day="${d}" data-f="time" value="${esc(v.time||'')}" aria-label="${mdw(d)} 開始"><input type="time" step="300" data-day="${d}" data-f="endTime" value="${esc(v.endTime||'')}" aria-label="${mdw(d)} 結束"></div></div>`}).join('');
+}
+function memoPics(){
+  const box=document.getElementById('f-mpics');if(!box||!memoSt)return;
+  const ex=memoSt.existing.filter(x=>!memoSt.removed.has(x.id)),all=[...ex.map(x=>({k:'e:'+x.id,img:x.img})),...memoSt.added.map((img,i)=>({k:'a:'+i,img}))];
+  box.innerHTML=all.map(p=>`<div class="mpic"><button type="button" class="mpimg" data-act="memoView" data-k="${p.k}" aria-label="放大照片"><img src="${p.img}" alt=""></button><button type="button" class="mpx" data-act="memoDel" data-k="${p.k}" aria-label="刪除照片">×</button></div>`).join('')
+    +(all.length<9?`<label class="mpic add" for="f-mimg">＋<br>照片</label>`:'')+(memoSt.loading?'<span class="sub" style="grid-column:1/-1">照片讀取中…</span>':'');
+}
+const memoImgOf=k=>k.startsWith('a:')?memoSt.added[+k.slice(2)]:memoSt.existing.find(x=>x.id===k.slice(2))?.img;
+async function shrinkBig(file){
+  const url=URL.createObjectURL(file);const img=new Image();img.src=url;await img.decode();
+  const M=1280,k=Math.min(1,M/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);
+  let q=.75,out=c.toDataURL('image/jpeg',q);while(out.length>700000&&q>.35){q-=.1;out=c.toDataURL('image/jpeg',q)}return out;
+}
+async function saveMemoImgs(nid){
+  if(!memoSt||!db)return 0;
+  const ops=[];for(const id of memoSt.removed)ops.push(db.collection('memoImgs').doc(id).delete());
+  memoSt.added.forEach((img,i)=>ops.push(db.collection('memoImgs').doc(rid('mi')).set({incomeId:nid,img,order:Date.now()+i})));
+  try{await Promise.all(ops)}catch(e){toast('照片沒存到：'+(e.code||e.message))}
+}
+async function delMemoImgs(iid){try{const q=await db.collection('memoImgs').where('incomeId','==',iid).get();await Promise.all(q.docs.map(d=>d.ref.delete()))}catch{}}
+document.addEventListener('change',async e=>{
+  if(['f-idate','f-iend2','f-iperday'].includes(e.target.id)){
+    if(e.target.id==='f-idate'){const en=document.getElementById('f-iend2');if(en&&en.value<e.target.value)en.value=e.target.value}
+    iDaysUpdate();return}
+  if(e.target.id==='f-mimg'&&e.target.files?.length&&memoSt){
+    const room=9-(memoSt.existing.length-memoSt.removed.size)-memoSt.added.length;const files=[...e.target.files].slice(0,Math.max(0,room));
+    if(e.target.files.length>room)toast('最多 9 張照片');
+    for(const f of files){try{memoSt.added.push(await shrinkBig(f));memoPics()}catch{toast('有一張照片讀不了')}}
+    e.target.value='';
+  }
 });
 
 function startData(){
