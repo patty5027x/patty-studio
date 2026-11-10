@@ -131,17 +131,17 @@ h2{letter-spacing:.08em}
 .pnav button[aria-selected="true"]{color:var(--green)}
 .pnav button[aria-selected="true"] .ic{background:var(--sage)}
 @media (prefers-reduced-motion:no-preference){
-  #app.in>*{animation:riseIn .34s cubic-bezier(.2,.75,.25,1) both}
-  #app.in>*:nth-child(2){animation-delay:.03s}#app.in>*:nth-child(3){animation-delay:.06s}#app.in>*:nth-child(4){animation-delay:.09s}#app.in>*:nth-child(5){animation-delay:.12s}#app.in>*:nth-child(n+6){animation-delay:.15s}
+  #app.in-r{animation:slideR .22s cubic-bezier(.25,.8,.3,1) both}
+  #app.in-l{animation:slideL .22s cubic-bezier(.25,.8,.3,1) both}
   .btn,.gift,.vth,.vmini,.seg button,.pnav .ic,.h2link{transition:transform .14s ease,background-color .18s}
   .btn:active,.gift:not([disabled]):active,.vth:active,.vmini:active,.seg button:active{transform:scale(.96)}
   .pnav button:active .ic{transform:scale(.9)}
-  .pnav button[aria-selected="true"] .ic{animation:tabPop .3s cubic-bezier(.3,1.4,.5,1)}
   .confirm{animation:riseIn .28s cubic-bezier(.2,.75,.25,1) both}
   .vid iframe{animation:fadeIn .3s ease both}
 }
 @keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@keyframes tabPop{0%{transform:scale(.8)}100%{transform:scale(1)}}
+@keyframes slideR{from{opacity:.55;transform:translateX(14px)}to{opacity:1;transform:none}}
+@keyframes slideL{from{opacity:.55;transform:translateX(-14px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 </style>
 </head>
@@ -188,7 +188,7 @@ else{
   },()=>{app.innerHTML='<div class="empty">讀取失敗，請確認網路後重新整理。</div>'});
   ref.collection('requests').onSnapshot(s=>{R=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.at||'').localeCompare(a.at||''));draw()},()=>{});
 
-  function setTab(t){tab=t;playing=null;nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));draw();scrollTo(0,0);app.classList.remove('in');void app.offsetWidth;app.classList.add('in');clearTimeout(setTab._t);setTab._t=setTimeout(()=>app.classList.remove('in'),520)}
+  const PT=['home','vid','gift'];function setTab(t){const dir=PT.indexOf(t)>PT.indexOf(tab)?'in-r':PT.indexOf(t)<PT.indexOf(tab)?'in-l':'';tab=t;playing=null;nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));draw();scrollTo(0,0);app.classList.remove('in-r','in-l');if(dir){void app.offsetWidth;app.classList.add(dir)}clearTimeout(setTab._t);setTab._t=setTimeout(()=>app.classList.remove('in-r','in-l'),400)}
   function draw(){
     if(!D)return;
     nav.hidden=false;

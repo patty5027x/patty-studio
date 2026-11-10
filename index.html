@@ -382,7 +382,14 @@ input[type=checkbox].switch:checked::after{left:19px}
 .mspan.s{margin-left:5px;border-radius:3px 0 0 3px}
 .mspan.e{margin-right:5px;border-radius:0 3px 3px 0}
 .perdays{display:flex;flex-direction:column;gap:8px}
-.perday input{height:40px;border:var(--line);border-radius:var(--r-sm);padding:0 10px;background:var(--paper);font-size:16px;width:100%}
+.perday{display:flex;flex-direction:column;gap:3px;font-size:13px}
+.perday input{display:block;width:100%;min-width:0;max-width:100%;height:44px;line-height:44px;padding:0 12px;border:0;box-shadow:inset 0 0 0 1px var(--edge);border-radius:12px;background:var(--paper);color:var(--ink);font-size:16px;font-family:inherit;-webkit-appearance:none;appearance:none;text-align:left}
+.perday input::-webkit-date-and-time-value{text-align:left;margin:0}
+/* iPhone: keep date/time boxes exactly the width of their column so they line up with the boxes above */
+.grid2>.field,.perday .grid2>input{min-width:0;overflow:hidden}
+.field>input,.field>select,.field>textarea{align-self:stretch;box-sizing:border-box}
+.field input[type=date],.field input[type=time],.perday input{min-height:44px;box-sizing:border-box}
+.field input[type=date]::-webkit-date-and-time-value,.field input[type=time]::-webkit-date-and-time-value,.perday input::-webkit-date-and-time-value{min-height:1.4em}
 .mpics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .mpic{position:relative;aspect-ratio:1}
 .mpimg{width:100%;height:100%;padding:0;border:var(--line);border-radius:var(--r-sm);overflow:hidden;background:var(--cream);cursor:zoom-in}
@@ -572,16 +579,14 @@ nav.tabs .lic{width:24px;height:24px}
 body>.mview{position:fixed;inset:0;z-index:60}
 /* motion: pages slide in, lists rise in, everything you tap gives a little press */
 @media (prefers-reduced-motion:no-preference){
-  #view.in-fwd{animation:pgFwd .32s cubic-bezier(.2,.75,.25,1) both}
-  #view.in-back{animation:pgBack .32s cubic-bezier(.2,.75,.25,1) both}
-  #view.in-tab>*{animation:riseIn .34s cubic-bezier(.2,.75,.25,1) both}
-  #view.in-tab>*:nth-child(2){animation-delay:.03s}#view.in-tab>*:nth-child(3){animation-delay:.06s}#view.in-tab>*:nth-child(4){animation-delay:.09s}
-  #view.in-tab>*:nth-child(5){animation-delay:.12s}#view.in-tab>*:nth-child(6){animation-delay:.15s}#view.in-tab>*:nth-child(n+7){animation-delay:.18s}
+  #view.in-fwd{animation:pgFwd .26s cubic-bezier(.25,.8,.3,1) both}
+  #view.in-back{animation:pgBack .26s cubic-bezier(.25,.8,.3,1) both}
+  #view.in-r{animation:slideR .22s cubic-bezier(.25,.8,.3,1) both}
+  #view.in-l{animation:slideL .22s cubic-bezier(.25,.8,.3,1) both}
   .item.click,.btn,.tag[data-act],.seg button,.ptbtn,.plusbtn,.gcard,.addop,.addrow,.vacbox,nav.tabs button .ic,.slotbtn,.pchip span,.spics button,.mpimg,.cic{transition:transform .14s ease,background-color .18s,color .18s,box-shadow .18s}
   .item.click:active,.btn:active,.tag[data-act]:active,.seg button:active,.ptbtn:active,.plusbtn:active,.gcard:active,.addop:active,.addrow:active,.vacbox:active,.slotbtn:active,.pchip:active span,.spics button:active,.mpimg:active,.cic:active{transform:scale(.96)}
   .item.click:active{transform:scale(.985);background:#FAF7F2}
   nav.tabs button:active .ic{transform:scale(.9)}
-  nav.tabs button.on .ic{animation:tabPop .3s cubic-bezier(.3,1.4,.5,1)}
   .seg button.on-att,.vacacts .btn.on{animation:pop .28s cubic-bezier(.3,1.5,.5,1)}
   dialog[open]{animation:sheetUp .32s cubic-bezier(.2,.8,.25,1) both}
   .mview{animation:fade .2s ease both}
@@ -589,8 +594,10 @@ body>.mview{position:fixed;inset:0;z-index:60}
 }
 .c-score,.blk.c-score,.chip.c-score,.dot.c-score,.mk.y{background:#EBCB7A}
 .tile.score{background:#F4EACB}
-@keyframes pgFwd{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
-@keyframes pgBack{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+@keyframes pgFwd{from{opacity:.4;transform:translateX(22px)}to{opacity:1;transform:none}}
+@keyframes pgBack{from{opacity:.4;transform:translateX(-22px)}to{opacity:1;transform:none}}
+@keyframes slideR{from{opacity:.55;transform:translateX(14px)}to{opacity:1;transform:none}}
+@keyframes slideL{from{opacity:.55;transform:translateX(-14px)}to{opacity:1;transform:none}}
 @keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes tabPop{0%{transform:scale(.8)}100%{transform:scale(1)}}
 @keyframes pop{0%{transform:scale(.88)}100%{transform:scale(1)}}
@@ -604,7 +611,7 @@ body>.mview{position:fixed;inset:0;z-index:60}
 <div class="wrap">
   <header class="mast">
     <div class="brand"><span data-icon="logo" data-size="30"></span><h1>PATTY.STUDIO</h1></div>
-    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v24</span><span id="conn"></span><button class="btn ghost bell" id="bellBtn" data-act="openNotify" hidden aria-label="通知設定"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
+    <div class="issue"><b id="issueNo"></b><div class="sub2"><span style="opacity:.6">v25</span><span id="conn"></span><button class="btn ghost bell" id="bellBtn" data-act="openNotify" hidden aria-label="通知設定"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button><button class="btn ghost" id="logoutBtn" data-act="logout" hidden style="padding:0;font-size:11px;letter-spacing:.06em">登出</button></div></div>
   </header>
   <main id="view"></main>
 </div>
@@ -854,17 +861,18 @@ function reminderBoxes(){
 }
 
 /* ---------- views ---------- */
-const DEPTH={stu:1,vac:1,gifts:1,notify:1,shoot:1};
-let lastView='',lastDepth=0;
+const DEPTH={stu:1,vac:1,gifts:1,notify:1,shoot:1},TAB_ORDER=['cal','students','sign','photo','money'];
+let lastView='',lastDepth=0,lastTab='';
 function render(){
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===(tab==='stu'||tab==='gifts'?'students':tab==='vac'?'cal':tab==='shoot'?'photo':tab)));
   const v=document.getElementById('view');
   if(db&&loaded.size<COLS.length){v.innerHTML='<div class="panel empty">讀取資料中…</div>';return}
   const vk=tab+'|'+(tab==='stu'?stuId:tab==='vac'?vacId:tab==='shoot'?shootId:'')+(tab==='cal'?'':'');
   v.innerHTML=({sign:viewSign,students:viewStudents,stu:viewStu,vac:viewVac,notify:viewNotify,gifts:viewGifts,shoot:viewShoot,cal:viewCal,photo:viewPhoto,money:viewMoney})[tab]();
-  if(vk!==lastView){const dp=DEPTH[tab]||0;v.classList.remove('in-fwd','in-back','in-tab');void v.offsetWidth;
-    v.classList.add(dp>lastDepth?'in-fwd':dp<lastDepth?'in-back':'in-tab');lastView=vk;lastDepth=dp;
-    clearTimeout(render._t);render._t=setTimeout(()=>v.classList.remove('in-fwd','in-back','in-tab'),520)}
+  if(vk!==lastView){const dp=DEPTH[tab]||0,a=TAB_ORDER.indexOf(lastTab),b=TAB_ORDER.indexOf(tab);
+    const cls=dp>lastDepth?'in-fwd':dp<lastDepth?'in-back':(a>=0&&b>=0&&a!==b?(b>a?'in-r':'in-l'):'');
+    v.classList.remove('in-fwd','in-back','in-r','in-l');if(cls&&lastView){void v.offsetWidth;v.classList.add(cls)}
+    lastView=vk;lastDepth=dp;lastTab=tab;clearTimeout(render._t);render._t=setTimeout(()=>v.classList.remove('in-fwd','in-back','in-r','in-l'),400)}
 }
 
 function lessonRowCal(e){
